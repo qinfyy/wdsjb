@@ -1,0 +1,33 @@
+{
+  "compact": true,
+  "simplify": true,
+
+  "controlFlowFlattening": true,
+  "controlFlowFlatteningThreshold": 1,
+
+  "deadCodeInjection": true,
+  "deadCodeInjectionThreshold": 1,
+
+  "stringArray": true,
+  "stringArrayThreshold": 1,
+  "stringArrayEncoding": ["rc4"],
+  "stringArrayWrappersCount": 5,
+  "stringArrayWrappersChainedCalls": true,
+  "stringArrayWrappersParametersMaxCount": 4,
+  "stringArrayWrappersType": "function",
+
+  "splitStrings": true,
+  "splitStringsChunkLength": 5,
+
+  "identifierNamesGenerator": "mangled-shuffled",
+
+  "renameGlobals": false,
+
+  "selfDefending": true,
+  "debugProtection": false,
+  "disableConsoleOutput": false,
+
+  "transformObjectKeys": true,
+
+  "target": "node"
+}
