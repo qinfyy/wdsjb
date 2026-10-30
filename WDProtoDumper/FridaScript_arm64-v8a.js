@@ -361,7 +361,7 @@ function repeatedFixedSize(klass, field) {
 function emitEnum(klass) {
     if (!api.il2cpp_class_is_enum(klass)) return;
     const info = classInfo(klass);
-    if (info.name === 'CmdId' || emittedEnums.has(info.full_name)) return;
+    if (emittedEnums.has(info.full_name)) return;
     emittedEnums.add(info.full_name);
     const values = getFields(klass).filter(f => f.flags & 0x40).map(f => {
         const object = api.il2cpp_field_get_value_object(f.pointer, NULL);
@@ -473,9 +473,10 @@ function dumpMessage(klass) {
     if (errors.length) failedCount++;
     emit(Object.assign({ event: 'record', kind: 'message', fields: collected,
         excluded_fields: excluded, errors, extraction_failed: errors.length > 0 }, info));
-    // CmdId 属于命令元数据，不能当作消息 wire 字段。
+    // CmdId 同时恢复为嵌套枚举和独立命令表，不加入消息 wire 字段。
     for (const owner of enumerate(klass, 'il2cpp_class_get_nested_types'))
         for (const child of [owner, ...enumerate(owner, 'il2cpp_class_get_nested_types')]) {
+            emitEnum(child);
             if (api.il2cpp_class_is_enum(child) && classInfo(child).name === 'CmdId') {
                 const command = getFields(child).find(f => ['CmdId', 'CMD_ID'].includes(f.name) && (f.flags & 0x40));
                 if (command) {
@@ -483,7 +484,7 @@ function dumpMessage(klass) {
                     emit({ event: 'command', full_name: info.full_name, name: info.name, namespace: info.namespace,
                         cmd_id: api.il2cpp_object_unbox(v).readS32() });
                 }
-            } else emitEnum(child);
+            }
         }
 }
 

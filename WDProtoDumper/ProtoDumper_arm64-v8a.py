@@ -100,7 +100,7 @@ def merge_records(raw_records: list[dict[str, Any]]) -> dict[str, dict[str, Any]
         full_name = canonical_type(raw.get("full_name"))
         if kind not in {"message", "enum"} or not full_name:
             continue
-        # 仅保留字段引用或消息嵌套的协议枚举，不包含 CmdId。
+        # 保留采集器确认的协议枚举，包括嵌套 CmdId。
         if kind == "enum" and not raw.get("is_proto_contract", False):
             continue
         record = dict(raw)
@@ -168,23 +168,21 @@ class ProtoRenderer:
                 if parent is None:
                     self.root_names.add(name)
 
-        # 嵌套类型和字段共享 proto 词法作用域，冲突时只调整类型名称。
+        # 仅处理嵌套类型与字段的名称冲突，不因枚举成员同名调整类型名。
         for parent, names in self.children.items():
-            if parent is None or self.records[parent]["kind"] != "message":
-                continue
             field_names = {
                 proto_identifier(
                     str(field.get("wire_name") or field.get("name") or "field"),
                     "field",
                 )
-                for field in self.records[parent].get("fields", [])
+                for field in (self.records[parent].get("fields", []) if parent else [])
             }
             used = {self.names[full_name] for full_name in names}
             for full_name in names:
                 current = self.names[full_name]
                 if current not in field_names:
                     continue
-                suffix_name = "Enum" if self.records[full_name]["kind"] == "enum" else "Message"
+                suffix_name = "" if self.records[full_name]["kind"] == "enum" else "Message"
                 base = proto_identifier(current + suffix_name, "Type")
                 replacement = base
                 suffix = 2
@@ -195,9 +193,10 @@ class ProtoRenderer:
                 used.add(replacement)
                 self.names[full_name] = replacement
                 self.diagnostics.append(
-                    f"嵌套{self.records[full_name]['kind']}类型 {full_name} 重命名为 {replacement}，"
+                    f"{self.records[full_name]['kind']}类型 {full_name} 重命名为 {replacement}，"
                     "因为清理后的名称与字段名称完全冲突"
                 )
+        self.root_names = {self.names[name] for name in self.children.get(None, [])}
 
         def path_for(full_name: str) -> str:
             parent = self.parents[full_name]
@@ -231,10 +230,15 @@ class ProtoRenderer:
         )
 
     def build_enum_members(self) -> None:
-        # protobuf 枚举值占用所在词法作用域。尽可能保留 CLR 拼写，只有发生冲突时才限定名称。
+        # 非别名枚举仅给重名成员添加枚举名前缀，别名枚举保留原有命名。
         used_by_scope: dict[str | None, set[str]] = defaultdict(set)
         for full_name, parent in self.parents.items():
-            used_by_scope[parent].add(self.names[full_name])
+            if self.records[full_name]["kind"] == "message":
+                used_by_scope[parent].add(self.names[full_name])
+                used_by_scope[full_name].update(
+                    proto_identifier(str(field.get("wire_name") or field.get("name") or "field"), "field")
+                    for field in self.records[full_name].get("fields", [])
+                )
 
         enum_names = sorted(
             (name for name, record in self.records.items() if record["kind"] == "enum"),
@@ -249,21 +253,19 @@ class ProtoRenderer:
             record = self.records[full_name]
             used = used_by_scope[self.parents[full_name]]
             values = self.ordered_enum_values(record)
+            numeric_values = [integer(value.get("value")) for value in values]
+            allow_alias = len(set(numeric_values)) != len(numeric_values)
             members: list[tuple[dict[str, Any] | None, str]] = []
             for value in values:
                 source_name = str(value.get("name") or "UNKNOWN")
                 base = proto_identifier(source_name, "UNKNOWN")
-                if base in used:
-                    emitted = self.unique_name(
-                        self.names[full_name] + "_" + base, used, "UNKNOWN"
-                    )
-                else:
-                    used.add(base)
-                    emitted = base
+                if base in used and not allow_alias:
+                    base = self.names[full_name] + "_" + base
+                emitted = self.unique_name(base, used, "UNKNOWN")
                 members.append((value, emitted))
             self.enum_members[full_name] = members
             if not any(integer(value.get("value")) == 0 for value in values):
-                zero_name = self.unique_name(self.names[full_name] + "_UNSPECIFIED", used, "UNSPECIFIED")
+                zero_name = self.unique_name("UNSPECIFIED", used, "UNSPECIFIED")
                 members.insert(0, (None, zero_name))
 
     @staticmethod

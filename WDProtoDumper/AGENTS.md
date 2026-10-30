@@ -10,7 +10,6 @@
 
 - `ProtoDumper_arm64-v8a.py` 控制 Frida/ADB 会话、收集清单并渲染 `package wd` 的 proto。
 - `FridaScript_arm64-v8a.js` 枚举 IL2CPP 类型，通过独立消息的逐字段序列化恢复 tag 和编码。
-- `DumpCmdIds.js` 从 Il2CppInspector 的拆分 CS 目录或单个 CS 文件提取 `Types.CmdId.CmdId`。
 - `ValidateSchema.py` 编译生成的 proto，并用标准 Python Google.Protobuf 验证字段样本和枚举。
 - `output/` 是生成目录，不是手工维护的协议源。
 
@@ -23,6 +22,8 @@
 - 字段类型、tag、wire type、packed 和 map 编码以运行时元数据及真实序列化样本为准，不依赖 descriptor 或 protobuf-net 特性，不按名称猜测。
 - DateTime/List 等缓存字段只有验证修改后不影响序列化输出才可排除，并记录原因。不要把 TypeScript 字节包装器伪造成空 proto 消息。
 - 保留独立协议枚举，不把 `_enum` 辅助属性强行替换到数值 wire 字段上。未支持的 oneof、group、数值 XOR 等情况不得静默伪造恢复结果。
+- `CmdId` 枚举及全部成员必须恢复到所属消息的 proto 中，不按枚举名称过滤；同时保留独立 `CmdIds.txt`，验证两种输出与运行时命令表一致。
+- 枚举类型不添加 `Enum` 后缀，保留 `enum CmdId` 内的 `CmdId` 成员原名及重复数值。含 `allow_alias = true` 的枚举成员不加枚举名前缀；其他枚举仅给发生名称冲突的成员添加 `枚举名_` 前缀，不冲突的成员保持原名，前缀后仍冲突时才使用确定性数字后缀。
 - 不随意重命名 wire 字段。只有发生合法 proto 标识符冲突时才做确定性消歧，并记录诊断。
 - `PROTO_PACKAGE` 保持 `wd`，默认生成 proto3；修改时同步检查类型引用、枚举零值和验证脚本。
 - 默认拒绝输出有失败、警告或缺失引用的正式 proto；仅通过显式 `--allow-partial` 允许部分结果，失败时保留诊断清单。

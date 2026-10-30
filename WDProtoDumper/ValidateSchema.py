@@ -59,6 +59,7 @@ def validate(schema_path: Path, proto_path: Path, protoc: Path) -> dict[str, Any
         pool.Add(file)
     statistics: Counter[str] = Counter()
     failures: list[str] = []
+    command_values: dict[str, int] = {}
     for full_name, record in records.items():
         generated_name = "wd." + renderer.type_paths[full_name]
         if record["kind"] == "enum":
@@ -68,6 +69,14 @@ def validate(schema_path: Path, proto_path: Path, protoc: Path) -> dict[str, Any
             if {v.name: v.number for v in descriptor.values} != expected:
                 failures.append(full_name + ": 枚举名称/数值不匹配")
             statistics["enums"] += 1
+            if record["name"] == "CmdId":
+                statistics["cmd_id_enums"] += 1
+                owner = renderer.parents[full_name]
+                values = [value for value in record["values"] if value["name"] in {"CmdId", "CMD_ID"}]
+                if owner is not None and len(values) == 1:
+                    if owner in command_values:
+                        failures.append(owner + ": 存在多个 CmdId 枚举")
+                    command_values[owner] = int(values[0]["value"])
             continue
         descriptor = pool.FindMessageTypeByName(generated_name)
         message_class = message_factory.GetMessageClass(descriptor)
@@ -112,6 +121,35 @@ def validate(schema_path: Path, proto_path: Path, protoc: Path) -> dict[str, Any
                 statistics["field_samples"] += 1
             except Exception as error:
                 failures.append(full_name + "." + sample["name"] + ": " + str(error))
+    commands = document["completed"].get("commands", [])
+    if commands:
+        for command in commands:
+            if command_values.get(command["full_name"]) != int(command["cmd_id"]):
+                failures.append(command["full_name"] + ": CmdId 枚举缺失或与命令表数值不一致")
+        command_path = proto_path.with_name("CmdIds.txt")
+        expected_commands = {(item["namespace"], item["name"]): int(item["cmd_id"]) for item in commands}
+        if not command_path.is_file():
+            failures.append("缺少独立命令表：" + str(command_path))
+        else:
+            actual_commands: dict[tuple[str, str], int] = {}
+            namespace = ""
+            for line in command_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith(";namespace "):
+                    namespace = line.removeprefix(";namespace ")
+                    continue
+                name, separator, value = line.partition(" = ")
+                try:
+                    if not separator or (namespace, name) in actual_commands:
+                        raise ValueError("无效或重复的命令条目")
+                    actual_commands[(namespace, name)] = int(value)
+                except ValueError:
+                    failures.append("命令表条目无效：" + line)
+            if actual_commands != expected_commands:
+                failures.append("CmdIds.txt 与运行时命令表不一致")
+        statistics["cmd_ids"] = len(commands)
     result: dict[str, Any] = dict(statistics)
     result["failures"] = failures
     result["protoc_compiled"] = True
