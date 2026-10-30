@@ -1,11 +1,5 @@
-# BH2Sniffer 前端
+# Vue 3 + Vite
 
-该目录是 BH2Sniffer 的 Vue 3 + Vite 前端。开发和构建说明见上级目录 [README.md](../README.md)，代码约定见 [AGENTS.md](../AGENTS.md)。
+This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-```powershell
-npm install
-npm run dev
-npm run build
-```
-
-生产运行由 `Srv.py` 提供 `frontend/dist` 静态文件和 SSE/API。
+Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).

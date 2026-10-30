@@ -1,10 +1,3 @@
-"""Local BH2 web sniffer controller and the frontend's minimal HTTP API.
-
-The Vue frontend owns a UUID per browser window.  A running Frida capture has
-one active owner, and packets are routed only to that owner's SSE connection.
-Uploaded replays are instead routed only to the window that uploaded them.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -15,17 +8,17 @@ import time
 from pathlib import Path
 from typing import Any
 
-import frida
 from flask import Flask, Response, jsonify, request, send_from_directory, stream_with_context
 
 from capture_store import PacketCaptureWriter, parse_uploaded_capture, record_to_frontend_packet
-from protocol_decoder import Bh2ProtocolDecoder, default_decoder
+from frida_runtime import DEFAULT_ADB, FridaRuntime
+from protocol_decoder import DEFAULT_CONFIG, WdProtocolDecoder, load_config
 
 
 ROOT = Path(__file__).resolve().parent
-FRIDA_SCRIPT_PATH = ROOT / "FridaScript_x86.js"
+FRIDA_SCRIPT_PATH = ROOT / "FridaScript_arm64-v8a.js"
 FRONTEND_DIST = ROOT / "frontend" / "dist"
-DEFAULT_PACKAGE = "com.miHoYo.HSoDv2Original"
+DEFAULT_PACKAGE = "com.miHoYo.wd"
 MAX_UPLOAD_BYTES = 128 * 1024 * 1024
 
 
@@ -116,19 +109,23 @@ class FridaController:
         self,
         package: str,
         max_packet_bytes: int,
-        decoder: Bh2ProtocolDecoder,
+        decoder: WdProtocolDecoder,
         clients: ClientHub,
         capture_writer: PacketCaptureWriter,
+        adb: Path = DEFAULT_ADB,
+        realm: str = "auto",
+        device_id: str | None = None,
     ) -> None:
         self.package = package
         self.max_packet_bytes = max_packet_bytes
         self.decoder = decoder
         self.clients = clients
         self.capture_writer = capture_writer
+        self.adb = adb
+        self.realm = realm
+        self.device_id = device_id
         self._lock = threading.RLock()
-        self._device: Any = None
-        self._session: Any = None
-        self._script: Any = None
+        self._runtime: FridaRuntime | None = None
         self._pid: int | None = None
         self._state = "stopped"
         self._last_error: str | None = None
@@ -153,7 +150,10 @@ class FridaController:
         if event == "sniffer_ready":
             print("Frida sniffer hooks are ready", flush=True)
             return
-        if event in {"hook_install_error", "unsupported_runtime", "hook_callback_error"}:
+        if event in {"hook_callback_error", "packet_skipped", "waiting_runtime"}:
+            print(f"Frida {event}: {payload.get('error')}", flush=True)
+            return
+        if event in {"hook_install_error", "unsupported_runtime"}:
             detail = str(payload.get("error") or event)
             with self._lock:
                 self._last_error = detail
@@ -176,26 +176,22 @@ class FridaController:
             if payload.get("event") != "business_packet":
                 self._report_frida_event(payload)
                 return
-            if data is None:
-                print("Frida business packet did not include byte data", flush=True)
-                return
-
-            protocol_hint = payload.get("protocol_hint")
-            if protocol_hint not in {"protobuf", "command"}:
-                protocol_hint = None
-            command_id_hint = payload.get("command_id")
-            if isinstance(command_id_hint, bool) or not isinstance(command_id_hint, int):
-                command_id_hint = None
-
-            record = self.decoder.decode_frame(
-                bytes(data),
+            command_id = payload.get("command_id")
+            if isinstance(command_id, bool) or not isinstance(command_id, int) or not 0 <= command_id <= 65535:
+                raise ValueError("Frida command_id 无效")
+            if data is None and payload.get("payload_length") == 0:
+                data = b""
+            if data is None or len(data) != payload.get("payload_length"):
+                raise ValueError("Frida 明文负载缺失或长度不一致")
+            record = self.decoder.decode_payload(
+                bytes(data), command_id=command_id,
                 direction=str(payload.get("direction") or "unknown"),
                 runtime_class=payload.get("runtime_class")
                 if isinstance(payload.get("runtime_class"), dict)
                 else None,
-                protocol_hint=protocol_hint,
-                command_id_hint=command_id_hint,
             )
+            if record["decode_status"] != "decoded":
+                print(f"解包 {command_id}: {record['decode_status']}，{record['decode_error']}", flush=True)
             timestamp_ms = int(payload.get("ts_ms") or time.time() * 1000)
             packet = record_to_frontend_packet(record, timestamp_ms)
             try:
@@ -209,9 +205,19 @@ class FridaController:
                 self._last_error = detail
             print(detail, flush=True)
 
-    def start(self, spawn_if_missing: bool = False) -> None:
+    def _on_detached(self, reason: str, crash: Any = None) -> None:
         with self._lock:
-            if self._script is not None:
+            if self._state == "stopped":
+                return
+            self._state = "error"
+            self._last_error = f"游戏连接断开: {reason}"
+            self._pid = None
+        self.capture_writer.close()
+        print(self._last_error, flush=True)
+
+    def start(self) -> None:
+        with self._lock:
+            if self._runtime is not None and self._state == "running":
                 return
             if self._state == "starting":
                 raise RuntimeError("Frida controller is already starting")
@@ -221,49 +227,21 @@ class FridaController:
         # 在加载 Hook 前切换会话，避免新进程恢复后的首包写入上一会话文件。
         self.capture_writer.start_session()
 
-        session: Any = None
-        script: Any = None
-        spawned_pid: int | None = None
+        if self._runtime is not None:
+            self._runtime.close()
+        runtime = FridaRuntime(self.package, self.adb, self.realm, self.device_id)
+        self._runtime = runtime
         try:
-            device = frida.get_usb_device(timeout=10)
-            application = next(
-                (item for item in device.enumerate_applications() if item.identifier == self.package),
-                None,
-            )
-            pid = int(application.pid) if application is not None and application.pid else 0
-            launch_mode = "attached"
-            if pid <= 0:
-                if not spawn_if_missing:
-                    raise RuntimeError(f"{self.package} is not running")
-                pid = int(device.spawn([self.package]))
-                spawned_pid = pid
-                launch_mode = "spawned"
-
-            session = device.attach(pid)
-            script = session.create_script(self._script_source())
-            script.on("message", self._on_message)
-            script.load()
-            if spawned_pid is not None:
-                device.resume(spawned_pid)
-
+            runtime.connect(self._script_source(), self._on_message, self._on_detached)
             with self._lock:
-                self._device = device
-                self._session = session
-                self._script = script
-                self._pid = pid
+                if self._last_error is not None:
+                    raise RuntimeError(self._last_error)
+                self._pid = runtime.pid
                 self._state = "running"
-            print(f"Frida {launch_mode} pid={pid}", flush=True)
         except Exception as error:
-            if script is not None:
-                try:
-                    script.unload()
-                except Exception:
-                    pass
-            if session is not None:
-                try:
-                    session.detach()
-                except Exception:
-                    pass
+            runtime.close()
+            self._runtime = None
+            self.capture_writer.close()
             detail = f"{type(error).__name__}: {error}"
             with self._lock:
                 self._state = "error"
@@ -273,23 +251,12 @@ class FridaController:
 
     def stop(self) -> None:
         with self._lock:
-            script = self._script
-            session = self._session
-            self._script = None
-            self._session = None
-            self._device = None
+            runtime = self._runtime
+            self._runtime = None
             self._pid = None
             self._state = "stopped"
-        if script is not None:
-            try:
-                script.unload()
-            except Exception:
-                pass
-        if session is not None:
-            try:
-                session.detach()
-            except Exception:
-                pass
+        if runtime is not None:
+            runtime.close()
         self.capture_writer.close()
 
 
@@ -301,21 +268,29 @@ def _replay_packets(clients: ClientHub, client_id: str, packets: list[dict[str, 
 
 def create_server(
     host: str = "127.0.0.1",
-    port: int = 1984,
+    port: int | None = None,
     package: str = DEFAULT_PACKAGE,
     max_packet_bytes: int = 8 * 1024 * 1024,
+    config_path: Path = DEFAULT_CONFIG,
+    adb: Path = DEFAULT_ADB,
+    realm: str = "auto",
+    device_id: str | None = None,
 ) -> Flask:
     if max_packet_bytes <= 0:
         raise ValueError("max_packet_bytes must be positive")
     if not FRONTEND_DIST.is_dir():
         raise RuntimeError(f"frontend build directory does not exist: {FRONTEND_DIST}")
 
-    decoder = default_decoder(ROOT)
+    config = load_config(config_path)
+    decoder = WdProtocolDecoder(config)
+    print(f"Schema 已加载: {decoder.status()}", flush=True)
     clients = ClientHub()
     capture_writer = PacketCaptureWriter(ROOT)
-    controller = FridaController(package, max_packet_bytes, decoder, clients, capture_writer)
+    controller = FridaController(package, max_packet_bytes, decoder, clients, capture_writer,
+                                 adb, realm, device_id)
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
+    app.config["LISTENING_PORT"] = port if port is not None else config.listening_port
     app.controller = controller  # type: ignore[attr-defined]
     app.clients = clients  # type: ignore[attr-defined]
     app.capture_writer = capture_writer  # type: ignore[attr-defined]
@@ -372,11 +347,12 @@ def create_server(
             return jsonify(error="clientID required or not registered"), 400
         with app.control_lock:  # type: ignore[attr-defined]
             try:
-                controller.start(spawn_if_missing=True)
+                clients.activate(value)
+                controller.start()
             except RuntimeError as error:
                 print(f"Frida start failed: {error}", flush=True)
+                clients.deactivate_if_owner(value)
                 return jsonify(error=str(error)), 500
-            clients.activate(value)
         return empty()
 
     @app.route("/api/stop", methods=["GET", "OPTIONS"])
@@ -441,7 +417,7 @@ def create_server(
         threading.Thread(
             target=_replay_packets,
             args=(clients, value, packets),
-            name="bh2-upload-replay",
+            name="wd-upload-replay",
             daemon=True,
         ).start()
         return jsonify(success=True)
@@ -449,7 +425,7 @@ def create_server(
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def static_files(path: str):
-        if path.startswith("api/"):
+        if path.startswith("api/") or path.rstrip("/").lower() in {"getconfig", "setconfig"}:
             return jsonify(error="not found"), 404
         relative = path or "index.html"
         return send_from_directory(FRONTEND_DIST, relative)
@@ -460,18 +436,23 @@ def create_server(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=1984)
     parser.add_argument("--package", default=DEFAULT_PACKAGE)
     parser.add_argument("--max-packet-bytes", type=int, default=8 * 1024 * 1024)
+    parser.add_argument("--adb", type=Path, default=DEFAULT_ADB, help="默认从 PATH 查找 adb.exe")
+    parser.add_argument("--realm", choices=("auto", "native", "emulated"), default="auto")
+    parser.add_argument("--device", help="Frida/ADB 设备 ID")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    server = create_server(args.host, args.port, args.package, args.max_packet_bytes)
-    print(f"BH2Sniffer listening on http://{args.host}:{args.port}", flush=True)
+    server = create_server(host=args.host, package=args.package,
+                           max_packet_bytes=args.max_packet_bytes, adb=args.adb,
+                           realm=args.realm, device_id=args.device)
+    port = server.config["LISTENING_PORT"]
+    print(f"WDSniffer listening on http://{args.host}:{port}", flush=True)
     try:
-        server.run(host=args.host, port=args.port, threaded=True, use_reloader=False)
+        server.run(host=args.host, port=port, threaded=True, use_reloader=False)
     except KeyboardInterrupt:
         pass
     finally:

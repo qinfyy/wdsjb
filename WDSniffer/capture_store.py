@@ -1,5 +1,3 @@
-"""转换、保存和导入当前抓包器的七字段 JSON 包对象。"""
-
 from __future__ import annotations
 
 import json
@@ -9,11 +7,11 @@ from pathlib import Path
 from typing import Any, TextIO
 
 
-CAPTURE_PACKET_FIELDS = ("time", "fromServer", "packetId", "packetName", "object", "type", "raw")
+CAPTURE_PACKET_FIELDS = ("time", "fromServer", "packetId", "packetName", "object", "raw")
 
 
 class PacketCaptureWriter:
-    """以 SSSniffer JSON 块格式追加包含 Type 的前端包对象。"""
+    """沿用 JSON 块格式追加包对象，不保存 type。"""
 
     def __init__(self, directory: Path) -> None:
         self._directory = directory
@@ -57,7 +55,7 @@ class PacketCaptureWriter:
 
 
 def record_to_frontend_packet(record: dict[str, Any], timestamp_ms: int | None = None) -> dict[str, Any]:
-    """将解码记录转换为 App.vue 使用的七个 SSE/保存字段。"""
+    """将解码记录转换为六个 SSE/保存字段。"""
 
     command_id = record.get("command_id")
     packet_id = int(command_id) if isinstance(command_id, int) else 0
@@ -66,16 +64,9 @@ def record_to_frontend_packet(record: dict[str, Any], timestamp_ms: int | None =
     if protocol == "protobuf":
         command_name = str(record.get("command_name") or f"UNKNOWN_{packet_id}")
         packet_name = command_name
-        packet_type = "CmdId"
         packet_object = record.get("decoded") if record.get("decode_status") == "decoded" else None
-    elif protocol == "command":
-        command_name = str(record.get("command_name") or f"UNKNOWN_{packet_id}")
-        packet_name = command_name
-        packet_type = "COMMAND"
-        packet_object = None
     else:
         packet_name = f"RAW.{packet_id}" if command_id is not None else "RAW.UNKNOWN"
-        packet_type = "RAW"
         packet_object = None
 
     return {
@@ -84,7 +75,6 @@ def record_to_frontend_packet(record: dict[str, Any], timestamp_ms: int | None =
         "packetId": packet_id,
         "packetName": packet_name,
         "object": packet_object,
-        "type": packet_type,
         "raw": str(record.get("raw_payload_base64") or ""),
     }
 
@@ -142,8 +132,6 @@ def _json_entry_to_frontend_packet(entry: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("packet packetName must be a string")
     if entry["object"] is not None and not isinstance(entry["object"], dict):
         raise ValueError("packet object must be an object or null")
-    if entry["type"] not in ("CmdId", "COMMAND", "RAW"):
-        raise ValueError("packet type must be CmdId, COMMAND, or RAW")
     if not isinstance(entry["raw"], str):
         raise ValueError("packet raw must be a Base64 string")
     return {field: entry[field] for field in CAPTURE_PACKET_FIELDS}

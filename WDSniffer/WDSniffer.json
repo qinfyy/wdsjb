@@ -1,0 +1,6 @@
+{
+  "cmdId": "..\\WDProtoDumper\\output\\CmdIds.txt",
+  "proto": "..\\WDProtoDumper\\output\\wd.proto",
+  "ListeningAddress": "127.0.0.1",
+  "ListeningPort": 1984
+}

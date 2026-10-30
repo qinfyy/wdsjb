@@ -3,16 +3,17 @@ import { ref, shallowRef, computed, onMounted, onUnmounted, nextTick, watch } fr
 import axios from 'axios'
 import { protoRawDecode } from './proto_raw_decoder.js'
 import { loadConfig } from './ConfigLoader.js'
+import { formatTimestamp } from './formatTimestamp.js'
 import Sidebar from './components/Sidebar.vue'
 import FilterBar from './components/FilterBar.vue'
 import PacketTable from './components/PacketTable.vue'
 import PacketDetails from './components/PacketDetails.vue'
 import SettingsModal from './components/SettingsModal.vue'
-import { base64ContainsBytes, bytesToBinaryString, encodeTextSearch, parseHexSearch } from './packetSearch.js'
 
 // 状态管理
 const API_URL = ref('')
 const configLoaded = ref(false)
+const showDate = ref(true)
 
 const clientID = ref('')
 
@@ -70,9 +71,7 @@ watch(isDarkTheme, (newVal) => {
 
 // 过滤相关
 const filterText = ref('')
-const contentFilter = ref('')
-const contentSearchMode = ref('text')
-const encoding = ref('utf-8')
+const jsonFilter = ref('')
 const useAnd = ref(true)
 
 // 布局相关
@@ -82,11 +81,10 @@ const detailsWidthPercent = ref(30)
 
 // 列宽相关
 const columnWidths = ref({
-  time: 48,
+  time: 210,
   idx: 40,
   src: 64,
   id: 48,
-  type: 76,
   name: 320,
   len: 48,
   json: 'auto'
@@ -121,56 +119,45 @@ const settings = ref({
 let eventSource = null
 
 const filteredPackets = computed(() => {
-  const hasPacketFilter = filterText.value.length > 0
-  const hasContentFilter = contentSearchMode.value === 'hex'
-    ? contentFilter.value.trim().length > 0
-    : contentFilter.value.length > 0
-
-  if (!hasPacketFilter && !hasContentFilter) {
+  if (!filterText.value && !jsonFilter.value) {
     return []
   }
   
   const packetsArray = packets.value
   const filterTextLower = filterText.value.toLowerCase()
-  const contentFilterLower = contentFilter.value.toLowerCase()
-  const contentSearch = contentSearchMode.value === 'hex'
-    ? parseHexSearch(contentFilter.value)
-    : encodeTextSearch(contentFilter.value, encoding.value)
-  const contentSearchBinary = contentSearch.valid
-    ? bytesToBinaryString(contentSearch.bytes)
-    : ''
+  const jsonFilterLower = jsonFilter.value.toLowerCase()
   
   return packetsArray.filter(packet => {
-    const and = hasPacketFilter && hasContentFilter && useAnd.value
-    let packetMatched = false
-    let contentMatched = false
+    let and = filterText.value && jsonFilter.value
+    if (!useAnd.value) and = false
     
-    if (hasPacketFilter) {
+    let text = false
+    let json = false
+    
+    if (filterText.value) {
       if (packet.protoName?.toLowerCase().includes(filterTextLower)) {
-        packetMatched = true
+        text = true
       }
       if (('' + packet.packetID).includes(filterText.value)) {
-        packetMatched = true
+        text = true
       }
     }
     
-    if (hasContentFilter) {
-      const isCommandPacket = packet.type === 'COMMAND' || packet.protoName?.startsWith('COMMAND.')
-
-      if (isCommandPacket) {
-        if (contentSearch.valid && contentSearch.bytes.length) {
-          contentMatched = base64ContainsBytes(packet.packet || packet.raw || '', contentSearchBinary)
-        }
-      } else if (contentSearchMode.value === 'text' && packet.object) {
-        // 缓存 JSON 字符串，避免重复计算。
-        if (!packet._jsonString) {
-          packet._jsonString = JSON.stringify(packet.object).toLowerCase()
-        }
-        contentMatched = packet._jsonString.includes(contentFilterLower)
+    if (jsonFilter.value && packet.object) {
+      // 缓存 JSON 字符串，避免重复计算
+      if (!packet._jsonString) {
+        packet._jsonString = JSON.stringify(packet.object).toLowerCase()
+      }
+      if (packet._jsonString.includes(jsonFilterLower)) {
+        json = true
       }
     }
     
-    return and ? packetMatched && contentMatched : packetMatched || contentMatched
+    if (!and && text) return true
+    if (!and && json) return true
+    if (and && text && json) return true
+    
+    return false
   })
 })
 
@@ -181,6 +168,8 @@ const initConfig = async () => {
 
   const config = await loadConfig('/Config.ini')
   API_URL.value = config?.Settings?.API || ''
+  showDate.value = config?.Settings?.ShowDate?.toLowerCase() !== 'false'
+  columnWidths.value = { ...columnWidths.value, time: showDate.value ? 210 : 120 }
   configLoaded.value = true
   console.log('Config loaded:', config)
 
@@ -245,7 +234,7 @@ const connectSSE = () => {
   })
   
   eventSource.addEventListener('packetNotify', (e) => {
-    const { time, fromServer, packetId, packetName, object, type, raw } = JSON.parse(e.data)
+    const { time, fromServer, packetId, packetName, object, raw } = JSON.parse(e.data)
     
     packetCounter.value++
 
@@ -259,11 +248,12 @@ const connectSSE = () => {
     
     const newPacket = {
       globalId: packetCounter.value,
+      time,
+      displayTime: formatTimestamp(time, showDate.value),
       reltime: time - firstTime.value === 0 ? null : (time - firstTime.value) / 1000,
       index: packetIndex.value,
       packetID: packetId,
       protoName: packetName,
-      type: type || (packetName?.startsWith('CmdId.') ? 'CmdId' : packetName?.startsWith('COMMAND.') ? 'COMMAND' : 'RAW'),
       source: !fromServer,
       object: object,
       packet: raw,
@@ -337,11 +327,10 @@ const clearPackets = () => {
   firstTime.value = 0
   currentPacket.value = null
   columnWidths.value = {
-    time: 48,
+    time: showDate.value ? 210 : 120,
     idx: 40,
     src: 64,
     id: 48,
-    type: 76,
     name: 320,
     len: 48,
     json: 'auto'
@@ -533,12 +522,11 @@ onUnmounted(() => {
       <div class="main-content" :style="{ width: (100 - detailsWidthPercent) + '%' }">
         <FilterBar 
           v-model:filter="filterText"
-          v-model:content-filter="contentFilter"
-          v-model:content-search-mode="contentSearchMode"
+          v-model:json-filter="jsonFilter"
           v-model:use-and="useAnd"
         />
 
-        <div class="results-host" :class="{ open: filterText || contentFilter }">
+        <div class="results-host" :class="{ open: filterText || jsonFilter }">
           <PacketTable
             ref="filterTableRef"
             :packets="filteredPackets"
@@ -575,7 +563,6 @@ onUnmounted(() => {
         :show-decode="showDecode"
         :width="detailsWidthPercent"
         :is-dark-theme="isDarkTheme"
-        v-model:encoding="encoding"
         @toggle-decode="showDecode = !showDecode"
       />
     </main>

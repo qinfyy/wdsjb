@@ -259,6 +259,8 @@ class ProtoRenderer:
             for value in values:
                 source_name = str(value.get("name") or "UNKNOWN")
                 base = proto_identifier(source_name, "UNKNOWN")
+                if base == self.names[full_name]:
+                    base += "Member"
                 if base in used and not allow_alias:
                     base = self.names[full_name] + "_" + base
                 emitted = self.unique_name(base, used, "UNKNOWN")

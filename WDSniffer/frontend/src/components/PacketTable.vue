@@ -21,20 +21,18 @@ const columns = [
   { key: 'time', label: 'TIME' },
   { key: 'idx', label: '#' },
   { key: 'src', label: 'SENDER' },
-  { key: 'type', label: 'TYPE' },
   { key: 'id', label: 'ID' },
   { key: 'name', label: 'PROTO NAME' },
   { key: 'len', label: 'LENGTH' },
-  { key: 'json', label: 'DATA' }
+  { key: 'json', label: 'JSON' }
 ]
 
 // 默认列宽
 const defaultColumnWidths = {
-  time: 60,
+  time: 210,
   idx: 50,
   src: 80,
   id: 60,
-  type: 76,
   name: 200,
   len: 70,
   json: 200
@@ -42,11 +40,10 @@ const defaultColumnWidths = {
 
 // 各列最小宽度
 const minColumnWidths = {
-  time: 50,
+  time: 120,
   idx: 40,
   src: 60,
   id: 50,
-  type: 64,
   name: 100,
   len: 50,
   json: 100
@@ -69,7 +66,6 @@ const columnMaxValues = shallowRef({
   idx: 0,
   src: 0,
   id: 0,
-  type: 0,
   name: 0,
   len: 0
 })
@@ -78,13 +74,6 @@ const columnMaxValues = shallowRef({
 const measureCanvas = typeof window !== 'undefined' ? document.createElement('canvas') : null
 const measureContext = measureCanvas ? measureCanvas.getContext('2d') : null
 const measureCache = new Map()
-
-// COMMAND 原始数据的十六进制预览按 Base64 字符串缓存，避免虚拟滚动时反复解码。
-const commandHexPreviewCache = new Map()
-const packetPreviewCache = new WeakMap()
-const COMMAND_HEX_PREVIEW_BYTES = 64
-const PREVIEW_CACHE_LIMIT = 2000
-const JSON_PREVIEW_LENGTH = 200
 
 const measureTextWidth = (text, fontSize = 12, fontWeight = '600') => {
   if (!measureContext) return 0
@@ -107,78 +96,17 @@ const measureTextWidth = (text, fontSize = 12, fontWeight = '600') => {
   return width
 }
 
-// 兼容新旧存档：新数据直接使用 type，旧数据从协议名称推断类型。
-const getPacketType = (packet) => {
-  const explicitType = typeof packet?.type === 'string' ? packet.type.trim() : ''
-  if (explicitType) {
-    const normalizedType = explicitType.toLowerCase()
-    if (normalizedType === 'cmdid' || normalizedType === 'protobuf' || normalizedType === 'proto') {
-      return 'CmdId'
-    }
-    if (normalizedType === 'command') return 'COMMAND'
-    if (normalizedType === 'raw') return 'RAW'
-    return explicitType
-  }
-
-  const protoName = typeof packet?.protoName === 'string' ? packet.protoName : ''
-  if (protoName.startsWith('CmdId.') || protoName.startsWith('bhxy2.')) return 'CmdId'
-  if (protoName.startsWith('COMMAND.')) return 'COMMAND'
-  return 'RAW'
-}
-
-const getPacketRaw = (packet) => {
-  if (typeof packet?.packet === 'string') return packet.packet
-  if (typeof packet?.raw === 'string') return packet.raw
-  return ''
-}
-
-const cacheCommandHexPreview = (raw, value) => {
-  commandHexPreviewCache.set(raw, value)
-  if (commandHexPreviewCache.size > PREVIEW_CACHE_LIMIT) {
-    const firstKey = commandHexPreviewCache.keys().next().value
-    commandHexPreviewCache.delete(firstKey)
-  }
-  return value
-}
-
-const getCommandHexPreview = (raw) => {
-  if (!raw) return ''
-  if (commandHexPreviewCache.has(raw)) return commandHexPreviewCache.get(raw)
-
-  try {
-    // 同时接受标准 Base64 和 URL-safe Base64，存档中的空白会被忽略。
-    const normalized = raw
-      .replace(/\s+/g, '')
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
-    const padding = (4 - (normalized.length % 4)) % 4
-    const binary = atob(normalized + '='.repeat(padding))
-    const byteCount = Math.min(binary.length, COMMAND_HEX_PREVIEW_BYTES)
-    const bytes = new Array(byteCount)
-    for (let index = 0; index < byteCount; index += 1) {
-      bytes[index] = binary.charCodeAt(index).toString(16).padStart(2, '0').toUpperCase()
-    }
-    const suffix = binary.length > COMMAND_HEX_PREVIEW_BYTES ? ' ...' : ''
-    return cacheCommandHexPreview(raw, bytes.join(' ') + suffix)
-  } catch {
-    // 原始数据异常时不显示 Base64，避免误认为是 JSON 内容。
-    return cacheCommandHexPreview(raw, '')
-  }
-}
-
 // 获取列值的文本表示
 const getCellValue = (packet, columnKey) => {
   switch (columnKey) {
     case 'time':
-      return packet.reltime?.toFixed(3) || ''
+      return packet.displayTime || ''
     case 'idx':
       return (packet.index || 0).toString()
     case 'src':
       return packet.source ? 'CLIENT' : 'SERVER'
     case 'id':
       return (packet.packetID || 0).toString()
-    case 'type':
-      return getPacketType(packet)
     case 'name':
       return packet.protoName || ''
     case 'len':
@@ -191,7 +119,7 @@ const getCellValue = (packet, columnKey) => {
 // 计算列宽需要的像素值
 const getTextWidthForColumn = (columnKey, text) => {
   const padding = 24
-  const maxLimits = { time: 150, idx: 80, id: 100, type: 100, name: 400, len: 80 }
+  const maxLimits = { time: 240, idx: 80, id: 100, name: 400, len: 80 }
   
   const width = measureTextWidth(text, 12, columnKey === 'id' || columnKey === 'len' ? '700' : '400') + padding
   return Math.min(width, maxLimits[columnKey] || 400)
@@ -437,34 +365,8 @@ const getPacketLength = (packet) => {
 }
 
 const getPacketString = (packet) => {
-  if (!packet || typeof packet !== 'object') return ''
-
-  const type = getPacketType(packet)
-  const raw = getPacketRaw(packet)
-  const cached = packetPreviewCache.get(packet)
-  if (cached && cached.type === type && cached.raw === raw && cached.object === packet.object) {
-    return cached.value
-  }
-
-  let value = ''
-  if (type === 'COMMAND') {
-    value = getCommandHexPreview(raw)
-  } else {
-    try {
-      const json = JSON.stringify(packet.object ?? {})
-      value = json.length > JSON_PREVIEW_LENGTH ? `${json.substring(0, JSON_PREVIEW_LENGTH)}...` : json
-    } catch {
-      value = ''
-    }
-  }
-
-  packetPreviewCache.set(packet, {
-    type,
-    raw,
-    object: packet.object,
-    value
-  })
-  return value
+  const obj = packet?.object || {}
+  return JSON.stringify(obj).substring(0, 200)
 }
 
 const getColumnWidth = (key, widths) => {
@@ -530,7 +432,7 @@ const getColumnWidth = (key, widths) => {
               width: getColumnWidth('time', columnWidths)
             }"
           >
-            {{ packet.reltime?.toFixed(3) || '' }}
+            {{ getCellValue(packet, 'time') }}
           </div>
           <div
             class="col idx"
@@ -551,15 +453,6 @@ const getColumnWidth = (key, widths) => {
             <span :class="packet.source ? 'client' : 'server'">
               {{ packet.source ? 'CLIENT' : 'SERVER' }}
             </span>
-          </div>
-          <div
-            class="col type"
-            :style="{
-              flex: `0 0 ${getColumnWidth('type', columnWidths)}`,
-              width: getColumnWidth('type', columnWidths)
-            }"
-          >
-            {{ getPacketType(packet) }}
           </div>
           <div
             class="col id"
@@ -730,6 +623,8 @@ const getColumnWidth = (key, widths) => {
 .col.time { 
   justify-content: center; 
   font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .col.idx { 
@@ -744,12 +639,6 @@ const getColumnWidth = (key, widths) => {
 .col.id { 
   justify-content: center; 
   font-family: 'JetBrains Mono', monospace; 
-  font-weight: 600;
-}
-
-.col.type {
-  justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
 }
 

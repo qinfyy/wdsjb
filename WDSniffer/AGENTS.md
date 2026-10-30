@@ -1,37 +1,12 @@
-# BH2Sniffer 开发约定
+# WDSniffer 开发约定
 
-## 职责与边界
-
-BH2Sniffer 是面向协议开发者的业务层抓包、解码和网页查看工具。它不负责流量重定向、私服响应或通用网络代理。
-
-当前 Frida 特征码与对象布局面向开发使用的 x86 客户端。增加其他 ABI 时必须提供独立目标表和实际验证，不能复用 x86 特征或对象布局。
-
-## 权威输入
-
-- 解码器只能使用 `data/bh2.proto`、`data/CmdIds.txt` 和 `data/CommandType.txt`。
-- 以上三个文件是只读输入。协议解码器改动不得修改它们，也不得引入对 `dump.cs`、外部 `.pb`、BH2ProtoDumper 输出或服务端 Gateway 文件的运行时依赖。
-- 每次创建解码器时使用仓库内 `protoc/protoc.exe` 把 `data/bh2.proto` 编译为 `data/bh2.pb`，再从 descriptor set 加载；不要手写 `.proto` 解析器。
-- `data/bh2.pb` 是生成文件，不是新的权威输入。
-
-## 捕获与解码
-
-- `fridaScript.js` 在业务层分别捕获传统 COMMAND 和 Protobuf 路径。
-- `GeneralPackage.Pack/UnPack` 只代表 COMMAND；Protobuf 必须通过 `UnPackProtoBufPacket` 和发送链路 Hook 捕获。
-- 离线判定优先使用明确的 Hook 协议提示和运行时类型。仅凭 cmdId 遇到 COMMAND/Protobuf 重号时不得强行解码。
-- 无法可靠解码的包必须保留完整 raw 数据和明确状态，不能丢弃或伪造字段。
-- 捕获文件可能包含认证和账号数据，不得提交仓库，也不得把原始内容复制到公开文档。
-
-## 后端与前端
-
-- Python 遵循官方风格并使用类型注解；注释和新增文档使用中文。
-- JavaScript、Vue 和 TypeScript 使用 4 个空格缩进。
-- `Srv.py` 负责 Flask API、Frida 生命周期和 SSE；协议解析保持在 `protocol_decoder.py`。
-- 前端只消费稳定的公开包字段。增加字段时同步更新导入、实时 SSE 和保存格式。
-- 不创建第二套捕获存储格式；捕获保存与导入统一放在 `capture_store.py`。
-
-## 验证与文档
-
-- 修改 Python 后执行 `py -m compileall .` 和依赖检查。
-- 修改前端后在 `frontend` 执行 `npm run build`。
-- 协议改动使用至少一帧 COMMAND 和一帧 Protobuf 做完整动态解码验证，并执行 `git diff --check`。
-- 启动方式、输入文件、API 或支持范围变化时更新 `README.md`。
+- 不修改 frontend。SSE、保存和导入统一使用 time/fromServer/packetId/packetName/object/raw 的 JSON 块，不输出 type。GetConfig、SetConfig 返回 404 是预期行为。
+- WDSniffer.json 的 proto、cmdId 是解码权威输入，路径相对配置文件；ListeningAddress、ListeningPort 指定监听地址和端口。地址缺省或为空时使用 127.0.0.1。
+- CLI 只保留 --package、--max-packet-bytes、--adb、--realm、--device。不添加 --host、--port 或 --config；监听地址、端口和 schema 从默认 WDSniffer.json 读取。
+- 每次创建解码器用本目录 protoc/protoc.exe 编译配置里的 schema，descriptor 只能输出到本目录被 Git 忽略的 temp/*.pb。不手写 proto 解析器、不修改输入 schema、不依赖 dump SDK 运行。
+- FridaScript_arm64-v8a.js 使用唯一特征码匹配及 ARM64 对象布局，在 NetPacket 的 serialize/serializeSec、deserialize/deserializeSec 成功返回时读取明文 Body。不使用固定 RVA 或自动解析 ARM64 符号；不额外校验函数字节。特征码前写命名空间、类及完整函数签名；布局项写 CLR 字段或 Native 结构体字段注释。
+- 默认 ADB 是 PATH 的 adb.exe，支持 --adb。ARM64 agent 固定为 ../WDRedirector/frida-agent-arm64.so，支持 --realm auto/native/emulated。自动检测主进程，未运行则启动。
+- Srv.py 管理 Flask/SSE；frida_runtime.py 管理设备连接、Native Bridge 和注入；protocol_decoder.py 负责 schema 解码；capture_store.py 统一保存和导入。
+- 无法解码时保留完整 raw 和明确诊断，不猜字段、不截断伪装成完整包。抓包含认证与账号数据，禁止提交或在公开文档里复制原始内容。
+- Python 使用类型注解；JavaScript 使用四空格缩进。执行 Python 编译、后端测试和 git diff --check，不修改或构建前端。动态验证不主动登录、支付或发送业务请求。
+- README 只写简短用法；网络分析与 RVA 记录在 NETWORK.md。

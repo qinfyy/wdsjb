@@ -1,45 +1,25 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import JsonEditorVue from 'json-editor-vue'
-import HexDumper from './HexDumper.vue'
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 
 const props = defineProps({
   packet: Object,
   showDecode: Boolean,
   width: Number,
-  isDarkTheme: Boolean,
-  encoding: {
-    type: String,
-    default: 'utf-8'
-  }
+  isDarkTheme: Boolean
 })
 
-const emit = defineEmits(['toggleDecode', 'update:encoding'])
-
-const encoding = computed({
-  get: () => props.encoding,
-  set: (value) => emit('update:encoding', value)
-})
+const emit = defineEmits(['toggleDecode'])
 
 const objectEditorRef = ref(null)
 const decodeEditorRef = ref(null)
-const rawEditorRef = ref(null)
 
 const objectData = ref({})
 const decodeData = ref({})
-const rawData = ref({})
-
-const isCommandPacket = computed(() => {
-  return props.packet?.type === 'COMMAND' || props.packet?.protoName?.startsWith('COMMAND.')
-})
-
-const isRawOnlyPacket = computed(() => {
-  return Boolean(props.packet) && !isCommandPacket.value && !props.packet.object
-})
 
 const showTwoEditors = computed(() => {
-  return !isCommandPacket.value && !isRawOnlyPacket.value && props.packet?.object && props.packet?.decode && props.showDecode
+  return props.packet?.object && props.packet?.decode && props.showDecode
 })
 
 // 根据主题设置编辑器类名
@@ -58,17 +38,6 @@ watch(() => props.packet, (newPacket) => {
     decodeData.value = newPacket.decode
   } else {
     decodeData.value = {}
-  }
-
-  if (newPacket && !newPacket.object) {
-    rawData.value = {
-      protocol: newPacket.type === 'COMMAND' || newPacket.protoName?.startsWith('COMMAND.') ? 'COMMAND' : 'RAW',
-      packetId: newPacket.packetID ?? 0,
-      packetName: newPacket.protoName || 'RAW.UNKNOWN',
-      rawBase64: newPacket.packet || ''
-    }
-  } else {
-    rawData.value = {}
   }
 }, { immediate: true })
 
@@ -96,27 +65,7 @@ const editorOptions = {
 
     <template v-else>
       <div :class="[showTwoEditors ? 'two-editor' : 'one-editor', editorThemeClass]">
-        <div v-if="isCommandPacket" class="editor-container">
-          <HexDumper v-model:encoding="encoding" :raw="packet.packet || packet.raw || ''" />
-        </div>
-
-        <div v-else-if="isRawOnlyPacket" class="editor-container">
-          <div class="editor-wrapper">
-            <JsonEditorVue
-              ref="rawEditorRef"
-              v-model="rawData"
-              :mode="editorOptions.mode"
-              :main-menu-bar="editorOptions.mainMenuBar"
-              :navigation-bar="editorOptions.navigationBar"
-              :status-bar="editorOptions.statusBar"
-              :read-only="editorOptions.readOnly"
-              :indentation="editorOptions.indentation"
-              class="json-editor"
-            />
-          </div>
-        </div>
-
-        <div v-else-if="packet.object" class="editor-container">
+        <div v-if="packet.object" class="editor-container">
           <!-- 悬浮控制按钮，融入菜单栏样式 -->
           <div class="overlay-controls">
             <button
@@ -144,7 +93,7 @@ const editorOptions = {
           </div>
         </div>
 
-        <div v-if="!isCommandPacket && !isRawOnlyPacket && packet.decode && (showDecode || !packet.object)" class="editor-container">
+        <div v-if="packet.decode && (showDecode || !packet.object)" class="editor-container">
           <div class="editor-wrapper">
             <JsonEditorVue
               ref="decodeEditorRef"
