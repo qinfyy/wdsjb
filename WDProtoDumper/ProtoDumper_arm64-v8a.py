@@ -3,6 +3,7 @@
 import argparse
 import json
 import re
+import shutil
 import sys
 import threading
 import subprocess
@@ -19,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 SCRIPT_PATH = ROOT / "FridaScript_arm64-v8a.js"
 DEFAULT_OUTPUT = ROOT / "output" / "wd.proto"
 DEFAULT_SCHEMA = ROOT / "output" / "wd_schema.json"
-DEFAULT_ADB = Path(r"C:\Program Files\Netease\MuMu\nx_device\15.0\shell\adb.exe")
+DEFAULT_ADB = Path("adb.exe")
 DEFAULT_AGENT = ROOT.parent / "WDRedirector" / "frida-agent-arm64.so"
 REMOTE_AGENT = "/data/local/tmp/re.frida.server/frida-agent-arm64.so"
 PROTO_PACKAGE = "wd"
@@ -53,15 +54,13 @@ def parse_args() -> argparse.Namespace:
         default="Pb,Baseproto",
         help="筛选 CLR 命名空间，可用逗号分隔；默认导出 Pb 网络消息及 Baseproto 包头，传空字符串可包含配置消息。",
     )
-    parser.add_argument("--startup-delay", type=int, default=2500, help="libil2cpp 加载后等待的毫秒数。")
-    parser.add_argument("--timeout", type=float, default=600.0, help="最长收集时间，单位为秒。")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="输出 .proto 文件路径。")
     parser.add_argument("--schema-json", type=Path, default=DEFAULT_SCHEMA, help="原始运行时清单 JSON 路径。")
     parser.add_argument("--no-schema-json", action="store_true", help="不保存原始运行时清单 JSON。")
     parser.add_argument("--schema-input", type=Path, help="使用已保存的清单生成文件，不附加 Android 进程。")
     parser.add_argument("--realm", choices=("auto", "native", "emulated"), default="auto", help="x86_64 模拟器自动选择 emulated。")
     parser.add_argument("--device", help="Frida 设备 ID，默认使用 USB/模拟器设备。")
-    parser.add_argument("--adb", type=Path, default=DEFAULT_ADB, help="ADB 可执行文件。")
+    parser.add_argument("--adb", type=Path, default=DEFAULT_ADB, help="ADB 可执行文件，默认从 PATH 查找 adb.exe。")
     parser.add_argument("--agent", type=Path, default=DEFAULT_AGENT, help="与 Frida server 同版本的 ARM64 agent。")
     parser.add_argument("--messages", default="", help="只探测指定消息，用逗号分隔 CLR 全名或类名。")
     parser.add_argument("--inspect", action="store_true", help="只检查运行时消息和 descriptor 是否存在。")
@@ -477,8 +476,9 @@ class ProtoRenderer:
 
 def running_pid(device: Any, package: str, adb_path: Path) -> int | None:
     # Android 的应用 PID 可能指向 :PushService，优先精确查询主进程。
-    if adb_path.is_file():
-        result = subprocess.run([str(adb_path), "-s", device.id, "shell", "pidof", package],
+    adb_executable = shutil.which(str(adb_path))
+    if adb_executable:
+        result = subprocess.run([adb_executable, "-s", device.id, "shell", "pidof", package],
                                 capture_output=True, text=True, timeout=15)
         pids = result.stdout.split()
         return int(pids[0]) if result.returncode == 0 and pids and pids[0].isdecimal() else None
@@ -568,9 +568,10 @@ def collect_runtime_inventory(
     if realm == "auto":
         realm = "emulated" if device.query_system_parameters().get("arch") in {"x64", "x86_64", "ia32"} else "native"
     if realm == "emulated":
-        if not args.adb.is_file() or not args.agent.is_file():
+        adb_executable = shutil.which(str(args.adb))
+        if not adb_executable or not args.agent.is_file():
             raise FileNotFoundError(f"需要 ADB 和 ARM64 agent：{args.adb}，{args.agent}")
-        adb = [str(args.adb), "-s", device.id]
+        adb = [adb_executable, "-s", device.id]
         subprocess.run(adb + ["shell", "mkdir", "-p", str(Path(REMOTE_AGENT).parent).replace("\\", "/")], check=True)
         subprocess.run(adb + ["push", str(args.agent), REMOTE_AGENT], check=True)
         subprocess.run(adb + ["shell", "chmod", "0644", REMOTE_AGENT], check=True)
@@ -621,15 +622,13 @@ def collect_runtime_inventory(
         script.load()
         script.post({"type": "start", "payload": {
             "namespacePrefix": args.namespace_prefix,
-            "startupDelayMs": args.startup_delay,
             "messageFilter": args.messages,
             "inspectOnly": args.inspect,
         }})
         if spawned and realm == "native":
             device.resume(pid)
         print(f"PID={pid}，Realm={realm}，开始 Google.Protobuf 恢复", flush=True)
-        if not complete.wait(args.timeout):
-            errors.append(f"导出在 {args.timeout:g} 秒内没有完成")
+        complete.wait()
     finally:
         for script in reversed(scripts):
             try:
@@ -670,10 +669,6 @@ def load_inventory(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any
 
 def main() -> int:
     args = parse_args()
-    if args.timeout <= 0:
-        raise ValueError("--timeout 必须大于 0")
-    if args.startup_delay < 0:
-        raise ValueError("--startup-delay 不能为负数")
 
     if args.schema_input:
         source_path = args.schema_input.resolve()

@@ -2,7 +2,7 @@
 
 const PTR = 8, ARRAY_LENGTH = 0x18, ARRAY_DATA = 0x20;
 const SAMPLE_STRING = 'WD_PROTO_SAMPLE';
-// 当前 ARM64 libil2cpp.so 的公共 API RVA，不依赖 Native Bridge 导出符号。
+// CN 6.1.0 il2cpp apis
 const IL2CPP_RVAS = {
     il2cpp_domain_get: 0x029BE708,
     il2cpp_domain_get_assemblies: 0x029BE714,
@@ -506,20 +506,32 @@ function next() {
     } catch (error) { finish(error.stack || error); }
 }
 
+function retryStart(module) {
+    if (thread && !thread.isNull()) api.il2cpp_thread_detach(thread);
+    thread = null;
+    classes.clear();
+    names.clear();
+    methods.clear();
+    fields.clear();
+    setTimeout(() => start(module), 500);
+}
+
 function start(module) {
     try {
         if (Process.arch !== 'arm64' || Process.pointerSize !== PTR) throw new Error('需要 ARM64 Emulated Realm，实际为 ' + Process.arch);
         moduleInfo = module;
         api = installApi(module);
         const domain = api.il2cpp_domain_get();
-        if (domain.isNull()) return setTimeout(() => start(module), 1000);
+        if (domain.isNull()) return retryStart(module);
         thread = api.il2cpp_thread_attach(domain);
         const count = Memory.alloc(PTR);
         count.writeU64(0);
         const assemblies = api.il2cpp_domain_get_assemblies(domain, count);
+        let hasGameAssembly = false;
         for (let i = 0; i < count.readU64().toNumber(); i++) {
             const image = api.il2cpp_assembly_get_image(assemblies.add(i * PTR).readPointer());
             const imageName = cString(api.il2cpp_image_get_name(image));
+            if (imageName === 'Assembly-CSharp.dll') hasGameAssembly = true;
             const classCount = api.il2cpp_image_get_class_count(image).toNumber();
             for (let j = 0; j < classCount; j++) {
                 const klass = api.il2cpp_image_get_class(image, j);
@@ -530,7 +542,8 @@ function start(module) {
             }
         }
         const descriptors = [...classes.keys()].filter(n => /^Google\.Protobuf\.Reflection\./.test(n));
-        if (!classes.has('Google.Protobuf.IMessage')) throw new Error('没有 Google.Protobuf.IMessage');
+        if (!hasGameAssembly || !['Google.Protobuf.IMessage', 'Google.Protobuf.MessageExtensions',
+            'Google.Protobuf.ByteString'].every(name => classes.has(name))) return retryStart(module);
         serializer = method(classes.get('Google.Protobuf.MessageExtensions'), 'ToByteArray', ['Google.Protobuf.IMessage']);
         byteStringFactory = method(classes.get('Google.Protobuf.ByteString'), 'CopyFromUtf8', ['System.String']);
         const prefixes = (settings.namespacePrefix || '').split(',').filter(Boolean);
@@ -566,7 +579,7 @@ function start(module) {
 function waitForModule() {
     const module = Process.findModuleByName('libil2cpp.so');
     if (module === null) return setTimeout(waitForModule, 500);
-    setTimeout(() => start(module), settings.startupDelayMs || 0);
+    start(module);
 }
 
 recv('start', message => { settings = message.payload || {}; waitForModule(); });
