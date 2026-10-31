@@ -46,14 +46,16 @@ def validate(schema_path: Path, proto_path: Path, protoc: Path) -> dict[str, Any
     if document.get("warnings") or document["completed"].get("failed_messages"):
         raise ValueError("清单包含运行时失败，不能作为完整协议验证")
     records = merge_records(document["records"])
-    renderer = ProtoRenderer(records, [])
+    descriptor_path = proto_path.with_suffix(".pb")
+    subprocess.run([str(protoc), f"--proto_path={proto_path.parent}",
+                    f"--descriptor_set_out={descriptor_path}", proto_path.name], check=True,
+                   cwd=proto_path.parent)
+    descriptor_set = descriptor_pb2.FileDescriptorSet.FromString(descriptor_path.read_bytes())
+    proto_descriptor = next(file for file in descriptor_set.file if file.name == proto_path.name)
+    renderer = ProtoRenderer(records, [], package=proto_descriptor.package)
     renderer.render()
     if renderer.stubs:
         raise ValueError("清单存在缺失类型")
-    descriptor_path = proto_path.with_suffix(".pb")
-    subprocess.run([str(protoc), f"--proto_path={proto_path.parent}",
-                    f"--descriptor_set_out={descriptor_path}", proto_path.name], check=True)
-    descriptor_set = descriptor_pb2.FileDescriptorSet.FromString(descriptor_path.read_bytes())
     pool = descriptor_pool.DescriptorPool()
     for file in descriptor_set.file:
         pool.Add(file)
@@ -61,7 +63,7 @@ def validate(schema_path: Path, proto_path: Path, protoc: Path) -> dict[str, Any
     failures: list[str] = []
     command_values: dict[str, int] = {}
     for full_name, record in records.items():
-        generated_name = "wd." + renderer.type_paths[full_name]
+        generated_name = proto_descriptor.package + "." + renderer.type_paths[full_name]
         if record["kind"] == "enum":
             descriptor = pool.FindEnumTypeByName(generated_name)
             expected = {name: int(value["value"]) if value is not None else 0

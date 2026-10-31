@@ -8,7 +8,7 @@
 
 ## 结构
 
-- `ProtoDumper_arm64-v8a.py` 控制 Frida/ADB 会话、收集清单并渲染 `package wd` 的 proto。
+- `ProtoDumper_arm64-v8a.py` 控制 Frida/ADB 会话、收集清单并渲染 proto，可通过 `--package` 设置。
 - `FridaScript_arm64-v8a.js` 枚举 IL2CPP 类型，通过独立消息的逐字段序列化恢复 tag 和编码。
 - `ValidateSchema.py` 编译生成的 proto，并用标准 Python Google.Protobuf 验证字段样本和枚举。
 - `output/` 是生成目录，不是手工维护的协议源。
@@ -25,7 +25,7 @@
 - `CmdId` 枚举及全部成员必须恢复到所属消息的 proto 中，不按枚举名称过滤；同时保留独立 `CmdIds.txt`，验证两种输出与运行时命令表一致。
 - 枚举类型不添加 `Enum` 后缀；任意枚举中与枚举类型同名的成员添加 `Member` 后缀，例如 `CmdIdMember`，保留全部成员及重复数值。含 `allow_alias = true` 的枚举成员不加枚举名前缀；其他枚举仅给发生名称冲突的成员添加 `枚举名_` 前缀，不冲突的成员保持原名，前缀后仍冲突时才使用确定性数字后缀。
 - 不随意重命名 wire 字段。只有发生合法 proto 标识符冲突时才做确定性消歧，并记录诊断。
-- `PROTO_PACKAGE` 保持 `wd`，默认生成 proto3；修改时同步检查类型引用、枚举零值和验证脚本。
+- `PROTO_PACKAGE` 默认保持 `wd`，`--package` 设置生成的 proto 包名，`--app-package` 设置 Android 应用包名，两者不得混用。默认生成 proto3；修改时同步检查类型引用、枚举零值和验证脚本，验证脚本从编译出的 descriptor 获取包名。
 - 默认拒绝输出有失败、警告或缺失引用的正式 proto；仅通过显式 `--allow-partial` 允许部分结果，失败时保留诊断清单。
 - 不手工修补 `output/wd.proto` 作为长期协议源；应修正导出器后重新生成，客户端更新后重新定位 RVA 并导出。
 

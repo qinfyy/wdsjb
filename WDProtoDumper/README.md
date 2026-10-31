@@ -12,7 +12,7 @@ py -X utf8 ProtoDumper_arm64-v8a.py --attach
 
 游戏未运行时去掉 `--attach`，或使用 `--spawn`，持续等待和收集至完成，Ctrl+C 中止。
 
-常用参数：`--device` 指定设备，`--adb` / `--agent` 指定工具路径，`--messages` 筛选消息，`--namespace-prefix` 筛选命名空间，`--output` / `--schema-json` 指定输出文件。
+常用参数：`--device` 指定设备，`--adb` / `--agent` 指定工具路径，`--messages` 筛选消息，`--namespace-prefix` 筛选命名空间，`--output` / `--schema-json` 指定输出文件。`--package` 设置 proto 包名；`--app-package` 设置 Android 应用包名。
 
 ## 其他命令
 

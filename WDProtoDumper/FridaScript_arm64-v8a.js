@@ -435,12 +435,30 @@ function verifyAuxiliaryField(klass, field, type) {
         if (type === 'System.DateTime') {
             sample = Memory.alloc(8);
             sample.writeU64(37);
+        } else if (type === 'UnityEngine.Vector3Int') {
+            sample = Memory.alloc(12);
+            sample.writeS32(37);
+            sample.add(4).writeS32(-37);
+            sample.add(8).writeS32(19);
         } else {
             const collectionClass = api.il2cpp_class_from_il2cpp_type(field.type);
             sample = instance(collectionClass, handles);
-            const add = getMethods(collectionClass).find(m => m.name === 'Add' && m.params.length === 1);
-            if (!add) throw new Error('辅助集合缺少 Add(T)，不能验证排除');
-            invoke(add.pointer, sample, [value(add.params[0], handles).argument]);
+            const parameterCount = type.startsWith('System.Collections.Generic.Dictionary<') ? 2 : 1;
+            const add = getMethods(collectionClass).find(m => m.name === 'Add' && m.params.length === parameterCount);
+            if (!add) throw new Error('辅助集合缺少 Add，不能验证排除');
+            const arguments_ = add.params.map(parameter => {
+                const elementClass = api.il2cpp_class_from_il2cpp_type(parameter);
+                if (classInfo(elementClass).name === 'NpcSpineAniData') {
+                    const element = instance(elementClass, handles);
+                    for (const member of getFields(elementClass)) {
+                        if (member.flags & (0x10 | 0x40)) continue;
+                        api.il2cpp_field_set_value(element, member.pointer, value(member.type, handles).argument);
+                    }
+                    return element;
+                }
+                return value(parameter, handles).argument;
+            });
+            invoke(add.pointer, sample, arguments_);
         }
         api.il2cpp_field_set_value(object, field.pointer, sample);
         if (hex(before) !== hex(serialize(object))) throw new Error('辅助字段改变了序列化输出，不能排除');
@@ -454,7 +472,7 @@ function dumpMessage(klass) {
         const type = typeName(field.type);
         if (field.flags & (0x10 | 0x40) || type === 'Google.Protobuf.UnknownFieldSet') continue;
         try {
-            if (type === 'System.DateTime' || type.startsWith('System.Collections.')) {
+            if (type === 'System.DateTime' || type === 'UnityEngine.Vector3Int' || type.startsWith('System.Collections.')) {
                 verifyAuxiliaryField(klass, field, type);
                 excluded.push({ name: field.name, type, reason: '已验证：修改辅助字段不改变序列化输出' });
                 continue;

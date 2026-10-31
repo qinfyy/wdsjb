@@ -43,12 +43,19 @@ MAP_KEYS = {
 WIRE_SCALARS = MAP_KEYS | {"bytes", "double", "float"}
 
 
+def proto_package(value: str) -> str:
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*", value):
+        raise argparse.ArgumentTypeError("proto 包名必须是有效标识符，可用点分隔。")
+    return value
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--attach", action="store_true", help="要求游戏已经运行并附加到游戏进程。")
     mode.add_argument("--spawn", action="store_true", help="启动游戏后再附加到游戏进程。")
-    parser.add_argument("--package", default=PACKAGE_NAME, help="Android 应用包名。")
+    parser.add_argument("--package", type=proto_package, default=PROTO_PACKAGE, help="生成的 proto 包名，默认 wd。")
+    parser.add_argument("--app-package", default=PACKAGE_NAME, help="Android 应用包名。")
     parser.add_argument(
         "--namespace-prefix",
         default="Pb,Baseproto",
@@ -124,9 +131,10 @@ def merge_records(raw_records: list[dict[str, Any]]) -> dict[str, dict[str, Any]
 
 
 class ProtoRenderer:
-    def __init__(self, records: dict[str, dict[str, Any]], warnings: list[dict[str, Any]]) -> None:
+    def __init__(self, records: dict[str, dict[str, Any]], warnings: list[dict[str, Any]], package: str = PROTO_PACKAGE) -> None:
         self.records = records
         self.warnings = warnings
+        self.package = package
         self.parents: dict[str, str | None] = {}
         self.children: dict[str | None, list[str]] = defaultdict(list)
         self.names: dict[str, str] = {}
@@ -205,9 +213,9 @@ class ProtoRenderer:
             return path_for(parent) + "." + self.names[full_name]
 
         for full_name in self.records:
-            path = "." + PROTO_PACKAGE + "." + path_for(full_name)
+            path = "." + self.package + "." + path_for(full_name)
             canonical_name = canonical_type(full_name)
-            relative_path = path.removeprefix("." + PROTO_PACKAGE + ".")
+            relative_path = path.removeprefix("." + self.package + ".")
             self.type_paths[canonical_name] = relative_path
             self.type_full_names[canonical_name] = full_name
             # IL2CPP 可能使用 '/' 或 '.' 表示嵌套 CLR 类型。两种写法都保留，
@@ -436,7 +444,7 @@ class ProtoRenderer:
             "// WDProtoDumper, Written by Cyt\n",
             'syntax = "proto3";',
             "",
-            "package " + PROTO_PACKAGE + ";",
+            "package " + self.package + ";",
             "",
         ]
         groups: dict[str, list[str]] = defaultdict(list)
@@ -579,30 +587,30 @@ def collect_runtime_inventory(
         subprocess.run(adb + ["shell", "mkdir", "-p", str(Path(REMOTE_AGENT).parent).replace("\\", "/")], check=True)
         subprocess.run(adb + ["push", str(args.agent), REMOTE_AGENT], check=True)
         subprocess.run(adb + ["shell", "chmod", "0644", REMOTE_AGENT], check=True)
-    pid = running_pid(device, args.package, args.adb)
+    pid = running_pid(device, args.app_package, args.adb)
     spawned = False
     if args.attach and pid is None:
-        raise RuntimeError(f"找不到正在运行的应用：{args.package}")
+        raise RuntimeError(f"找不到正在运行的应用：{args.app_package}")
     if args.spawn or pid is None:
         if realm == "emulated":
             # Native Bridge 不需要早期挂起；ADB 启动避免 MuMu 的 Frida spawn 超时。
             resolved = subprocess.run(adb + ["shell", "cmd", "package", "resolve-activity", "--brief",
                                             "-a", "android.intent.action.MAIN",
-                                            "-c", "android.intent.category.LAUNCHER", args.package],
+                                            "-c", "android.intent.category.LAUNCHER", args.app_package],
                                       check=True, capture_output=True, text=True, timeout=15)
             components = [line.strip() for line in resolved.stdout.splitlines()
-                          if line.strip().startswith(args.package + "/")]
+                          if line.strip().startswith(args.app_package + "/")]
             if not components:
-                raise RuntimeError(f"找不到应用启动 Activity：{args.package}")
+                raise RuntimeError(f"找不到应用启动 Activity：{args.app_package}")
             subprocess.run(adb + ["shell", "am", "start", "-W", "-n", components[-1]],
                            check=True, capture_output=True, text=True, timeout=60)
             time.sleep(8)
-            pid = running_pid(device, args.package, args.adb)
+            pid = running_pid(device, args.app_package, args.adb)
         else:
-            pid = device.spawn([args.package])
+            pid = device.spawn([args.app_package])
             spawned = True
     if pid is None:
-        raise RuntimeError(f"无法找到或启动应用：{args.package}")
+        raise RuntimeError(f"无法找到或启动应用：{args.app_package}")
 
     try:
         if realm == "emulated":
@@ -689,7 +697,7 @@ def main() -> int:
     if not records:
         raise RuntimeError("没有收集到可用的 protobuf 记录")
 
-    renderer = ProtoRenderer(records, warnings)
+    renderer = ProtoRenderer(records, warnings, package=args.package)
     output_path = args.output.resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     proto_text = renderer.render()
