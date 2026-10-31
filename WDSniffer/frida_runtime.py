@@ -1,4 +1,4 @@
-"""未定 ARM64 注入及 x86_64 模拟器 Native Bridge 支持。"""
+"""ARM64 注入及 x86_64 模拟器 Native Bridge 支持。"""
 
 from __future__ import annotations
 

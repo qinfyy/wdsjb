@@ -1,0 +1,4 @@
+lz4>=4,<5
+pycryptodome>=3,<4
+requests>=2,<3
+UnityPy>=1,<2
