@@ -1,0 +1,13 @@
+{
+    "name": "jsprotodumper",
+    "version": "1.0.0",
+    "description": "Recover protobuf schemas from protobufjs static JavaScript using Babel AST",
+    "license": "ISC",
+    "author": "",
+    "type": "commonjs",
+    "main": "index.js",
+    "dependencies": {
+        "@babel/parser": "^7.28.5",
+        "commander": "^15.0.0"
+    }
+}
