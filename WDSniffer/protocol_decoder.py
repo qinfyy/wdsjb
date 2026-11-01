@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import re
+import shutil
 import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
@@ -10,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from google.protobuf import descriptor_pb2, descriptor_pool, json_format, message_factory
+from google.protobuf.descriptor import Descriptor
 
 
 ROOT = Path(__file__).resolve().parent
@@ -20,7 +23,7 @@ _CMD_ENTRY = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
 
 @dataclass(frozen=True)
 class SnifferConfig:
-    proto_path: Path
+    proto_paths: list[Path]
     cmd_ids_path: Path
     listening_port: int
     listening_address: str = "127.0.0.1"
@@ -49,7 +52,21 @@ def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
     if not isinstance(address, str):
         raise ValueError("ListeningAddress 必须是字符串")
     address = address.strip() or "127.0.0.1"
-    return SnifferConfig(input_path("proto"), input_path("cmdId"), port, address)
+    sources = config.get("proto")
+    if isinstance(sources, str):
+        sources = [sources]
+    if not isinstance(sources, list) or not sources:
+        raise ValueError("proto 必须是非空的路径数组")
+    proto_paths: list[Path] = []
+    for value in sources:
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("proto 数组必须包含有效的路径字符串")
+        target = Path(value)
+        target = (target if target.is_absolute() else path.parent / target).resolve()
+        if not target.is_dir() and not (target.is_file() and target.suffix.lower() == ".proto"):
+            raise FileNotFoundError(f"proto 目录或文件未找到: {target}")
+        proto_paths.append(target)
+    return SnifferConfig(proto_paths, input_path("cmdId"), port, address)
 
 
 @dataclass(frozen=True)
@@ -84,71 +101,86 @@ def _read_cmd_ids(path: Path) -> dict[int, list[CommandInfo]]:
 
 class WdProtocolDecoder:
     def __init__(self, config: SnifferConfig) -> None:
-        self.proto_path = config.proto_path
+        self.proto_paths = config.proto_paths
         self.cmd_ids_path = config.cmd_ids_path
         self.protoc_path = ROOT / "protoc" / "protoc.exe"
-        self.descriptor_path = ROOT / "temp" / (self.proto_path.stem + ".pb")
+        self.descriptor_paths: list[Path] = []
         self.command_types = _read_cmd_ids(self.cmd_ids_path)
-        self.pool = descriptor_pool.DescriptorPool()
+        self.pools: list[descriptor_pool.DescriptorPool] = []
+        self.messages: dict[str, Descriptor] = {}
         self.descriptor_names: dict[str, str] = {}
         self._load_descriptor_pool()
 
-    def _load_descriptor_pool(self) -> None:
+    def _compile_descriptor(self, source: Path) -> Path:
         if not self.protoc_path.is_file():
             raise FileNotFoundError(f"protoc 未找到: {self.protoc_path}")
-        self.descriptor_path.parent.mkdir(parents=True, exist_ok=True)
+        source = source.resolve()
+        root = source if source.is_dir() else source.parent
+        files = sorted(path for path in source.rglob("*.proto") if path.is_file()) if source.is_dir() else [source]
+        if not files:
+            raise ValueError(f"proto 目录没有 .proto 文件: {source}")
+        identity = hashlib.sha256(str(source).encode("utf-8")).hexdigest()[:8]
+        target = ROOT / "temp" / f"{source.stem}-{identity}.pb"
+        target.parent.mkdir(parents=True, exist_ok=True)
         completed = subprocess.run(
-            [str(self.protoc_path), f"--descriptor_set_out={self.descriptor_path}",
-             "--include_imports", f"--proto_path={self.proto_path.parent}",
-             f"--proto_path={self.protoc_path.parent}", self.proto_path.name],
-            cwd=self.proto_path.parent, capture_output=True, text=True, check=False,
+            [str(self.protoc_path), f"--descriptor_set_out={target}",
+             "--include_imports", f"--proto_path={root}",
+             f"--proto_path={self.protoc_path.parent}",
+             *(path.relative_to(root).as_posix() for path in files)],
+            cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False,
         )
         if completed.returncode:
             detail = (completed.stderr or completed.stdout).strip()
-            raise RuntimeError(f"protoc 编译失败 ({completed.returncode}): {detail}")
-        descriptor_set = descriptor_pb2.FileDescriptorSet.FromString(self.descriptor_path.read_bytes())
-        source = next((item for item in descriptor_set.file if item.name == self.proto_path.name), None)
-        if source is None:
-            raise RuntimeError(f"descriptor 中缺少源文件: {self.proto_path.name}")
-        self.proto_package = source.package
+            raise RuntimeError(f"protoc 编译失败: {source} ({completed.returncode}): {detail}")
+        return target
 
-        # 按依赖拓扑加载，不能假设 descriptor set 内文件顺序。
-        pending = {item.name: item for item in descriptor_set.file}
-        loaded: set[str] = set()
-        while pending:
-            ready = [item for item in pending.values() if set(item.dependency) <= loaded]
-            if not ready:
-                raise RuntimeError("descriptor 的依赖缺失或存在循环: " + ", ".join(pending))
-            for item in ready:
-                self.pool.AddSerializedFile(item.SerializeToString())
-                loaded.add(item.name)
-                del pending[item.name]
+    def _load_descriptor_pool(self) -> None:
+        temp = ROOT / "temp"
+        if temp.resolve() != temp:
+            raise ValueError("temp 目录不能是目录链接")
+        if any(source.resolve().is_relative_to(temp) for source in self.proto_paths):
+            raise ValueError("proto 输入不能位于待清空的 temp 目录")
+        if temp.exists():
+            shutil.rmtree(temp)
+        temp.mkdir()
 
-        # CLR 命名空间与 proto package 不相同；优先精确匹配，短名仅唯一时使用。
-        messages: dict[str, list[str]] = defaultdict(list)
+        def visit(message: Descriptor) -> None:
+            self.messages[message.name] = message
+            for nested in message.nested_types:
+                visit(nested)
 
-        def visit(items: Any, prefix: str) -> None:
-            for item in items:
-                full_name = ".".join(part for part in (prefix, item.name) if part)
-                messages[item.name].append(full_name)
-                visit(item.nested_type, full_name)
-
-        for item in descriptor_set.file:
-            visit(item.message_type, item.package)
+        for source in self.proto_paths:
+            target = self._compile_descriptor(source)
+            self.descriptor_paths.append(target)
+            descriptor_set = descriptor_pb2.FileDescriptorSet.FromString(target.read_bytes())
+            if not descriptor_set.file:
+                raise ValueError(f"descriptor 没有文件定义: {target}")
+            # 每份描述符独立加载；忽略包名，后面的同名消息覆盖前面的。
+            pool = descriptor_pool.DescriptorPool()
+            self.pools.append(pool)
+            pending = list(descriptor_set.file)
+            loaded: set[str] = set()
+            while pending:
+                ready = [item for item in pending if set(item.dependency) <= loaded]
+                if not ready:
+                    raise RuntimeError("descriptor 的依赖缺失或存在循环: " + ", ".join(item.name for item in pending))
+                for item in ready:
+                    pool.AddSerializedFile(item.SerializeToString())
+                    loaded.add(item.name)
+                    pending.remove(item)
+                    for message in item.message_type:
+                        full_name = ".".join(part for part in (item.package, message.name) if part)
+                        visit(pool.FindMessageTypeByName(full_name))
         for candidates in self.command_types.values():
             for candidate in candidates:
-                preferred = [candidate.clr_type.replace("/", "."),
-                             ".".join(part for part in (self.proto_package, candidate.short_name) if part)]
-                found = next((name for name in preferred if name in messages[candidate.short_name]), None)
-                if found is None and len(messages[candidate.short_name]) == 1:
-                    found = messages[candidate.short_name][0]
-                if found is not None:
-                    self.descriptor_names[candidate.clr_type] = found
+                message = self.messages.get(candidate.short_name)
+                if message is not None:
+                    self.descriptor_names[candidate.clr_type] = message.full_name
 
     def status(self) -> dict[str, Any]:
         return {
-            "proto_path": str(self.proto_path), "cmd_ids_path": str(self.cmd_ids_path),
-            "descriptor_path": str(self.descriptor_path), "proto_package": self.proto_package,
+            "proto_paths": [str(path) for path in self.proto_paths], "cmd_ids_path": str(self.cmd_ids_path),
+            "descriptor_paths": [str(path) for path in self.descriptor_paths],
             "command_ids": len(self.command_types), "mapped_types": len(self.descriptor_names),
         }
 
@@ -180,7 +212,7 @@ class WdProtocolDecoder:
             record.update(decode_status="schema_missing", decode_error="schema 中未找到对应消息")
             return record
         try:
-            message = message_factory.GetMessageClass(self.pool.FindMessageTypeByName(descriptor_name))()
+            message = message_factory.GetMessageClass(self.messages[candidate.short_name])()
             consumed = message.MergeFromString(payload)
             if consumed != len(payload):
                 raise ValueError(f"protobuf 只读取了 {consumed}/{len(payload)} 字节")

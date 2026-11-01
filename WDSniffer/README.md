@@ -24,13 +24,17 @@ WDSniffer.json 的路径相对该配置文件：
 ~~~json
 {
   "cmdId": "..\\WDProtoDumper\\output\\CmdIds.txt",
-  "proto": "..\\WDProtoDumper\\output\\wd.proto",
+  "proto": [
+    "..\\WDProtoDumper\\output",
+    "..\\JsProtoDumper\\output\\pb"
+  ],
   "ListeningAddress": "127.0.0.1",
   "ListeningPort": 1984
 }
 ~~~
 
-启动时使用 protoc/protoc.exe 编译配置中的 proto，输出固定在本目录 temp/*.pb。
+
+消息匹配不使用 package，按数组顺序加载，后面的同名消息覆盖前面的。目录必须包含 `.proto`，`cmdId` 必须指向存在的命令清单；缺失时直接报错，不使用旧描述符。
 
 ~~~powershell
 py Srv.py --realm emulated
