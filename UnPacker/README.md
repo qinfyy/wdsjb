@@ -1,4 +1,4 @@
-# Unpacker
+# UnPacker
 
 CN 6.1.0 资源解析器：按 XMF 切分 BLK，验签 PBStaticConfigure，恢复含 mr0k 的 UnityFS AB。算法、版本限制和验证记录见 [ASSET_ANALYSIS.md](ASSET_ANALYSIS.md)。
 
