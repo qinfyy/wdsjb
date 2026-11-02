@@ -12,7 +12,8 @@ from pathlib import Path
 import sys
 
 from lua_parser import LuaTask, is_lua_file, restore_lua, unluac_command
-from pb_config import ConfigSchema, inspect_wire
+from pb_config import ConfigSchema
+from protobuf_raw_parser import inspect_wire
 
 
 ROOT = Path(__file__).resolve().parent
@@ -52,34 +53,37 @@ def restore_file(path: Path, relative: Path, output: Path, schema: ConfigSchema,
         if not verify_only:
             write_preserving(output / target, payload)
         return result
-    descriptor = schema.route(relative.stem, message)
-    if descriptor is not None:
-        document, unknown = schema.decode(payload, descriptor)
-        result.update(message=descriptor.full_name, status="partial" if unknown else "protobuf")
-        if unknown:
-            result["reason"] = "存在 schema 未识别的字段；未输出丢失字段的命名 JSON"
+    descriptors = schema.route(relative.stem, message)
+    if descriptors:
+        try:
+            decoded = schema.decode(payload, descriptors)
+            if decoded.unknown_count == 0:
+                schema.verify_group(relative.stem, decoded.document)
+        except ValueError as error:
+            result.update(status="failed", reason=str(error))
         else:
-            schema.verify_group(relative.stem, document)
+            unknown = decoded.unknown_count > 0
+            result.update(message=decoded.descriptor.full_name, proto=decoded.descriptor.file.name,
+                          status="partial" if unknown else "protobuf", decodedFieldCount=decoded.known_count,
+                          unknownFieldCount=decoded.unknown_count)
             target = relative.with_suffix(".json")
             result["output"] = target.as_posix()
             if not verify_only:
-                write_json(output / target, document)
-            return result
+                write_json(output / target, decoded.document)
+            if not unknown:
+                return result
+            result["reason"] = f"已解析 {decoded.known_count} 个字段，仍有 {decoded.unknown_count} 个未知字段"
     else:
         result.update(status="unsupported", reason="当前 schema 没有对应根消息，未按相似类型猜测")
     result["preserved"] = relative.as_posix()
     if not verify_only:
         write_preserving(output / relative, payload)
-    try:
-        fields = inspect_wire(payload)
-    except ValueError:
-        result["format"] = "binary"
-    else:
-        result["format"] = "protobuf-wire"
-        target = relative.with_suffix(".wire.json")
-        result["wireOutput"] = target.as_posix()
-        if not verify_only:
-            write_json(output / target, {"schemaResolved": False, "fields": fields})
+    wire_document = inspect_wire(payload)
+    result["format"] = "binary" if "leftOver" in wire_document else "protobuf-wire"
+    target = relative.with_suffix(".wire.json")
+    result["wireOutput"] = target.as_posix()
+    if not verify_only:
+        write_json(output / target, wire_document)
     return result
 
 

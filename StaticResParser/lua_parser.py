@@ -71,7 +71,6 @@ class LuaTask:
 
 
 def restore_lua(task: LuaTask) -> tuple[dict[str, object], bytes | None]:
-    """独立进程处理单个 Lua；只返回结果，输出保护由 main.py 统一执行。"""
     result: dict[str, object] = {"file": task.relative.as_posix(), "format": "lua", "signed": task.signed}
     try:
         raw = task.path.read_bytes()

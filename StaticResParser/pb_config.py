@@ -1,7 +1,8 @@
-"""protobuf schema 加载、客户端路由和无 schema 的原始 wire 检查。"""
+"""protobuf schema 加载、客户端路由和候选解码打分。"""
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 from pathlib import Path
 import re
@@ -11,7 +12,8 @@ from typing import Any
 
 from google.protobuf import descriptor_pb2, descriptor_pool, json_format, message_factory
 from google.protobuf.descriptor import Descriptor
-from google.protobuf.message import DecodeError
+from google.protobuf.message import DecodeError, Message
+from google.protobuf.unknown_fields import UnknownFieldSet
 
 from routes import SPLIT_MESSAGES
 
@@ -50,6 +52,36 @@ def compile_schema(source: Path) -> Path:
     return target
 
 
+@dataclass(frozen=True)
+class ConfigDecode:
+    descriptor: Descriptor
+    document: dict[str, Any]
+    known_count: int
+    unknown_count: int
+
+
+def _message_coverage(message: Message) -> tuple[int, int]:
+    fields = message.ListFields()
+    known_count, unknown_count = len(fields), len(UnknownFieldSet(message))
+    for field, value in fields:
+        if field.message_type is None:
+            continue
+        if field.is_repeated:
+            if field.message_type.GetOptions().map_entry:
+                if field.message_type.fields_by_name["value"].message_type is None:
+                    continue
+                children = value.values()
+            else:
+                children = value
+        else:
+            children = (value,)
+        for child in children:
+            known, unknown = _message_coverage(child)
+            known_count += known
+            unknown_count += unknown
+    return known_count, unknown_count
+
+
 class ConfigSchema:
     def __init__(self, paths: Path | list[Path]) -> None:
         sources = [paths] if isinstance(paths, Path) else paths
@@ -65,7 +97,7 @@ class ConfigSchema:
         temp.mkdir()
         self.descriptor_paths = [compile_schema(source) for source in sources]
         self.pools: list[descriptor_pool.DescriptorPool] = []
-        self.messages: dict[str, Descriptor] = {}
+        self.messages: dict[str, list[Descriptor]] = {}
         digest = hashlib.sha256()
         self.descriptor_hashes: list[str] = []
         for path in self.descriptor_paths:
@@ -82,14 +114,14 @@ class ConfigSchema:
     def _load_descriptor_set(self, descriptor_set: descriptor_pb2.FileDescriptorSet) -> None:
         if not descriptor_set.file:
             raise ValueError("schema 没有文件定义")
-        # 每份描述符独立加载；忽略包名，后面的同名消息覆盖前面的。
+        # 每份描述符独立加载；同名消息保留为候选，不合并字段和引用。
         pool = descriptor_pool.DescriptorPool()
         self.pools.append(pool)
         pending = list(descriptor_set.file)
         loaded: set[str] = set()
 
         def visit(message: Descriptor) -> None:
-            self.messages[message.name.casefold()] = message
+            self.messages.setdefault(message.name.casefold(), []).append(message)
             for nested in message.nested_types:
                 visit(nested)
 
@@ -108,31 +140,49 @@ class ConfigSchema:
                     full_name = ".".join(part for part in (file.package, message.name) if part)
                     visit(pool.FindMessageTypeByName(full_name))
 
-    def find_message(self, name: str) -> Descriptor | None:
-        return self.messages.get(name.rsplit(".", 1)[-1].casefold())
+    def find_messages(self, name: str) -> list[Descriptor]:
+        return self.messages.get(name.rsplit(".", 1)[-1].casefold(), [])
 
-    def route(self, stem: str, explicit: str | None = None) -> Descriptor | None:
+    def route(self, stem: str, explicit: str | None = None) -> list[Descriptor]:
         if explicit:
-            message = self.find_message(explicit)
-            if message is None:
+            messages = self.find_messages(explicit)
+            if not messages:
                 raise ValueError(f"schema 不包含消息：{explicit}")
-            return message
+            return messages
         match = re.fullmatch(r"(story|explore|text|live2d)_([0-9]+)", stem)
         if match:
-            return self.find_message(SPLIT_MESSAGES[match[1]])
-        return self.find_message("All" + stem + "Datas")
+            return self.find_messages(SPLIT_MESSAGES[match[1]])
+        return self.find_messages("All" + stem + "Datas")
 
-    def decode(self, payload: bytes, descriptor: Descriptor) -> tuple[dict[str, Any], bool]:
-        try:
-            message = message_factory.GetMessageClass(descriptor).FromString(payload)
-        except DecodeError as error:
-            raise ValueError(f"{descriptor.full_name} 解析失败，可能截断或路由不匹配") from error
-        before = message.SerializeToString(deterministic=True)
-        message.DiscardUnknownFields()
-        unknown = before != message.SerializeToString(deterministic=True)
+    def decode(self, payload: bytes, descriptors: list[Descriptor]) -> ConfigDecode:
+        best: tuple[Descriptor, Message, int, int] | None = None
+        best_score: tuple[bool, int] | None = None
+        errors: list[str] = []
+        for descriptor in descriptors:
+            try:
+                message = message_factory.GetMessageClass(descriptor)()
+                consumed = message.MergeFromString(payload)
+                if consumed != len(payload):
+                    raise ValueError(f"protobuf 只读取了 {consumed}/{len(payload)} 字节")
+                if not message.IsInitialized():
+                    raise ValueError("protobuf 缺少必填字段：" + ", ".join(message.FindInitializationErrors()))
+                known_count, unknown_count = _message_coverage(message)
+            except (DecodeError, ValueError) as error:
+                errors.append(f"{descriptor.full_name} ({descriptor.file.name})：{error}")
+                continue
+            complete = unknown_count == 0
+            score = (complete, 0 if complete else known_count)
+            if best_score is None or score > best_score:
+                best = (descriptor, message, known_count, unknown_count)
+                best_score = score
+            if complete:
+                break
+        if best is None:
+            raise ValueError("所有候选消息解析失败：" + "; ".join(errors))
+        descriptor, message, known_count, unknown_count = best
         document = json_format.MessageToDict(message, preserving_proto_field_name=True,
                                              use_integers_for_enums=True)
-        return document, unknown
+        return ConfigDecode(descriptor, document, known_count, unknown_count)
 
     @staticmethod
     def verify_group(stem: str, document: dict[str, Any]) -> None:
@@ -141,49 +191,6 @@ class ConfigSchema:
             return
         name = {"story": "storyID", "explore": "mapID", "text": "iD", "live2d": "iD"}[match[1]]
         # proto3 的零值通常不出现在 JSON 中；不能把 text_0 当作缺少 ID。
-        actual = document.get(name, 0)
+        actual = next((value for key, value in document.items() if key.casefold() == name.casefold()), 0)
         if actual != int(match[2]):
             raise ValueError(f"文件名分组 ID 与消息字段 {name} 不一致：{match[2]} != {actual}")
-
-
-def read_varint(data: bytes, offset: int) -> tuple[int, int]:
-    value = 0
-    for shift in range(0, 70, 7):
-        if offset >= len(data):
-            raise ValueError("varint 截断")
-        byte = data[offset]
-        offset += 1
-        if shift == 63 and byte > 1:
-            raise ValueError("varint 超出 uint64")
-        value |= (byte & 127) << shift
-        if not byte & 128:
-            return value, offset
-    raise ValueError("varint 超长")
-
-
-def inspect_wire(data: bytes) -> list[dict[str, Any]]:
-    """保留字段编号、编码和原始字节，不臆造字段名、子消息或数值类型。"""
-    fields: list[dict[str, Any]] = []
-    offset = 0
-    while offset < len(data):
-        start = offset
-        key, offset = read_varint(data, offset)
-        tag, wire = key >> 3, key & 7
-        if not 0 < tag < 1 << 29 or wire not in (0, 1, 2, 5):
-            raise ValueError("不支持的 protobuf tag/wire")
-        field: dict[str, Any] = {"offset": start, "tag": tag, "wire": wire}
-        if wire == 0:
-            value, offset = read_varint(data, offset)
-            field["varint"] = str(value)
-        else:
-            size = 8 if wire == 1 else 4
-            if wire == 2:
-                size, offset = read_varint(data, offset)
-            end = offset + size
-            if end > len(data):
-                raise ValueError("protobuf 字段截断")
-            field["payloadHex"] = data[offset:end].hex()
-            offset = end
-        field["rawHex"] = data[start:offset].hex()
-        fields.append(field)
-    return fields

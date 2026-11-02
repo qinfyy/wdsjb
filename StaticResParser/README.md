@@ -30,8 +30,6 @@ py -X utf8 main.py --input 解包文件目录 --output pb_output --no-decrypt-lu
 
 需要处理非 Lua 内容时，读取 `main.py` 的 `DEFAULT_SCHEMA` 目录数组，包括 WDProtoDumper 的 `output_pbconfig` 和 JsProtoDumper 的 `output/pbconfig`。加载 schema 时先清空本工具的 `temp` 目录，再自动调用 `../WDSniffer/protoc/protoc.exe`，递归编译各目录中的 `.proto`，一个目录生成一个 FileDescriptorSet，保存到 `temp/<目录名>-<路径摘要>.pb`。schema 输入不能放在 `temp` 中。`--lua-only` 不加载或编译 schema。
 
-消息匹配不使用 package，按目录数组顺序加载，后面的同名消息覆盖前面的。
-
 ## 参数
 
 - `--input`：必填，已解包的目录或单个文件。目录递归查找 `.bytes`、`.lua`、`.luac`，不把 Unpacker 的报告当成资源。
@@ -53,6 +51,6 @@ Lua 逻辑位于独立文件 `lua_parser.py`，按内容头识别，不依据 `L
 
 Lua 恢复为同名 `.lua`，直接平铺到输出目录，不另建 `lua` 子目录；不同输入目录中的同名文件仍按已有输出保护规则处理，不覆盖不同内容。临时标准字节码不保存在输出目录，反编译失败记录原因，不用原始 `.bytes` 冒充源码。源码注释和已剥离的变量名不能逐字恢复。
 
-非 Lua 内容缺少 schema 或含未知字段时保留原始 `.bytes`。能验证 wire 结构时额外输出 `.wire.json`，只记录字段编号、编码和原始字节，不伪造字段名称。报告列出全部结果、摘要及原因。
+protobuf 全解时只输出 `.json`，不复制原始 `.bytes` 或输出 `.wire.json`。未全解时，将已解析字段照常输出到同名 `.json`，同时保留原始 `.bytes` 和 `.wire.json`；资源 JSON 不添加不完整标记。没有可用的解析结果时只输出 bytes 和 wire。已有输出不会自动删除。
 
 存在失败、缺失 schema 或未知字段时返回码为 1；返回码 0 才表示全部输入成功恢复。读取规则及 CN 6.1.0 的 RVA 见 [ASSET_ANALYSIS.md](ASSET_ANALYSIS.md)。

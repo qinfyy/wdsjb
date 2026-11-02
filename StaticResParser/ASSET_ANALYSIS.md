@@ -191,17 +191,15 @@ XOR 后是 Lua 5.3 format 1，32 字节头部：
 
 CN 6.1.0 的 PbConfig 已独立编译和验证：1726 个消息、371 个枚举、5890 个字段样本，无失败、警告或占位类型。此统计仅表示已导出 CLR 消息的完整性，不意味着每个解包文件都有对应 CLR schema。
 
-StaticResParser 同时读取 WDProtoDumper 与 JsProtoDumper 的配置协议目录。每次运行先清空 StaticResParser 的 `temp`，再使用 WDSniffer 随附的 `protoc/protoc.exe`，将每个目录的 `.proto` 独立编译为包含 import 依赖的 FileDescriptorSet，保存到 `temp`。按目录数组顺序加载消息，匹配时忽略 package，后面的同名消息覆盖前面的；消息字段与引用仍由其原始描述符解析，不手工合并不同 schema。
+StaticResParser 同时读取 WDProtoDumper 与 JsProtoDumper 的配置协议目录。每次运行先清空 StaticResParser 的 `temp`，再使用 WDSniffer 随附的 `protoc/protoc.exe`，将每个目录的 `.proto` 独立编译为包含 import 依赖的 FileDescriptorSet，保存到 `temp`。按目录数组顺序加载消息，匹配时忽略 package，同名消息全部保留为候选；消息字段与引用仍由其原始描述符解析，不手工合并不同 schema，也不扫描其他消息猜类型。
 
-解析一个消息后递归移除未知字段，比较移除前后的规范化序列化字节。存在变化时表示当前 schema 未覆盖全部字段，不能导出丢失信息的命名 JSON。分表还需要核对外层 ID 与文件名一致。
+每个候选都必须读完整个正文并满足必填字段约束。递归统计实际出现的已解析字段与 UnknownFieldSet，包括 repeated 子消息及 map 的消息值。与 WDSniffer 的打分规则一致：未知字段为零的完整候选优先；只有部分候选时比较已解析字段数；同分取配置顺序中的第一份。此处的完整只表示该 schema 没有遗留未知字段，不证明其字段语义与原始源码完全一致。分表还需要核对外层 ID 与文件名一致，字段名大小写不影响 ID 校验。
 
-无 schema 的 wire 导出只保留：
+完整解析只输出命名 JSON，不复制原始 bytes，不生成 wire JSON。部分解析仍输出选中候选已解析的字段到普通 JSON，同时保留 bytes 和 wire JSON；普通 JSON 不加不完整标记，报告独立记录状态与字段计数。没有可用候选时只保留 bytes 和 wire JSON；所有候选解析失败与缺少根消息分别报告为 failed 与 unsupported，不清理已有输出。
 
-- 原始文件及 SHA-256。
-- 每个字段的偏移、tag、wire 和原始编码字节。
-- varint 的无符号原值，或 length-delimited/fixed 字段的原始 payload。
+wire JSON 在独立的 `protobuf_raw_parser.py` 中保留前端 raw decoder 的候选解释思路，输出改为结构化 JSON：字段编号作键，重复字段按出现顺序加 `#2` 等后缀；字段对象用 `wire` 保存编码类型。varint 的 `int` 与 ZigZag `signed_int` 都是数值；fixed 字段保存无符号 `int`、二进制补码 `signed_int`、`float` 或 `double` 及 `raw_hex`，非有限浮点解释为 null。长度字段在完整可读取时用 `message` 展开子消息，否则保存 `string`、`raw_hex`、`repeated_int` 和 `repeated_signed_int`；可读 UTF-8 字符串的 repeated 属性为 null，其他正文只有全部读取为 varint 后才输出 packed 数组。未读取的尾部以 base64 `leftOver` 保存，递归展开最多 64 层。原始 bytes 和报告中的 SHA-256 保留独立的原始证据。
 
-缺少 schema 时，length-delimited 可以是字符串、字节串、子消息或 packed 数值；varint 可以是 bool、enum、int 或 ZigZag 编码。不能根据“能解析”自动赋予字段语义。
+缺少 schema 时，length-delimited 可以是字符串、字节串、子消息或 packed 数值；varint 可以是 bool、enum、int 或 ZigZag 编码。wire 中的展开与标签仅供查看，不是实际类型或字段语义，也不参与候选 schema 的打分。
 
 ## 汇总读取入口
 
