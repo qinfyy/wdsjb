@@ -150,13 +150,36 @@ file = live2d_<group>.bytes
 
 `MiscData_misc_data.bytes` 经 RSACheckContent 后按 Encoding.Default 转为字符串，送入 ConstVariableManager；它不是 Allmisc_dataDatas。
 
-`LuaScript_Battle_*.bytes` 也不是 PbConfig。客户端通过 GameBattleLuaManager 的脚本加载链处理它们。当前样本不是普通 protobuf，不能把 Lua 私有二进制格式的头部当作 protobuf 字段或再次套 mr0k。未恢复 Lua 的私有格式时只保留原始文件，不声称恢复出 Lua 源码。
+Lua 脚本也不是 PbConfig。按内容识别，不使用 `LuaScript` 文件名前缀作为判据；不能把 Lua 私有二进制格式的头部当作 protobuf 字段或再次套 mr0k。解密和反编译集中在独立文件 `lua_parser.py`。
 
 | 版本 | 模块 | RVA | 入口 |
 | --- | --- | --- | --- |
 | CN 6.1.0 | libil2cpp.so | `0x05E1DD48` | GameBattleLuaManager.myLoader |
 | CN 6.1.0 | libil2cpp.so | `0x05E1E054` | GameBattleLuaManager.GetScriptEnv |
 | CN 6.1.0 | libil2cpp.so | `0x070680A4` | XLua.SignatureLoader.load_and_verify |
+
+`GameBattleLuaManager.GetScriptEnv` 从 FileMapper 读取内容，调用 RSACheckContent 验签，再初始化 4 字节密钥数组（字段句柄 `FieldInfo_341_A6FC8F8`），逐字节执行 `content[i] ^= key[i % 4]`，最后传入 LuaEnv.DoString。密钥 `2F 4F 65 9D` 由样本的加密 magic `34 03 10 FC` 与 Lua magic `1B 4C 75 61` 恢复，再通过完整头部和反编译验证。PBStaticConfigureUnpack 已移除 RSA 签名，不重复裁掉 `0x80` 字节。
+
+XOR 后是 Lua 5.3 format 1，32 字节头部：
+
+```text
+1B 4C 75 61 53 01 19 93 0D 0A 1A 0A
+04 04 08 08 78 56 00 00 00 00 00 00
+00 00 00 00 00 28 77 40
+```
+
+| 版本 | 模块 | RVA | 证据 |
+| --- | --- | --- | --- |
+| CN 6.1.0 | libxlua.so | `0x0002EFD0` | luaU_undump：检查版本 0x53、format 1；头部不读取 size_t 长度字节 |
+| CN 6.1.0 | libxlua.so | `0x0002F988` | LoadString：短长度 1 字节，0xFF 后的长长度是 uint32；读 length-1 字节内容 |
+| CN 6.1.0 | libxlua.so | `0x0002F304` | LoadFunction：读取函数头、指令、常量、upvalue、子函数和调试数据 |
+| CN 6.1.0 | libxlua.so | `0x0003190C` | luaV_execute：instruction & 0x3F 分派，已核对开头的标准 Lua 5.3 指令分支 |
+
+标准化只修改头部：将文件偏移 `0x05` 的 format 从 1 改为 0，在文件偏移 `0x0D` 插入 `04`，声明 4 字节 size_t。函数体不改写。恢复后交给 unluac 解析及反编译，不把“出现 Lua magic”当成成功源码。
+
+`LuaAsset.GetDecodeBytes` (`libil2cpp.so 0x05B68D54`) 的 XXTEA 分支是另一个加载入口，不能用于替代这里的 PBStaticConfigure XOR 分支。StarRail 参考实现读取 Luau 3/4 归档，不直接适用于本次的 Lua 5.3 字节码。
+
+默认处理 Lua。关闭 `--decrypt-lua` 时跳过且不复制原始 Lua；`--lua-only` 只筛选和处理 Lua，其他文件不解析、不解密、不复制，也不加载 schema。识别只读取内容头，完整字节码是否可反编译由 unluac 验证。反编译结果不等同于原始源码，也不证明所有逻辑等价；不执行游戏脚本。
 
 部分普通文件虽然具有合法 protobuf wire 结构，但当前 CLR PbConfig 没有对应的 All…Datas。缺少消息定义不是解密失败，也不等于这些文件可以共用其他同形消息；需要继续定位其真正的 schema 来源，不能仅凭名称认定它们属于 TypeScript。
 

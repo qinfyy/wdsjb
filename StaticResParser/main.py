@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
+from lua_parser import LuaTask, is_lua_file, restore_lua, unluac_command
 from pb_config import ConfigSchema, inspect_wire
 
 
@@ -36,7 +39,7 @@ def restore_file(path: Path, relative: Path, output: Path, schema: ConfigSchema,
     payload = raw
     if signed:
         # CN 6.1.0 libil2cpp.so 0x0603081C；已解包内容不得再次移除 0x80 字节。
-        from Unpacker.crypto import verify_signed_file
+        from UnPacker.crypto import verify_signed_file
         payload = verify_signed_file(raw)
     result: dict[str, object] = {
         "file": relative.as_posix(), "size": len(raw), "payloadSize": len(payload),
@@ -88,29 +91,78 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("输出目录不能等于输入目录或位于输入目录内部")
     if args.message and not source.is_file():
         raise ValueError("--message 只用于单文件，不能对整个目录套用同一种消息")
-    schema = ConfigSchema(args.schema or DEFAULT_SCHEMA)
-    files = [source] if source.is_file() else sorted(source.rglob("*.bytes"))
+    if args.lua_only and not args.decrypt_lua:
+        raise ValueError("--lua-only 不能与 --no-decrypt-lua 同时使用")
+    if args.lua_workers < 1:
+        raise ValueError("--lua-workers 必须是正整数")
+    files = [source] if source.is_file() else sorted(
+        path for path in source.rglob("*") if path.is_file() and path.suffix.lower() in {".bytes", ".lua", ".luac"}
+    )
     if not files:
-        raise ValueError("没有找到 .bytes 配置文件")
-    entries: list[dict[str, object]] = []
+        raise ValueError("没有找到 .bytes/.lua/.luac 资源文件")
+    schema: ConfigSchema | None = None
+    results: dict[Path, dict[str, object]] = {}
+    lua_files: list[tuple[Path, Path]] = []
+    pb_files: list[tuple[Path, Path]] = []
     for index, path in enumerate(files, 1):
         relative = Path(path.name) if source.is_file() else path.relative_to(source)
         try:
-            entry = restore_file(path, relative, output, schema, args.signed, args.verify_only, args.message)
+            if is_lua_file(path, args.signed):
+                if args.decrypt_lua:
+                    lua_files.append((path, relative))
+                    continue
+                entry = {"file": relative.as_posix(), "status": "skipped_lua", "reason": "Lua 解密已关闭，未复制原始文件"}
+            elif args.lua_only:
+                continue
+            else:
+                pb_files.append((path, relative))
+                continue
         except (OSError, ValueError) as error:
             entry = {"file": relative.as_posix(), "status": "failed", "reason": str(error)}
-        entries.append(entry)
+        results[path] = entry
         if args.detailed_log or index % 1000 == 0 or index == len(files):
             print(f"[{index}/{len(files)}] {relative.as_posix()}：{entry['status']}")
+    if pb_files:
+        schema = ConfigSchema(args.schema or DEFAULT_SCHEMA)
+        for index, (path, relative) in enumerate(pb_files, 1):
+            try:
+                entry = restore_file(path, relative, output, schema, args.signed, args.verify_only, args.message)
+            except (OSError, ValueError) as error:
+                entry = {"file": relative.as_posix(), "status": "failed", "reason": str(error)}
+            results[path] = entry
+            if args.detailed_log or index % 1000 == 0 or index == len(pb_files):
+                print(f"[{index}/{len(pb_files)}] {relative.as_posix()}：{entry['status']}")
+    if lua_files:
+        try:
+            command = unluac_command()
+        except ValueError as error:
+            for path, relative in lua_files:
+                results[path] = {"file": relative.as_posix(), "format": "lua", "status": "failed", "reason": str(error)}
+        else:
+            tasks = [LuaTask(path, relative, command, args.signed) for path, relative in lua_files]
+            workers = min(args.lua_workers, len(tasks))
+            print(f"Lua：{len(tasks)} 个文件，{workers} 个工作进程")
+            with ProcessPoolExecutor(max_workers=workers) as executor:
+                for index, (task, (entry, restored)) in enumerate(zip(tasks, executor.map(restore_lua, tasks)), 1):
+                    if restored is not None and not args.verify_only:
+                        try:
+                            write_preserving(output / str(entry["output"]), restored)
+                        except (OSError, ValueError) as error:
+                            entry.update(status="failed", reason=str(error))
+                    results[task.path] = entry
+                    if args.detailed_log or index % 100 == 0 or index == len(tasks):
+                        print(f"[Lua {index}/{len(tasks)}] {task.relative.as_posix()}：{entry['status']}")
+    entries = [results[path] for path in files if path in results]
     counts = Counter(str(entry["status"]) for entry in entries)
     report: dict[str, object] = {
-        "version": "CN 6.1.0", "schemaSha256": schema.sha256,
+        "version": "CN 6.1.0", "schemaSha256": schema.sha256 if schema else None,
         "schemas": [
             {"descriptor": path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name,
              "sha256": digest}
             for path, digest in zip(schema.descriptor_paths, schema.descriptor_hashes)
-        ],
+        ] if schema else [],
         "verifyOnly": args.verify_only, "fileCount": len(entries),
+        "decryptLua": args.decrypt_lua, "luaOnly": args.lua_only, "scannedFileCount": len(files),
         "counts": dict(counts), "files": entries,
     }
     # 报告是本次运行的状态；不清空输出，不改写已经导出的资源。
@@ -119,7 +171,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     return report
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="解包后的 .bytes 目录或单个文件")
     parser.add_argument("--output", type=Path, default=ROOT / "output", help="输出目录；不清空已有内容")
@@ -128,7 +180,15 @@ def main() -> int:
     parser.add_argument("--message", help="单文件显式指定消息名，不用于猜测未知 schema")
     parser.add_argument("--verify-only", action="store_true", help="只验证并写报告，不导出资源")
     parser.add_argument("--detailed-log", action="store_true", help="打印逐文件结果")
-    args = parser.parse_args()
+    parser.add_argument("--decrypt-lua", action=argparse.BooleanOptionalAction, default=True,
+                        help="默认解密并反编译 Lua；--no-decrypt-lua 跳过且不复制原始 Lua")
+    parser.add_argument("--lua-only", action="store_true", help="只处理 Lua，不加载 schema 或处理其他资源")
+    parser.add_argument("--lua-workers", type=int, default=min(4, os.cpu_count() or 1), help="Lua 反编译并发进程数")
+    return parser.parse_args(argv)
+
+
+def main() -> int:
+    args = parse_args()
     try:
         report = run(args)
     except (OSError, ValueError) as error:
