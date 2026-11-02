@@ -18,8 +18,7 @@ import frida
 PACKAGE_NAME = "com.miHoYo.wd"
 ROOT = Path(__file__).resolve().parent
 SCRIPT_PATH = ROOT / "FridaScript_arm64-v8a.js"
-DEFAULT_OUTPUT = ROOT / "output" / "wd.proto"
-DEFAULT_SCHEMA = ROOT / "output" / "wd_schema.json"
+DEFAULT_OUTPUT = ROOT / "output"
 DEFAULT_ADB = Path("adb.exe")
 DEFAULT_AGENT = ROOT.parent / "WDRedirector" / "frida-agent-arm64.so"
 REMOTE_AGENT = "/data/local/tmp/re.frida.server/frida-agent-arm64.so"
@@ -61,8 +60,8 @@ def parse_args() -> argparse.Namespace:
         default="Pb,Baseproto",
         help="筛选 CLR 命名空间，可用逗号分隔；默认导出 Pb 网络消息及 Baseproto 包头，传空字符串可包含配置消息。",
     )
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="输出 .proto 文件路径。")
-    parser.add_argument("--schema-json", type=Path, default=DEFAULT_SCHEMA, help="原始运行时清单 JSON 路径。")
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="输出目录，不存在时自动创建，默认 output。")
+    parser.add_argument("--schema-json", type=Path, help="原始运行时清单 JSON 路径，默认输出目录下的 wd_schema.json。")
     parser.add_argument("--no-schema-json", action="store_true", help="不保存原始运行时清单 JSON。")
     parser.add_argument("--schema-input", type=Path, help="使用已保存的清单生成文件，不附加 Android 进程。")
     parser.add_argument("--realm", choices=("auto", "native", "emulated"), default="auto", help="x86_64 模拟器自动选择 emulated。")
@@ -72,7 +71,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--messages", default="", help="只探测指定消息，用逗号分隔 CLR 全名或类名。")
     parser.add_argument("--inspect", action="store_true", help="只检查运行时消息和 descriptor 是否存在。")
     parser.add_argument("--allow-partial", action="store_true", help="允许输出存在明确诊断的部分结果；默认拒绝不完整 schema。")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.schema_json is None:
+        args.schema_json = args.output / "wd_schema.json"
+    return args
 
 
 def proto_identifier(value: str, fallback: str) -> str:
@@ -655,7 +657,7 @@ def collect_runtime_inventory(
 
     done["commands"] = commands
     if errors:
-        partial_path = args.schema_json.with_name("wd_schema.partial.json")
+        partial_path = args.schema_json.with_suffix(".partial.json")
         partial_path.parent.mkdir(parents=True, exist_ok=True)
         partial_path.write_text(json.dumps({"completed": done, "warnings": warnings,
                                            "records": records, "errors": errors}, ensure_ascii=False, indent=2) + "\n",
@@ -681,6 +683,11 @@ def load_inventory(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any
 
 def main() -> int:
     args = parse_args()
+    output_dir = args.output.resolve()
+    if output_dir.exists() and not output_dir.is_dir():
+        raise NotADirectoryError(f"--output 必须指定目录，已有同名文件：{output_dir}")
+    if not args.inspect:
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.schema_input:
         source_path = args.schema_input.resolve()
@@ -698,8 +705,7 @@ def main() -> int:
         raise RuntimeError("没有收集到可用的 protobuf 记录")
 
     renderer = ProtoRenderer(records, warnings, package=args.package)
-    output_path = args.output.resolve()
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "wd.proto"
     proto_text = renderer.render()
 
     if not args.no_schema_json and not args.schema_input:
@@ -724,7 +730,7 @@ def main() -> int:
     output_path.write_text(proto_text, encoding="utf-8")
     commands = completed.get("commands", [])
     if commands:
-        command_path = output_path.with_name("CmdIds.txt")
+        command_path = output_dir / "CmdIds.txt"
         grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for command in commands:
             grouped[str(command["namespace"])].append(command)
