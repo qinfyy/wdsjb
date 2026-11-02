@@ -62,9 +62,9 @@ def record_to_frontend_packet(record: dict[str, Any], timestamp_ms: int | None =
     protocol = record.get("protocol")
 
     if protocol == "protobuf":
-        command_name = str(record.get("command_name") or f"UNKNOWN_{packet_id}")
+        command_name = str(record.get("command_name") or "UNKNOWN")
         packet_name = command_name
-        packet_object = record.get("decoded") if record.get("decode_status") == "decoded" else None
+        packet_object = record.get("decoded") if record.get("decode_status") in {"decoded", "decoded_partial"} else None
     else:
         packet_name = f"RAW.{packet_id}" if command_id is not None else "RAW.UNKNOWN"
         packet_object = None

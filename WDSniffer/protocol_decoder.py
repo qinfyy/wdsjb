@@ -13,6 +13,8 @@ from typing import Any
 
 from google.protobuf import descriptor_pb2, descriptor_pool, json_format, message_factory
 from google.protobuf.descriptor import Descriptor
+from google.protobuf.message import Message
+from google.protobuf.unknown_fields import UnknownFieldSet
 
 
 ROOT = Path(__file__).resolve().parent
@@ -111,6 +113,28 @@ def _read_cmd_ids(paths: list[Path]) -> dict[int, list[CommandInfo]]:
     return dict(entries)
 
 
+def _message_coverage(message: Message) -> tuple[int, int]:
+    fields = message.ListFields()
+    known_count, unknown_count = len(fields), len(UnknownFieldSet(message))
+    for field, value in fields:
+        if field.message_type is None:
+            continue
+        if field.is_repeated:
+            if field.message_type.GetOptions().map_entry:
+                if field.message_type.fields_by_name["value"].message_type is None:
+                    continue
+                children = value.values()
+            else:
+                children = value
+        else:
+            children = (value,)
+        for child in children:
+            known, unknown = _message_coverage(child)
+            known_count += known
+            unknown_count += unknown
+    return known_count, unknown_count
+
+
 class WdProtocolDecoder:
     def __init__(self, config: SnifferConfig) -> None:
         self.proto_paths = config.proto_paths
@@ -202,40 +226,63 @@ class WdProtocolDecoder:
         runtime_class: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         candidates = self.command_types.get(command_id, [])
-        full_name = runtime_class.get("full_name") if isinstance(runtime_class, dict) else None
-        candidate = next((item for item in candidates if item.clr_type == full_name), None)
-        if candidate is None and isinstance(full_name, str):
-            short_name = full_name.rsplit(".", 1)[-1].rsplit("/", 1)[-1]
-            candidate = next((item for item in candidates if item.short_name == short_name), None)
-        if candidate is None and len(candidates) == 1:
-            candidate = candidates[0]
         record: dict[str, Any] = {
             "direction": direction, "protocol": "protobuf", "command_id": command_id,
-            "command_name": candidate.short_name if candidate else "UNKNOWN",
-            "message_type": candidate.clr_type if candidate else None,
+            "command_name": "UNKNOWN", "message_type": None,
             "runtime_class": runtime_class, "payload_length": len(payload),
             "possible_protobuf_types": [item.clr_type for item in candidates],
             "raw_payload_base64": base64.b64encode(payload).decode("ascii"),
-            "decoded": None, "decode_error": None,
+            "decoded": None, "decode_error": None, "candidate_decodes": [],
         }
-        if candidate is None:
-            record["decode_status"] = "mapping_ambiguous" if candidates else "mapping_missing"
-            record["decode_error"] = "命令映射不唯一" if candidates else "CmdIds 中没有命令映射"
+        if not candidates:
+            record.update(decode_status="mapping_missing", decode_error="CmdIds 中没有命令映射")
             return record
-        descriptor_name = self.descriptor_names.get(candidate.clr_type)
-        record["descriptor_name"] = descriptor_name
-        if descriptor_name is None:
-            record.update(decode_status="schema_missing", decode_error="schema 中未找到对应消息")
+
+        best: tuple[dict[str, Any], dict[str, Any], tuple[bool, int]] | None = None
+        for candidate in candidates:
+            descriptor = self.messages.get(candidate.short_name)
+            attempt: dict[str, Any] = {
+                "command_name": candidate.short_name, "message_type": candidate.clr_type,
+                "descriptor_name": descriptor.full_name if descriptor else None,
+                "decode_status": "schema_missing", "decode_error": "schema 中未找到对应消息",
+                "decoded_field_count": 0, "unknown_field_count": 0,
+            }
+            record["candidate_decodes"].append(attempt)
+            if descriptor is None:
+                continue
+            try:
+                message = message_factory.GetMessageClass(descriptor)()
+                consumed = message.MergeFromString(payload)
+                if consumed != len(payload):
+                    raise ValueError(f"protobuf 只读取了 {consumed}/{len(payload)} 字节")
+                if not message.IsInitialized():
+                    raise ValueError("protobuf 缺少必填字段: " + ", ".join(message.FindInitializationErrors()))
+                known_count, unknown_count = _message_coverage(message)
+                decoded = json_format.MessageToDict(message, preserving_proto_field_name=True)
+                complete = unknown_count == 0
+                attempt.update(
+                    decode_status="decoded" if complete else "decoded_partial",
+                    decode_error=None if complete else f"部分解码: 已解析 {known_count} 个字段，仍有 {unknown_count} 个未知字段",
+                    decoded_field_count=known_count, unknown_field_count=unknown_count,
+                )
+                # 完整候选并列取首个；只有部分候选才比较实际解析的字段数。
+                score = (complete, 0 if complete else known_count)
+                if best is None or score > best[2]:
+                    best = (attempt, decoded, score)
+            except Exception as error:
+                attempt.update(decode_status="decode_error", decode_error=f"{type(error).__name__}: {error}")
+
+        if best is None:
+            failed = next((item for item in record["candidate_decodes"] if item["decode_status"] == "decode_error"),
+                          record["candidate_decodes"][0])
+            record.update(failed)
+            if len(candidates) > 1:
+                record["decode_error"] = "; ".join(
+                    f"{item['command_name']}: {item['decode_error']}" for item in record["candidate_decodes"]
+                )
             return record
-        try:
-            message = message_factory.GetMessageClass(self.messages[candidate.short_name])()
-            consumed = message.MergeFromString(payload)
-            if consumed != len(payload):
-                raise ValueError(f"protobuf 只读取了 {consumed}/{len(payload)} 字节")
-            record["decoded"] = json_format.MessageToDict(message, preserving_proto_field_name=True)
-            record["decode_status"] = "decoded"
-        except Exception as error:
-            record.update(decode_status="decode_error", decode_error=f"{type(error).__name__}: {error}")
+        selected, decoded, _ = best
+        record.update(selected, decoded=decoded)
         return record
 
 
