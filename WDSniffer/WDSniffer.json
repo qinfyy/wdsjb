@@ -1,5 +1,8 @@
 {
-  "cmdId": "..\\WDProtoDumper\\output\\CmdIds.txt",
+  "cmdId": [
+    "..\\WDProtoDumper\\output\\CmdIds.txt",
+    "..\\JsProtoDumper\\output\\CmdIds.txt"
+  ],
   "proto": [
     "..\\WDProtoDumper\\output",
     "..\\JsProtoDumper\\output\\pb"

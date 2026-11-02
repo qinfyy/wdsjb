@@ -6,6 +6,9 @@
     "author": "",
     "type": "commonjs",
     "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
     "dependencies": {
         "@babel/parser": "^7.28.5",
         "commander": "^15.0.0"

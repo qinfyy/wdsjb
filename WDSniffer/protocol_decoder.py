@@ -24,7 +24,7 @@ _CMD_ENTRY = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
 @dataclass(frozen=True)
 class SnifferConfig:
     proto_paths: list[Path]
-    cmd_ids_path: Path
+    cmd_ids_paths: list[Path]
     listening_port: int
     listening_address: str = "127.0.0.1"
 
@@ -35,15 +35,22 @@ def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
     if not isinstance(config, dict):
         raise ValueError("WDSniffer.json 必须是 JSON 对象")
 
-    def input_path(key: str) -> Path:
+    def input_paths(key: str) -> list[Path]:
         value = config.get(key)
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"配置缺少有效的 {key} 路径")
-        target = Path(value)
-        target = (target if target.is_absolute() else path.parent / target).resolve()
-        if not target.is_file():
-            raise FileNotFoundError(f"{key} 文件未找到: {target}")
-        return target
+        if isinstance(value, str):
+            value = [value]
+        if not isinstance(value, list) or not value:
+            raise ValueError(f"{key} 必须是非空的路径数组")
+        targets: list[Path] = []
+        for item in value:
+            if not isinstance(item, str) or not item.strip():
+                raise ValueError(f"{key} 数组必须包含有效的路径字符串")
+            target = Path(item)
+            target = (target if target.is_absolute() else path.parent / target).resolve()
+            if not target.is_file():
+                raise FileNotFoundError(f"{key} 文件未找到: {target}")
+            targets.append(target)
+        return targets
 
     port = config.get("ListeningPort", 1984)
     if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
@@ -66,7 +73,8 @@ def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
         if not target.is_dir() and not (target.is_file() and target.suffix.lower() == ".proto"):
             raise FileNotFoundError(f"proto 目录或文件未找到: {target}")
         proto_paths.append(target)
-    return SnifferConfig(proto_paths, input_path("cmdId"), port, address)
+    cmd_ids_paths = input_paths("cmdId")
+    return SnifferConfig(proto_paths, cmd_ids_paths, port, address)
 
 
 @dataclass(frozen=True)
@@ -79,33 +87,37 @@ class CommandInfo:
         return self.clr_type.rsplit(".", 1)[-1].rsplit("/", 1)[-1]
 
 
-def _read_cmd_ids(path: Path) -> dict[int, list[CommandInfo]]:
-    namespace = ""
+def _read_cmd_ids(paths: list[Path]) -> dict[int, list[CommandInfo]]:
+    commands: dict[str, CommandInfo] = {}
+    for path in paths:
+        namespace = ""
+        for line in path.read_text(encoding="utf-8-sig").splitlines():
+            match = _CMD_NAMESPACE.match(line)
+            if match:
+                namespace = match.group(1)
+                continue
+            match = _CMD_ENTRY.match(line)
+            if match:
+                name, raw_command = match.groups()
+                command_id = int(raw_command)
+                info = CommandInfo(command_id, f"{namespace}.{name}" if namespace else name)
+                # 忽略命名空间，后面的同名命令覆盖前面的。
+                commands[info.short_name] = info
+    if not commands:
+        raise ValueError("CmdIds 文件中没有命令映射: " + ", ".join(str(path) for path in paths))
     entries: dict[int, list[CommandInfo]] = defaultdict(list)
-    for line in path.read_text(encoding="utf-8-sig").splitlines():
-        match = _CMD_NAMESPACE.match(line)
-        if match:
-            namespace = match.group(1)
-            continue
-        match = _CMD_ENTRY.match(line)
-        if match:
-            name, raw_command = match.groups()
-            command_id = int(raw_command)
-            info = CommandInfo(command_id, f"{namespace}.{name}" if namespace else name)
-            if info not in entries[command_id]:
-                entries[command_id].append(info)
-    if not entries:
-        raise ValueError(f"CmdIds 文件中没有命令映射: {path}")
+    for info in commands.values():
+        entries[info.command_id].append(info)
     return dict(entries)
 
 
 class WdProtocolDecoder:
     def __init__(self, config: SnifferConfig) -> None:
         self.proto_paths = config.proto_paths
-        self.cmd_ids_path = config.cmd_ids_path
+        self.cmd_ids_paths = config.cmd_ids_paths
         self.protoc_path = ROOT / "protoc" / "protoc.exe"
         self.descriptor_paths: list[Path] = []
-        self.command_types = _read_cmd_ids(self.cmd_ids_path)
+        self.command_types = _read_cmd_ids(self.cmd_ids_paths)
         self.pools: list[descriptor_pool.DescriptorPool] = []
         self.messages: dict[str, Descriptor] = {}
         self.descriptor_names: dict[str, str] = {}
@@ -179,7 +191,8 @@ class WdProtocolDecoder:
 
     def status(self) -> dict[str, Any]:
         return {
-            "proto_paths": [str(path) for path in self.proto_paths], "cmd_ids_path": str(self.cmd_ids_path),
+            "proto_paths": [str(path) for path in self.proto_paths],
+            "cmd_ids_paths": [str(path) for path in self.cmd_ids_paths],
             "descriptor_paths": [str(path) for path in self.descriptor_paths],
             "command_ids": len(self.command_types), "mapped_types": len(self.descriptor_names),
         }
@@ -191,6 +204,9 @@ class WdProtocolDecoder:
         candidates = self.command_types.get(command_id, [])
         full_name = runtime_class.get("full_name") if isinstance(runtime_class, dict) else None
         candidate = next((item for item in candidates if item.clr_type == full_name), None)
+        if candidate is None and isinstance(full_name, str):
+            short_name = full_name.rsplit(".", 1)[-1].rsplit("/", 1)[-1]
+            candidate = next((item for item in candidates if item.short_name == short_name), None)
         if candidate is None and len(candidates) == 1:
             candidate = candidates[0]
         record: dict[str, Any] = {

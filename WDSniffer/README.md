@@ -23,7 +23,10 @@ WDSniffer.json 的路径相对该配置文件：
 
 ~~~json
 {
-  "cmdId": "..\\WDProtoDumper\\output\\CmdIds.txt",
+  "cmdId": [
+    "..\\WDProtoDumper\\output\\CmdIds.txt",
+    "..\\JsProtoDumper\\output\\CmdIds.txt"
+  ],
   "proto": [
     "..\\WDProtoDumper\\output",
     "..\\JsProtoDumper\\output\\pb"
@@ -34,7 +37,7 @@ WDSniffer.json 的路径相对该配置文件：
 ~~~
 
 
-消息匹配不使用 package，按数组顺序加载，后面的同名消息覆盖前面的。目录必须包含 `.proto`，`cmdId` 必须指向存在的命令清单；缺失时直接报错，不使用旧描述符。
+消息匹配不使用 package，按数组顺序加载，后面的同名消息覆盖前面的。目录必须包含 `.proto`；`cmdId` 按数组顺序合并命令清单，忽略命名空间，后面的同名命令覆盖前面的。配置的输入缺失时直接报错，不使用旧描述符。
 
 ~~~powershell
 py Srv.py --realm emulated

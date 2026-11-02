@@ -508,7 +508,7 @@ function buildUnits(files) {
 }
 
 function renderUnit(unit, types) {
-    const lines = [`// JsProtoDumper: ${unit.source}`, "// Written by Cyt", 'syntax = "proto3";', ""];
+    const lines = [`// JsProtoDumper: ${unit.source}`, "// Written by Cyt", "", 'syntax = "proto3";', ""];
     if (unit.package) lines.push(`package ${protoName(unit.package)};`, "");
     for (const imported of [...unit.imports].sort()) lines.push(`import ${JSON.stringify(imported)};`);
     if (unit.imports.size) lines.push("");
@@ -593,6 +593,21 @@ function renderUnit(unit, types) {
     return lines.join("\n");
 }
 
+function renderCommandIds(types) {
+    const commands = [];
+    for (const record of types.values()) {
+        if (record.kind !== "enum" || record.name.split(".").at(-1) !== "CmdId") continue;
+        const owner = types.get(record.name.split(".").slice(0, -1).join("."));
+        const command = record.values.find((value) => ["CMD_ID", "CmdId"].includes(value.name));
+        if (owner?.kind === "message" && command) {
+            commands.push({ name: identifier(owner.name.split(".").at(-1)), commandId: command.value });
+        }
+    }
+    commands.sort((left, right) => left.commandId - right.commandId || left.name.localeCompare(right.name, "en"));
+    const lines = [...new Set(commands.map(({ name, commandId }) => `${name} = ${commandId}`))];
+    return lines.join("\n") + (lines.length ? "\n" : "");
+}
+
 function collectFiles(input, output) {
     const files = [];
     function visit(directory) {
@@ -655,7 +670,7 @@ function main(argv) {
         }
     }
     fs.mkdirSync(options.output, { recursive: true });
-    const report = { files: seen.size, skipped, errors, outputs: [], messages: 0, enums: 0, fields: 0 };
+    const report = { files: seen.size, skipped, errors, outputs: [], messages: 0, enums: 0, fields: 0, commandIds: 0 };
     try {
         const { types, units } = buildUnits(files);
         // Render everything before writing so unresolved types do not leave half-written schemas.
@@ -665,6 +680,14 @@ function main(argv) {
             fs.mkdirSync(path.dirname(filename), { recursive: true });
             fs.writeFileSync(filename, content, "utf8");
             report.outputs.push(unit.output);
+        }
+        const commandIds = renderCommandIds(types);
+        if (commandIds) {
+            fs.writeFileSync(path.join(options.output, "CmdIds.txt"), commandIds, "utf8");
+            report.commandIds = commandIds.trimEnd().split("\n").length;
+        } else {
+            const commandPath = path.join(options.output, "CmdIds.txt");
+            if (fs.existsSync(commandPath)) fs.unlinkSync(commandPath);
         }
         for (const record of types.values()) {
             report[record.kind === "enum" ? "enums" : "messages"]++;
@@ -678,7 +701,7 @@ function main(argv) {
         errors.push({ file: null, error: "No protobufjs declarations found" });
     fs.writeFileSync(path.join(options.output, "report.json"), `${JSON.stringify(report, null, 4)}\n`, "utf8");
     console.log(
-        `JS: ${report.files}; proto: ${report.outputs.length}; messages: ${report.messages}; enums: ${report.enums}; fields: ${report.fields}; skipped: ${skipped.length}; errors: ${errors.length}`,
+        `JS: ${report.files}; proto: ${report.outputs.length}; messages: ${report.messages}; enums: ${report.enums}; fields: ${report.fields}; CmdIds: ${report.commandIds}; skipped: ${skipped.length}; errors: ${errors.length}`,
     );
     if (errors.length) process.exitCode = 1;
 }

@@ -1,13 +1,13 @@
 # JsProtoDumper
 
-静态解析 protobufjs 生成的 JavaScript，恢复 `.proto`
+静态解析 protobufjs 生成的 JavaScript，恢复 `.proto` 和 `CmdIds.txt`。
 
 ## 使用
 
 ```powershell
 cd D:\Il2Cpp\wd\JsProtoDumper
 npm install
-node index.js --input 输入目录 --output 输出目录
+npm run start -- --input 输入目录 --output 输出目录
 ```
 
 输入支持目录（递归读取 `.js`，忽略 `.js.map`）或单个 JS 文件。保留输入的相对目录及文件名，每个 JS 的每个 protobuf 包生成一份 `.proto`。
@@ -15,10 +15,10 @@ node index.js --input 输入目录 --output 输出目录
 多个输入之间有类型引用时，在同一次运行中传入，自动生成 import：
 
 ```powershell
-node index.js --input ..\AbUnPacker\output_Script\pb --input ..\AbUnPacker\output_Script\pbconfig --output output
+npm run start -- --input ..\AbUnPacker\output_Script\pb --input ..\AbUnPacker\output_Script\pbconfig --output output
 ```
 
-多输入模式在输出目录下保留 `pb/`、`pbconfig/`。`report.json` 记录数量、输出文件、非协议 JS 和恢复错误。错误返回非零退出码，不把未知类型猜成 bytes。
+多输入模式在输出目录下保留 `pb/`、`pbconfig/`。遇到消息内的 `CmdId` 枚举时，同时提取 `CMD_ID` 写入 `CmdIds.txt`，格式与 WDProtoDumper 一致，不写 `;` 命名空间注释。`report.json` 记录数量、输出文件、非协议 JS 和恢复错误。错误返回非零退出码，不把未知类型猜成 bytes。
 
 ## 恢复范围
 
