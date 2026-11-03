@@ -1,26 +1,33 @@
-"""通过 Frida spawn 启动 BH2，并注入流量重定向脚本。"""
+"""启动 WD，注入 SDK RSA Bypass 和 UnityWebRequest HTTP 重定向。"""
 
 from __future__ import annotations
 
+import argparse
+import base64
 import configparser
 import json
+import shutil
 import signal
+import subprocess
 import sys
 import threading
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlsplit
 
 import frida
 
 
-PACKAGE_NAME = "com.miHoYo.HSoDv2Original"
-PROJECT_DIRECTORY = Path(__file__).resolve().parent
-CONFIG_PATH = PROJECT_DIRECTORY / "Config.ini"
-SCRIPT_PATH = PROJECT_DIRECTORY / "dist" / "FridaScript.js"
-EMULATED_REALM_ATTACH_DELAY_SECONDS = 8.0
-NATIVE_BRIDGE_SETUP_WAIT_SECONDS = 5.0
-EMULATED_AGENT_PATH = "/data/local/tmp/re.frida.server/frida-agent-arm64.so"
-
+PACKAGE_NAME = "com.miHoYo.wd"
+ROOT = Path(__file__).resolve().parent
+CONFIG_PATH = ROOT / "Config.ini"
+SCRIPT_PATH = ROOT / "dist" / "FridaScript.js"
+REPLACED_SCRIPT_PATH = ROOT / "dist" / "FridaScript_Replacemented.js"
+DEFAULT_AGENT = ROOT / "frida-agent-arm64.so"
+REMOTE_AGENT = "/data/local/tmp/re.frida.server/frida-agent-arm64.so"
+CONFIG_MARKER = "__CONFIG_REPLACEMENT__"
+BUNDLE_MAGIC = "\U0001f4e6\n"
+BUNDLE_SEPARATOR = "\n\u2704\n"
 FRIDA_ERRORS = (
     frida.AddressInUseError,
     frida.ExecutableNotFoundError,
@@ -39,260 +46,237 @@ FRIDA_ERRORS = (
 )
 
 
-def load_config() -> dict[str, object]:
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--realm", choices=("auto", "native", "emulated"), default="auto", help="自动识别 ARM64 真机或模拟器，默认 auto。")
+    parser.add_argument("--device", help="Frida 设备 ID，默认 USB/模拟器设备。")
+    parser.add_argument("--adb", type=Path, default=Path("adb.exe"), help="ADB 路径，默认从 PATH 查找。")
+    parser.add_argument("--agent", type=Path, default=DEFAULT_AGENT, help="与 Frida server 同版本的 ARM64 agent，emulated 时自动上传。")
+    return parser.parse_args()
+
+
+def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     parser = configparser.ConfigParser(interpolation=None)
-    if not parser.read(CONFIG_PATH, encoding="utf-8-sig"):
-        raise FileNotFoundError(f"找不到配置文件：{CONFIG_PATH}")
-    if "Settings" not in parser:
-        raise ValueError("Config.ini 缺少 [Settings] 节")
-
-    settings = parser["Settings"]
-    values: dict[str, str] = {}
-    for name in ("HTTP_URL_BASE", "GATEWAY_HOST", "GATEWAY_IPV6"):
-        value = settings.get(name, "").strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1].strip()
-        values[name] = value
-
-    parsed_url = urlsplit(values["HTTP_URL_BASE"])
-    if (
-        parsed_url.scheme != "http"
-        or not parsed_url.netloc
-        or parsed_url.path not in ("", "/")
-        or parsed_url.query
-        or parsed_url.fragment
-    ):
-        raise ValueError("HTTP_URL_BASE 必须是 HTTP 根地址，例如 http://192.168.0.108:21000")
-
-    gateway_host = values["GATEWAY_HOST"]
-    if (
-        not gateway_host
-        or any(character.isspace() for character in gateway_host)
-        or any(character in gateway_host for character in ":/@?#")
-    ):
-        raise ValueError("GATEWAY_HOST 必须是不带协议和端口的 IPv4 地址或主机名")
-
     try:
-        gateway_port = settings.getint("GATEWAY_PORT")
-    except (TypeError, ValueError) as error:
-        raise ValueError("GATEWAY_PORT 必须是整数") from error
-    if gateway_port is None or not 1 <= gateway_port <= 65535:
-        raise ValueError("GATEWAY_PORT 必须在 1 到 65535 之间")
-
+        with path.open(encoding="utf-8-sig") as config_file:
+            parser.read_file(config_file)
+    except configparser.Error as error:
+        raise ValueError("Config.ini 格式错误：" + str(error)) from error
+    if parser.sections() != ["Settings"] or parser.defaults():
+        raise ValueError("Config.ini 必须且只能包含 [Settings] 配置节")
+    config = parser["Settings"]
+    unknown = config.keys() - {"http_url_base", "use_java_bypass_rsa"}
+    if unknown:
+        raise ValueError("不支持的配置项：" + ", ".join(sorted(unknown)))
+    value = config.get("HTTP_URL_BASE")
+    if not isinstance(value, str):
+        raise ValueError("HTTP_URL_BASE 必须是 HTTP/HTTPS 根地址")
+    url = urlsplit(value.strip())
+    if (url.scheme not in {"http", "https"} or not url.hostname or url.username is not None
+            or url.password is not None or url.path not in {"", "/"} or url.query or url.fragment
+            or any(character.isspace() for character in value) or "\\" in value):
+        raise ValueError("HTTP_URL_BASE 必须是根地址，例如 http://192.168.0.108:21000")
+    if url.port is not None and not 1 <= url.port <= 65535:
+        raise ValueError("HTTP_URL_BASE 端口必须在 1 到 65535 之间")
     try:
-        use_zlib_hook = settings.getboolean("UES_ZLIB_HOOK", fallback=True)
-        use_java_url_modify = settings.getboolean(
-            "USE_JAVA_URL_MODIFY", fallback=True
-        )
-        use_java_bypass_rsa = settings.getboolean(
-            "USE_JAVA_BYPASS_RSA", fallback=True
-        )
-        emulator = settings.getboolean("EMULATOR", fallback=False)
+        bypass = config.getboolean("USE_JAVA_BYPASS_RSA", fallback=True)
     except ValueError as error:
-        raise ValueError(
-            "EMULATOR、UES_ZLIB_HOOK、USE_JAVA_URL_MODIFY 和 "
-            "USE_JAVA_BYPASS_RSA 必须是布尔值"
-        ) from error
+        raise ValueError("USE_JAVA_BYPASS_RSA 必须是有效的 INI 布尔值，例如 true/false") from error
+    return {"httpUrlBase": f"{url.scheme}://{url.netloc}", "useJavaBypassRsa": bypass}
 
-    client_arch = settings.get("CLIENT_ARCH", "x86").strip().lower()
-    if (
-        len(client_arch) >= 2
-        and client_arch[0] == client_arch[-1]
-        and client_arch[0] in "\"'"
-    ):
-        client_arch = client_arch[1:-1].strip()
-    if client_arch not in ("x86", "arm64-v8a"):
-        raise ValueError("CLIENT_ARCH 只支持 x86 或 arm64-v8a")
-    if client_arch == "x86" and emulator:
-        raise ValueError("x86 客户端不使用 Emulated Realm，请设置 EMULATOR=false")
 
-    return {
-        "httpUrlBase": f"http://{parsed_url.netloc}",
-        "gatewayHost": gateway_host,
-        "gatewayPort": gateway_port,
-        "gatewayIpv6": values["GATEWAY_IPV6"],
-        "useZlibHook": use_zlib_hook,
-        "useJavaUrlModify": use_java_url_modify,
-        "useJavaBypassRsa": use_java_bypass_rsa,
-        "clientArch": client_arch,
-        "emulator": emulator,
-    }
+def configure_script(source: str, config: dict[str, Any]) -> str:
+    if source.count(CONFIG_MARKER) != 1:
+        raise ValueError("脚本必须且只能包含一个配置占位符，请重新执行 npm run build")
+    encoded = base64.b64encode(json.dumps(config, ensure_ascii=True, separators=(",", ":")).encode("utf-8")).decode("ascii")
+    replacement = json.dumps(encoded)
+    if not source.startswith(BUNDLE_MAGIC):
+        return source.replace(CONFIG_MARKER, replacement)
+
+    # frida-compile 使用 UTF-8 字节长度分隔模块；替换内容时必须同步修改清单。
+    header, separator, body = source.partition(BUNDLE_SEPARATOR)
+    if not separator:
+        raise ValueError("Frida bundle 缺少模块分隔符")
+    lines = header.split("\n")
+    modules = body.encode("utf-8")
+    delimiter = BUNDLE_SEPARATOR.encode("utf-8")
+    offset = 0
+    for index, line in enumerate(lines[1:], 1):
+        if line.startswith("\u21bb "):
+            continue
+        size_text, space, name = line.partition(" ")
+        if not space or not size_text.isdecimal() or not name:
+            raise ValueError("无效的 Frida bundle 模块清单")
+        size = int(size_text)
+        end = offset + size
+        chunk = modules[offset:end]
+        if len(chunk) != size:
+            raise ValueError("Frida bundle 模块长度不匹配")
+        if CONFIG_MARKER.encode("ascii") in chunk:
+            updated = chunk.replace(CONFIG_MARKER.encode("ascii"), replacement.encode("ascii"))
+            lines[index] = f"{len(updated)} {name}"
+            modules = modules[:offset] + updated + modules[end:]
+            end = offset + len(updated)
+        if end == len(modules):
+            offset = end
+        elif modules[end:end + len(delimiter)] == delimiter:
+            offset = end + len(delimiter)
+        else:
+            raise ValueError("Frida bundle 模块边界不匹配")
+    if offset != len(modules) or CONFIG_MARKER.encode("ascii") in modules:
+        raise ValueError("Frida bundle 配置替换失败")
+    return "\n".join(lines) + separator + modules.decode("utf-8")
 
 
 def main() -> int:
+    args = parse_args()
     config = load_config()
     if not SCRIPT_PATH.is_file():
-        raise RuntimeError("缺少 Frida 编译产物，请先在 BH2Redirector 执行 npm run check")
+        raise FileNotFoundError("缺少 dist/FridaScript.js，请先在 WDRedirector 执行 npm run build")
     source = SCRIPT_PATH.read_text(encoding="utf-8")
+    configure_script(source, config)
+    device = frida.get_device(args.device, timeout=15) if args.device else frida.get_usb_device(timeout=15)
+    realm = args.realm
+    if realm == "auto":
+        realm = "emulated" if device.query_system_parameters().get("arch") in {"x64", "x86_64", "ia32"} else "native"
+    runtime_config = config | {"emulator": realm == "emulated", "emulatedAgentPath": REMOTE_AGENT}
+    prepared_source = configure_script(source, runtime_config)
+    REPLACED_SCRIPT_PATH.write_text(prepared_source, encoding="utf-8", newline="\n")
+    print(f"[脚本] 已保存替换后的注入脚本：{REPLACED_SCRIPT_PATH}", flush=True)
+
+    adb: list[str] = []
+    if realm == "emulated":
+        executable = shutil.which(str(args.adb))
+        if not executable or not args.agent.is_file():
+            raise FileNotFoundError(f"需要 ADB 和 ARM64 agent：{args.adb}，{args.agent}")
+        adb = [executable, "-s", device.id]
+        for command in (["shell", "mkdir", "-p", REMOTE_AGENT.rsplit("/", 1)[0]],
+                        ["push", str(args.agent.resolve()), REMOTE_AGENT],
+                        ["shell", "chmod", "0644", REMOTE_AGENT]):
+            subprocess.run(adb + command, check=True, timeout=60)
 
     stopped = threading.Event()
-    native_bridge_ready = threading.Event()
-    script_configured = threading.Event()
-    device = frida.get_usb_device(timeout=10)
+    bridge_ready = threading.Event()
+    script_ready = threading.Event()
+    errors: list[str] = []
+    sessions: list[Any] = []
+    scripts: list[Any] = []
     pid: int | None = None
-    sessions: list[frida.Session] = []
-    scripts: list[frida.core.Script] = []
-    attached_realms: list[str] = []
     resumed = False
-
-    def on_message(
-        message: dict[str, object],
-        _data: bytes | None,
-        realm_label: str,
-    ) -> None:
-        prefix = f"[{realm_label}] " if len(realm_specs) > 1 else ""
-        if message.get("type") == "send":
-            payload = message.get("payload")
-            if isinstance(payload, dict):
-                if payload.get("event") in (
-                    "native-bridge-ready",
-                    "native-bridge-failed",
-                ):
-                    native_bridge_ready.set()
-                if payload.get("event") == "script-configured":
-                    script_configured.set()
-                detail = payload.get("message", json.dumps(payload, ensure_ascii=False))
-                print(f"{prefix}{detail}", flush=True)
-            else:
-                print(f"{prefix}{payload}", flush=True)
-            return
-
-        description = message.get("description", "未知 Frida 错误")
-        print(f"{prefix}[Frida 错误] {description}", file=sys.stderr, flush=True)
-        if stack := message.get("stack"):
-            print(stack, file=sys.stderr, flush=True)
-
-    def on_detached(reason: str, crash: object | None, realm_label: str) -> None:
-        if crash is None:
-            print(f"[{realm_label}] 游戏进程连接已断开：{reason}", flush=True)
-        else:
-            print(
-                f"[{realm_label}] 游戏进程异常退出：{reason}，{crash}",
-                file=sys.stderr,
-                flush=True,
-            )
-        stopped.set()
 
     def stop(_signum: int, _frame: object) -> None:
         stopped.set()
 
-    signal.signal(signal.SIGINT, stop)
-    signal.signal(signal.SIGTERM, stop)
-
-    if config["clientArch"] == "arm64-v8a" and config["emulator"]:
-        realm_specs = (
-            ("Native Realm", "native", "platform"),
-            ("Emulated Realm", "emulated", "il2cpp"),
-        )
-    else:
-        realm_specs = (("Native Realm", "native", "all"),)
-
-    def attach_realm(realm_label: str, realm: str, runtime_role: str) -> None:
-        if pid is None:
-            raise RuntimeError("游戏进程尚未启动")
-
-        if realm == "emulated":
-            session = device.attach(
-                pid,
-                realm=realm,
-                emulated_agent_path=EMULATED_AGENT_PATH,
-            )
+    def on_message(message: dict[str, Any], _data: bytes | None, label: str) -> None:
+        payload = message.get("payload")
+        if message.get("type") == "send" and isinstance(payload, dict):
+            event = payload.get("event")
+            if event == "bridge-ready":
+                bridge_ready.set()
+            elif event == "script-ready":
+                script_ready.set()
+            print(f"[{label}] {payload.get('message', payload)}", flush=True)
+            if event != "error":
+                return
+            detail = str(payload.get("message", payload))
         else:
-            session = device.attach(pid, realm=realm)
+            detail = str(message.get("stack") or message.get("description") or message)
+            print(f"[{label}] [Frida 错误] {detail}", file=sys.stderr, flush=True)
+        errors.append(detail)
+        stopped.set()
+        bridge_ready.set()
+        script_ready.set()
 
-        def handle_detached(reason: str, crash: object | None) -> None:
-            on_detached(reason, crash, realm_label)
+    def on_detached(reason: str, crash: Any) -> None:
+        print(f"[断开] {reason}" + (f"，{crash}" if crash is not None else ""), flush=True)
+        if not stopped.is_set():
+            errors.append(f"游戏连接断开：{reason}")
+            stopped.set()
+            bridge_ready.set()
+            script_ready.set()
 
-        session.on("detached", handle_detached)
+    def attach(target_realm: str) -> None:
+        options = {"emulated_agent_path": REMOTE_AGENT} if target_realm == "emulated" else {}
+        session = device.attach(pid, realm=target_realm, **options)
         sessions.append(session)
-
-        script = session.create_script(source)
-        script.on(
-            "message",
-            lambda message, data: on_message(message, data, realm_label),
-        )
-        script.load()
-        script.post(
-            {
-                "type": "config",
-                "payload": config
-                | {
-                    "runtimeRole": runtime_role,
-                    "emulatedAgentPath": EMULATED_AGENT_PATH,
-                },
-            }
-        )
+        session.on("detached", on_detached)
+        script = session.create_script(prepared_source)
         scripts.append(script)
-        attached_realms.append(realm_label)
+        script.on("message", lambda message, data: on_message(message, data, target_realm))
+        script.load()
 
+    def check_startup() -> None:
+        if errors:
+            raise RuntimeError(" | ".join(errors))
+        if stopped.is_set():
+            raise InterruptedError("启动已取消")
+
+    previous_handlers = {sig: signal.signal(sig, stop) for sig in (signal.SIGINT, signal.SIGTERM)}
     try:
-        print(f"正在通过 spawn 启动 {PACKAGE_NAME}...", flush=True)
-        pid = device.spawn([PACKAGE_NAME])
-        if len(realm_specs) > 1:
-            device.resume(pid)
-            resumed = True
-            # MuMu 在 Houdini 装载 ARM 库前探测 Emulated Realm 会触发 linker 崩溃。
-            if stopped.wait(EMULATED_REALM_ATTACH_DELAY_SECONDS):
-                raise RuntimeError("等待 Native Bridge 初始化时游戏进程已退出")
-            attach_realm(*realm_specs[0])
-            if not native_bridge_ready.wait(NATIVE_BRIDGE_SETUP_WAIT_SECONDS):
-                raise RuntimeError("等待 Native Bridge 兼容层初始化超时")
-            try:
-                attach_realm(*realm_specs[1])
-            except FRIDA_ERRORS as error:
-                if "process is not using emulation" not in str(error):
-                    raise
-                print(
-                    "[Emulated Realm] [警告] 当前 Native Bridge 不受 Frida "
-                    "Emulated Realm 支持，跳过 IL2CPP Hook",
-                    flush=True,
-                )
+        if realm == "emulated":
+            # 与 WDProtoDumper 一致，ADB 启动避开 MuMu 的早期 Frida spawn/linker 问题。
+            resolved = subprocess.run(adb + ["shell", "cmd", "package", "resolve-activity", "--brief",
+                                            "-a", "android.intent.action.MAIN", "-c", "android.intent.category.LAUNCHER", PACKAGE_NAME],
+                                      check=True, capture_output=True, text=True, timeout=15)
+            components = [line.strip() for line in resolved.stdout.splitlines() if line.strip().startswith(PACKAGE_NAME + "/")]
+            if not components:
+                raise RuntimeError(f"找不到启动 Activity：{PACKAGE_NAME}")
+            subprocess.run(adb + ["shell", "am", "force-stop", PACKAGE_NAME], check=True, timeout=15)
+            subprocess.run(adb + ["shell", "am", "start", "-W", "-n", components[-1]],
+                           check=True, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(adb + ["shell", "pidof", PACKAGE_NAME], capture_output=True, text=True, check=True, timeout=15)
+            pids = result.stdout.split()
+            if len(pids) != 1 or not pids[0].isdecimal():
+                raise RuntimeError(f"无法确定 WD 主进程 PID：{result.stdout.strip()}")
+            pid = int(pids[0])
+            attach("native")
+            if not bridge_ready.wait(15):
+                raise RuntimeError("Native Bridge 初始化超时")
+            check_startup()
+            script_ready.clear()
+            attach("emulated")
         else:
-            attach_realm(*realm_specs[0])
-            if not script_configured.wait(5.0):
-                print(
-                    "[警告] Frida 脚本配置握手超时，继续恢复游戏；Java RSA Hook 将在类加载后补装",
-                    file=sys.stderr,
-                    flush=True,
-                )
+            pid = device.spawn([PACKAGE_NAME])
+            attach("native")
+
+        if not script_ready.wait(5):
+            raise RuntimeError("WDRedirector 脚本启动超时")
+        check_startup()
+        if realm == "native":
             device.resume(pid)
             resumed = True
-
-        realm_description = " + ".join(attached_realms)
-        print(
-            f"游戏已启动，PID={pid}，架构={config['clientArch']}，"
-            f"Realm={realm_description}，HTTP={config['httpUrlBase']}，"
-            f"Gateway={config['gatewayHost']}:{config['gatewayPort']}",
-            flush=True,
-        )
+        print(f"WD 已启动，PID={pid}，Realm={realm}，HTTP={config['httpUrlBase']}，按 Ctrl+C 退出。", flush=True)
         while not stopped.wait(0.25):
             pass
+        if errors:
+            raise RuntimeError(" | ".join(errors))
     finally:
-        if pid is not None and not resumed:
+        if pid is not None and realm == "native" and not resumed:
             try:
                 device.resume(pid)
-            except frida.InvalidOperationError:
+            except FRIDA_ERRORS:
                 pass
+        stopped.set()
         for script in reversed(scripts):
             try:
                 script.unload()
-            except frida.InvalidOperationError:
+            except FRIDA_ERRORS:
                 pass
         for session in reversed(sessions):
             try:
                 session.detach()
-            except frida.InvalidOperationError:
+            except FRIDA_ERRORS:
                 pass
-
+        for sig, handler in previous_handlers.items():
+            signal.signal(sig, handler)
     return 0
 
 
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (configparser.Error, OSError, ValueError, RuntimeError) as error:
-        print(f"启动失败：{error}", file=sys.stderr)
-        sys.exit(1)
-    except FRIDA_ERRORS as error:
+    except (KeyboardInterrupt, InterruptedError):
+        sys.exit(0)
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) + FRIDA_ERRORS as error:
         print(f"启动失败：{error}", file=sys.stderr)
         sys.exit(1)

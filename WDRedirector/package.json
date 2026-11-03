@@ -1,12 +1,10 @@
 {
-  "name": "BH2Redirector",
+  "name": "WDRedirector",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "frida-compile FridaScript.js -o ./dist/FridaScript.js -S",
-    "prod": "node prod.js",
-    "postinstall": "patch-package"
+    "build": "frida-compile FridaScript.js -o ./dist/FridaScript.js -S"
   },
   "engines": {
     "node": ">=18"
@@ -16,8 +14,6 @@
   },
   "devDependencies": {
     "@types/frida-gum": "^18.7.2",
-    "frida-compile": "^17.0.0",
-    "javascript-obfuscator": "^5.5.0",
-    "patch-package": "^8.0.1"
+    "frida-compile": "^17.0.0"
   }
 }
