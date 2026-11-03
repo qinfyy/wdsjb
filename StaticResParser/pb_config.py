@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import zlib
 from typing import Any
 
 from google.protobuf import descriptor_pb2, descriptor_pool, json_format, message_factory
@@ -37,7 +38,7 @@ def compile_schema(source: Path) -> Path:
         raise ValueError(f"schema 目录没有 .proto 文件：{source}")
     if not PROTOC.is_file():
         raise FileNotFoundError(f"protoc 未找到：{PROTOC}")
-    identity = hashlib.sha256(str(source).encode("utf-8")).hexdigest()[:8]
+    identity = f"{zlib.crc32(str(source).encode('utf-8')) & 0xffffffff:08x}"
     target = ROOT / "temp" / f"{source.stem}-{identity}.pb"
     target.parent.mkdir(parents=True, exist_ok=True)
     completed = subprocess.run(
@@ -98,18 +99,18 @@ class ConfigSchema:
         self.descriptor_paths = [compile_schema(source) for source in sources]
         self.pools: list[descriptor_pool.DescriptorPool] = []
         self.messages: dict[str, list[Descriptor]] = {}
-        digest = hashlib.sha256()
+        digest = hashlib.md5()
         self.descriptor_hashes: list[str] = []
         for path in self.descriptor_paths:
             data = path.read_bytes()
             digest.update(data)
-            self.descriptor_hashes.append(hashlib.sha256(data).hexdigest())
+            self.descriptor_hashes.append(hashlib.md5(data).hexdigest())
             try:
                 descriptor_set = descriptor_pb2.FileDescriptorSet.FromString(data)
             except DecodeError as error:
                 raise ValueError(f"schema 不是有效的 FileDescriptorSet：{path.name}") from error
             self._load_descriptor_set(descriptor_set)
-        self.sha256 = digest.hexdigest()
+        self.md5 = digest.hexdigest()
 
     def _load_descriptor_set(self, descriptor_set: descriptor_pb2.FileDescriptorSet) -> None:
         if not descriptor_set.file:

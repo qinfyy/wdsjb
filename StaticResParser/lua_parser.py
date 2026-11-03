@@ -5,7 +5,6 @@ import hashlib
 from pathlib import Path
 import shutil
 import subprocess
-import tempfile
 
 
 UNLUAC_DIR = Path(__file__).resolve().parent / "unluac"
@@ -68,35 +67,51 @@ class LuaTask:
     relative: Path
     command: tuple[str, ...]
     signed: bool = False
+    output: Path | None = None
 
 
-def restore_lua(task: LuaTask) -> tuple[dict[str, object], bytes | None]:
+def restore_lua(task: LuaTask) -> tuple[dict[str, object], Path | None]:
     result: dict[str, object] = {"file": task.relative.as_posix(), "format": "lua", "signed": task.signed}
     try:
         raw = task.path.read_bytes()
-        result.update(size=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+        result.update(size=len(raw), md5=hashlib.md5(raw).hexdigest())
         payload = raw
         if task.signed:
             from UnPacker.crypto import verify_signed_file
             payload = verify_signed_file(raw)
         bytecode, encrypted = convert_lua(payload)
         result.update(payloadSize=len(payload), xor=encrypted)
-        with tempfile.TemporaryDirectory(prefix="wd-lua-") as temporary:
-            root = Path(temporary)
-            chunk, source = root / "chunk.luac", root / "source.lua"
+        if task.output is None:
+            raise ValueError("Lua 临时目录未设置输出目录")
+        root = task.output / "temp-lua"
+        root.mkdir(parents=True, exist_ok=True)
+        work_id = hashlib.md5(
+            f"{task.path.resolve()}::{task.relative.as_posix()}".encode("utf-8")
+        ).hexdigest()
+        chunk, source = root / f"{work_id}.luac", root / f"{work_id}.lua"
+        source_ready = False
+        try:
+            chunk.unlink(missing_ok=True)
+            source.unlink(missing_ok=True)
             chunk.write_bytes(bytecode)
             completed = subprocess.run(
                 [*task.command, "-o", str(source), str(chunk)], capture_output=True,
                 text=True, encoding="utf-8", errors="replace", timeout=120, check=False,
             )
             if completed.returncode:
-                detail = (completed.stderr or completed.stdout).strip().replace(str(root), "<temp>")
+                detail = (completed.stderr or completed.stdout).strip().replace(str(root), "<temp-lua>")
                 raise ValueError(f"unluac 反编译失败 ({completed.returncode})：{detail}")
             if not source.is_file():
                 raise ValueError("unluac 未生成 Lua 源码")
-            restored = source.read_bytes()
+            source_ready = True
+        finally:
+            try:
+                chunk.unlink(missing_ok=True)
+            finally:
+                if not source_ready:
+                    source.unlink(missing_ok=True)
         result.update(status="lua", output=Path(task.relative.name).with_suffix(".lua").as_posix())
-        return result, restored
+        return result, source
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         result.update(status="failed", reason=str(error))
         return result, None

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-import hashlib
+import zlib
 import json
 import re
 import shutil
@@ -155,7 +155,7 @@ class WdProtocolDecoder:
         files = sorted(path for path in source.rglob("*.proto") if path.is_file()) if source.is_dir() else [source]
         if not files:
             raise ValueError(f"proto 目录没有 .proto 文件: {source}")
-        identity = hashlib.sha256(str(source).encode("utf-8")).hexdigest()[:8]
+        identity = f"{zlib.crc32(str(source).encode('utf-8')) & 0xffffffff:08x}"
         target = ROOT / "temp" / f"{source.stem}-{identity}.pb"
         target.parent.mkdir(parents=True, exist_ok=True)
         completed = subprocess.run(

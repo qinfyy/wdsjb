@@ -179,7 +179,7 @@ XOR 后是 Lua 5.3 format 1，32 字节头部：
 
 `LuaAsset.GetDecodeBytes` (`libil2cpp.so 0x05B68D54`) 的 XXTEA 分支是另一个加载入口，不能用于替代这里的 PBStaticConfigure XOR 分支。StarRail 参考实现读取 Luau 3/4 归档，不直接适用于本次的 Lua 5.3 字节码。
 
-默认处理 Lua。关闭 `--decrypt-lua` 时跳过且不复制原始 Lua；`--lua-only` 只筛选和处理 Lua，其他文件不解析、不解密、不复制，也不加载 schema。识别只读取内容头，完整字节码是否可反编译由 unluac 验证。反编译结果不等同于原始源码，也不证明所有逻辑等价；不执行游戏脚本。
+默认处理 Lua。指定 `--no-decrypt-lua` 时跳过且不复制原始 Lua；`--lua-only` 只筛选和处理 Lua，其他文件不解析、不解密、不复制，也不加载 schema。识别只读取内容头，完整字节码是否可反编译由 unluac 验证。反编译结果不等同于原始源码，也不证明所有逻辑等价；不执行游戏脚本。
 
 部分普通文件虽然具有合法 protobuf wire 结构，但当前 CLR PbConfig 没有对应的 All…Datas。缺少消息定义不是解密失败，也不等于这些文件可以共用其他同形消息；需要继续定位其真正的 schema 来源，不能仅凭名称认定它们属于 TypeScript。
 
@@ -197,7 +197,7 @@ StaticResParser 同时读取 WDProtoDumper 与 JsProtoDumper 的配置协议目�
 
 完整解析只输出命名 JSON，不复制原始 bytes，不生成 wire JSON。部分解析仍输出选中候选已解析的字段到普通 JSON，同时保留 bytes 和 wire JSON；普通 JSON 不加不完整标记，报告独立记录状态与字段计数。没有可用候选时只保留 bytes 和 wire JSON；所有候选解析失败与缺少根消息分别报告为 failed 与 unsupported，不清理已有输出。
 
-wire JSON 在独立的 `protobuf_raw_parser.py` 中保留前端 raw decoder 的候选解释思路，输出改为结构化 JSON：字段编号作键，重复字段按出现顺序加 `#2` 等后缀；字段对象用 `wire` 保存编码类型。varint 的 `int` 与 ZigZag `signed_int` 都是数值；fixed 字段保存无符号 `int`、二进制补码 `signed_int`、`float` 或 `double` 及 `raw_hex`，非有限浮点解释为 null。长度字段在完整可读取时用 `message` 展开子消息，否则保存 `string`、`raw_hex`、`repeated_int` 和 `repeated_signed_int`；可读 UTF-8 字符串的 repeated 属性为 null，其他正文只有全部读取为 varint 后才输出 packed 数组。未读取的尾部以 base64 `leftOver` 保存，递归展开最多 64 层。原始 bytes 和报告中的 SHA-256 保留独立的原始证据。
+wire JSON 在独立的 `protobuf_raw_parser.py` 中保留前端 raw decoder 的候选解释思路，输出改为结构化 JSON：字段编号作键，重复字段按出现顺序加 `#2` 等后缀；字段对象用 `wire` 保存编码类型。varint 的 `int` 与 ZigZag `signed_int` 都是数值；fixed 字段保存无符号 `int`、二进制补码 `signed_int`、`float` 或 `double` 及 `raw_hex`，非有限浮点解释为 null。长度字段在完整可读取时用 `message` 展开子消息，否则保存 `string`、`raw_hex`、`repeated_int` 和 `repeated_signed_int`；可读 UTF-8 字符串的 repeated 属性为 null，其他正文只有全部读取为 varint 后才输出 packed 数组。未读取的尾部以 base64 `leftOver` 保存，递归展开最多 64 层。原始 bytes 和报告中的 MD5 保留独立的原始证据。
 
 缺少 schema 时，length-delimited 可以是字符串、字节串、子消息或 packed 数值；varint 可以是 bool、enum、int 或 ZigZag 编码。wire 中的展开与标签仅供查看，不是实际类型或字段语义，也不参与候选 schema 的打分。
 

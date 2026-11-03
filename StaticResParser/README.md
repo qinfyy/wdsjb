@@ -28,7 +28,7 @@ py -X utf8 main.py --input 解包文件目录 --output output --lua-only
 py -X utf8 main.py --input 解包文件目录 --output pb_output --no-decrypt-lua
 ```
 
-需要处理非 Lua 内容时，读取 `main.py` 的 `DEFAULT_SCHEMA` 目录数组，包括 WDProtoDumper 的 `output_pbconfig` 和 JsProtoDumper 的 `output/pbconfig`。加载 schema 时先清空本工具的 `temp` 目录，再自动调用 `../WDSniffer/protoc/protoc.exe`，递归编译各目录中的 `.proto`，一个目录生成一个 FileDescriptorSet，保存到 `temp/<目录名>-<路径摘要>.pb`。schema 输入不能放在 `temp` 中。`--lua-only` 不加载或编译 schema。
+需要处理非 Lua 内容时，读取 `main.py` 的 `DEFAULT_SCHEMA` 目录数组，包括 WDProtoDumper 的 `output_pbconfig` 和 JsProtoDumper 的 `output/pbconfig`。加载 schema 时先清空本工具的 `temp` 目录，再自动调用 `../WDSniffer/protoc/protoc.exe`，递归编译各目录中的 `.proto`，一个目录生成一个 FileDescriptorSet，保存到 `temp/<目录名>-<路径CRC32>.pb`。schema 输入不能放在 `temp` 中。`--lua-only` 不加载或编译 schema。
 
 ## 参数
 
@@ -39,7 +39,7 @@ py -X utf8 main.py --input 解包文件目录 --output pb_output --no-decrypt-lu
 - `--message`：单文件显式指定消息名；传入全名时只使用末尾的消息名。
 - `--verify-only`：只检查并写报告，不导出任何资源。
 - `--detailed-log`：打印逐文件结果。
-- `--decrypt-lua`：默认开启，解密并反编译 Lua；`--no-decrypt-lua` 关闭，直接跳过且不复制原始 Lua。
+- `--no-decrypt-lua`：默认 `false`；指定后跳过 Lua 解密和反编译，不复制原始 Lua。
 - `--lua-only`：只处理按内容识别的 Lua，不加载 schema，不解析、解密或复制其他资源；不能与 `--no-decrypt-lua` 同用。
 - `--lua-workers`：Lua 反编译工作进程数，默认最多 4 个。
 
