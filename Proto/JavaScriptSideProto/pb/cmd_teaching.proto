@@ -1,0 +1,67 @@
+// JsProtoDumper: pb/cmd_teaching.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbteaching;
+
+message TeachingStoryItem {
+    uint32 teachingStoryId = 1;
+    uint32 teachingStoryStatus = 2;
+}
+
+message GetTeachingStoryDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1887;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 teachingStoryAll = 1;
+    repeated uint32 teachingStoryIdList = 2 [packed = true];
+}
+
+message GetTeachingStoryDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1888;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 teachingStoryAll = 2;
+    repeated .pbteaching.TeachingStoryItem teachingStoryList = 3;
+}
+
+message TeachingStoryStartReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1889;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 teachingStoryId = 1;
+}
+
+message TeachingStoryStartRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1890;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 teachingStoryId = 2;
+}

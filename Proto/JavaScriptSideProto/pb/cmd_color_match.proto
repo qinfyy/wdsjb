@@ -1,0 +1,237 @@
+// JsProtoDumper: pb/cmd_color_match.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbcolormatch;
+
+message ColorMatchScheduleData {
+    uint32 scheduleId = 1;
+    uint32 score = 2;
+    uint32 sendItemNum = 3;
+    uint32 interactionId = 4;
+    repeated .pbcolormatch.ColorMatchBoxData boxList = 5;
+    repeated .pbcolormatch.ColorMatchTrayData trayList = 6;
+    repeated .pbcolormatch.ColorMatchSkillData skillList = 7;
+    repeated .pbcolormatch.ColorMatchPointCfgData pointCfgList = 8;
+    repeated .pbcolormatch.RewardDataItem rewardItemList = 9;
+    int64 packageStartTime = 10;
+}
+
+message ColorMatchBoxData {
+    uint32 boxId = 1;
+    uint32 status = 2;
+    uint32 colorId = 3;
+    uint32 currNum = 4;
+}
+
+message ColorMatchTrayData {
+    uint32 trayId = 1;
+    uint32 status = 2;
+    repeated .pbcolormatch.ColorMatchItemData itemList = 3;
+}
+
+message ColorMatchItemData {
+    uint32 itemColorId = 1;
+    uint32 num = 2;
+}
+
+message ColorMatchSkillData {
+    uint32 skillType = 1;
+    uint32 canUseCnt = 2;
+}
+
+message ColorMatchPointCfgData {
+    uint32 id = 1;
+    repeated .pbcolormatch.RewardDataItem rewardItemList = 2;
+}
+
+message GetColorMatchDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1791;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetColorMatchDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1792;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbcolormatch.ColorMatchScheduleData scheduleData = 2;
+}
+
+message ColorMatchSendItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1793;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 currSendItemNum = 2;
+}
+
+message ColorMatchSendItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1794;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message ColorMatchOpenBoxReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1795;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 boxId = 2;
+}
+
+message ColorMatchOpenBoxRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1796;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message ColorMatchMoveItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1797;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 srcTrayId = 2;
+    uint32 itemColorId = 3;
+    uint32 dstType = 4;
+    uint32 dstId = 5;
+}
+
+message ColorMatchMoveItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1798;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message ColorMatchUseSkillReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1799;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 skillType = 2;
+    uint32 canUseCnt = 3;
+    uint32 dstId = 4;
+}
+
+message ColorMatchUseSkillRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1800;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message ColorMatchUseKeyReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1801;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 interactionId = 2;
+}
+
+message ColorMatchUseKeyRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1802;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

@@ -1,0 +1,65 @@
+// JsProtoDumper: pb/cmd_study.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbstudy;
+
+message StudyItem {
+    uint32 studyId = 1;
+    uint32 studyStatus = 2;
+}
+
+message GetStudyDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1389;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+    uint32 studyAll = 1;
+    repeated uint32 studyIdList = 2 [packed = true];
+}
+
+message GetStudyDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1390;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+    }
+    int32 retcode = 1;
+    uint32 studyAll = 2;
+    repeated .pbstudy.StudyItem studyList = 3;
+}
+
+message StudyStartReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1391;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 studyId = 1;
+}
+
+message StudyStartRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1392;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 studyId = 2;
+}

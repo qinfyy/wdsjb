@@ -1,0 +1,65 @@
+// JsProtoDumper: pb/cmd_implant.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbimplant;
+
+message ImplantItem {
+    uint32 implantId = 1;
+    uint32 implantStatus = 2;
+}
+
+message GetImplantDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1651;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+    uint32 implantAll = 1;
+    repeated uint32 implantIdList = 2 [packed = true];
+}
+
+message GetImplantDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1652;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+    }
+    int32 retcode = 1;
+    uint32 implantAll = 2;
+    repeated .pbimplant.ImplantItem implantList = 3;
+}
+
+message ImplantStartReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1653;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 implantId = 1;
+}
+
+message ImplantStartRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1654;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 implantId = 2;
+}

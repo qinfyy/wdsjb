@@ -1,0 +1,612 @@
+// JsProtoDumper: pb/cmd_tbrpg.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbtbrpg;
+
+message TBRPGRewardDataItem {
+    uint32 propItemId = 1;
+    uint32 itemNum = 2;
+}
+
+message TBRPGMissionConditionItem {
+    uint32 conditionOrder = 1;
+    uint32 progress = 2;
+    uint32 maxProgress = 3;
+}
+
+message TBRPGMissionItem {
+    uint32 missionId = 1;
+    uint32 missionStatus = 2;
+    int64 unlockTimestamp = 3;
+    repeated .pbtbrpg.TBRPGMissionConditionItem conditionItems = 4;
+    repeated .pbtbrpg.TBRPGRewardDataItem previewFinalRewards = 5;
+    repeated .pbtbrpg.TBRPGRewardDataItem missionRewards = 6;
+    uint32 missionType = 7;
+    uint32 acceptEntityId = 8;
+    uint32 submitEntityId = 9;
+    bool isTrack = 10;
+    bool isNew = 11;
+    repeated .pbtbrpg.TBRPGPropItem costPropItems = 12;
+}
+
+message TBRPGEntityItem {
+    uint32 uuid = 1;
+    bool active = 2;
+    uint32 status = 3;
+    int32 posX = 4;
+    int32 posY = 5;
+    uint32 orient = 6;
+    uint32 entityType = 7;
+}
+
+message TBRPGMapProgressItem {
+    uint32 type = 1;
+    uint32 currentProgress = 2;
+    uint32 maxProgress = 3;
+    uint32 currentWeight = 4;
+    uint32 maxWeight = 5;
+}
+
+message TBRPGMapItem {
+    uint32 mapId = 1;
+    uint32 entityAll = 2;
+    repeated .pbtbrpg.TBRPGEntityItem entities = 3;
+    bool isShow = 4;
+    uint32 progressAll = 5;
+    repeated .pbtbrpg.TBRPGMapProgressItem progressItems = 6;
+}
+
+message TBRPGCharacterPanelItem {
+    repeated .pbtbrpg.TBRPGPropItem propItems = 1;
+    repeated .pbtbrpg.TBRPGRoleItem roleItems = 2;
+    uint32 rosaEnergyNum = 3;
+    .pbtbrpg.TBRPGPlayerItem playerItem = 4;
+}
+
+message TBRPGPropItem {
+    uint32 uuid = 1;
+    uint32 propId = 2;
+    int32 propNum = 3;
+    int64 recvUnixTime = 4;
+    uint32 isNew = 5;
+}
+
+message TBRPGRoleItem {
+    uint32 roleId = 1;
+    uint32 roleLv = 2;
+    uint32 roleExp = 3;
+    repeated .pbtbrpg.TBRPGSkillItem roleSkills = 4;
+    map<uint32, .pbtbrpg.TBRPGEquipList> roleEquips = 5;
+    map<uint32, uint32> useItemMap = 6;
+}
+
+message TBRPGPlayerItem {
+    uint32 roleLv = 1;
+    uint32 roleExp = 2;
+}
+
+message TBRPGEquipList {
+    repeated uint32 equipUuids = 1 [packed = true];
+}
+
+message TBRPGSkillItem {
+    uint32 skillId = 1;
+    uint32 skillLevel = 2;
+}
+
+message TBRPGEquipChangeInfo {
+    uint32 equipUuid = 1;
+    uint32 roleId = 2;
+    uint32 equipPos = 3;
+    uint32 posIndex = 4;
+}
+
+message TBRPGEventItem {
+    uint32 order = 1;
+    uint32 eventType = 2;
+    .pbtbrpg.TBRPGEntityItem entity = 3;
+    uint32 submitMissionId = 4;
+}
+
+message TBRPGCharacterPosition {
+    int32 posX = 1;
+    int32 posY = 2;
+}
+
+message TBRPGMiniGameItem {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    uint32 miniGameType = 3;
+}
+
+message GetTBRPGDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1277;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+    uint32 missionAll = 2;
+    repeated uint32 missionIdList = 3 [packed = true];
+    uint32 mapAll = 4;
+    repeated uint32 mapIdList = 5 [packed = true];
+    uint32 needCharacterPanel = 6;
+    uint32 miniGameAll = 7;
+    repeated uint32 miniGameLevelIdList = 8 [packed = true];
+}
+
+message GetTBRPGDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1278;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 missionAll = 3;
+    repeated .pbtbrpg.TBRPGMissionItem missionItems = 4;
+    uint32 mapAll = 5;
+    repeated .pbtbrpg.TBRPGMapItem mapItems = 6;
+    uint32 panelAll = 7;
+    .pbtbrpg.TBRPGCharacterPanelItem characterPanelItem = 8;
+    uint32 initMapId = 9;
+    .pbtbrpg.TBRPGCharacterPosition characterPos = 10;
+    uint32 miniGameAll = 11;
+    repeated .pbtbrpg.TBRPGMiniGameItem miniGameItems = 12;
+}
+
+message TBRPGMissionAcceptReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1279;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 missionIds = 2 [packed = true];
+}
+
+message TBRPGMissionAcceptRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1280;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TBRPGSyncEntityReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1281;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 mapId = 2;
+    repeated .pbtbrpg.TBRPGEntityItem entityItems = 3;
+}
+
+message TBRPGSyncEntityRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1282;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 mapId = 3;
+    repeated .pbtbrpg.TBRPGEntityItem entityItems = 4;
+    repeated .pbtbrpg.TBRPGRewardDataItem rewards = 5;
+}
+
+message TBRPGUsePropItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1283;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 propItemUuid = 2;
+    int32 propItemCurrNum = 3;
+    uint32 propItemUseNum = 4;
+    uint32 targetRoleId = 5;
+}
+
+message TBRPGUsePropItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1284;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TBRPGShowedItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1285;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 propItemUuids = 2 [packed = true];
+    repeated uint32 missionIds = 3 [packed = true];
+}
+
+message TBRPGShowedItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1286;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TBRPGEquipChangeReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1287;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated .pbtbrpg.TBRPGEquipChangeInfo operateEquipInfo = 2;
+}
+
+message TBRPGEquipChangeRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1288;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TBRPGSkillLevelUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1289;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 targetRoleId = 2;
+    uint32 skillId = 3;
+}
+
+message TBRPGSkillLevelUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1290;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TBRPGMissionSubmitReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1291;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 missionIds = 2 [packed = true];
+}
+
+message TBRPGMissionSubmitRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1292;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbtbrpg.TBRPGRewardDataItem rewards = 2;
+}
+
+message TBRPGMissionTrackReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1293;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 missionId = 2;
+}
+
+message TBRPGMissionTrackRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1294;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 missionId = 2;
+}
+
+message TBRPGPerformEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1295;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 mapId = 2;
+    uint32 directorId = 3;
+    repeated .pbtbrpg.TBRPGEventItem eventItems = 4;
+}
+
+message TBRPGPerformEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1296;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbtbrpg.TBRPGRewardDataItem rewards = 2;
+}
+
+message TBRPGBattleBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1297;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 mapId = 2;
+    uint32 enemyAreaId = 3;
+    uint32 monsterId = 4;
+}
+
+message TBRPGBattleBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1298;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 mapId = 3;
+    uint32 battleId = 4;
+    uint32 monsterId = 5;
+    uint32 rosaEnergyNum = 6;
+}
+
+message TBRPGBattleEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1299;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 battleId = 2;
+    uint32 battleResult = 3;
+    uint32 rosaEnergyNum = 4;
+}
+
+message TBRPGBattleEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1300;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbtbrpg.TBRPGRewardDataItem rewards = 2;
+}
+
+message TBRPGPlayerMoveReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1301;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 mapId = 2;
+    uint32 mapEntryId = 3;
+    uint32 fromMapId = 4;
+    uint32 moveType = 5;
+    .pbtbrpg.TBRPGCharacterPosition characterPos = 6;
+}
+
+message TBRPGPlayerMoveRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1302;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    .pbtbrpg.TBRPGMapItem mapItem = 2;
+    uint32 moveType = 3;
+}
+
+message TBRPGMiniGameBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1303;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+}
+
+message TBRPGMiniGameBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1304;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 miniGameType = 4;
+}
+
+message TBRPGMiniGameEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1305;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 result = 3;
+}
+
+message TBRPGMiniGameEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1306;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    repeated .pbtbrpg.TBRPGRewardDataItem rewards = 4;
+}
+
+message TBRPGUseSkillReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1307;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 mapId = 2;
+    uint32 skillId = 3;
+    uint32 roleId = 4;
+    uint32 miniGameLevelId = 5;
+}
+
+message TBRPGUseSkillRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1308;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}

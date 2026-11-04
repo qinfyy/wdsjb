@@ -1,0 +1,263 @@
+// JsProtoDumper: pb/cmd_doll.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbdoll;
+
+message DollBodyInfo {
+    uint32 roleId = 1;
+    repeated uint32 clothesIds = 2 [packed = true];
+}
+
+message DollRoomInfo {
+    uint32 roleId = 1;
+    .pbdoll.DollRoomCottageInfo dollBodyItem = 2;
+    repeated .pbdoll.DollRoomCottageInfo dollCottageItems = 3;
+}
+
+message DollRoomCottageInfo {
+    uint32 cottageId = 1;
+    uint32 direction = 2;
+    repeated .pbdoll.DollRoomCottagePos usedPos = 3;
+}
+
+message DollRoomCottagePos {
+    uint32 x = 1;
+    uint32 y = 2;
+}
+
+message DollPrintBuffInfo {
+    uint32 id = 1;
+    uint32 cost = 2;
+    repeated uint32 printId = 3 [packed = true];
+    int64 leftTime = 4;
+}
+
+message GetDollDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1441;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+}
+
+message GetDollDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1442;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 mainRoleId = 2;
+    uint32 ap = 3;
+    uint32 dollBodyAll = 4;
+    repeated .pbdoll.DollBodyInfo dollBodyItems = 5;
+    uint32 dollRoomAll = 6;
+    repeated .pbdoll.DollRoomInfo dollRoomItems = 7;
+    repeated .pbdoll.DollPrintBuffInfo dollPrintBuffs = 8;
+    int64 systemOpenLeftTime = 9;
+    uint32 hasNewlyUpdate = 10;
+    repeated uint32 decorationIds = 11 [packed = true];
+}
+
+message DollChangeBodyReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1443;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    repeated uint32 clothesIds = 2 [packed = true];
+}
+
+message DollChangeBodyRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1444;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message DollChangeRoomReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1445;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    .pbdoll.DollRoomCottageInfo dollBodyItem = 2;
+    repeated .pbdoll.DollRoomCottageInfo dollCottageItems = 3;
+}
+
+message DollChangeRoomRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1446;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message DollPrintOptReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1447;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 printId = 1;
+    uint32 beforeAp = 2;
+    uint32 costAp = 3;
+    uint32 beforeHcoin = 4;
+    uint32 costHcoin = 5;
+    uint32 optNum = 6;
+}
+
+message DollPrintOptRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1448;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 printId = 2;
+    uint32 finishStage = 3;
+    repeated .pbdoll.RewardDataItem rewards = 4;
+}
+
+message DollSetMainRoleReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1449;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+}
+
+message DollSetMainRoleRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1450;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message DollGetNewlyUpdateReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1451;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+}
+
+message DollGetNewlyUpdateRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1452;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbdoll.RewardDataItem rewards = 2;
+}
+
+message DollChangeBodyAndRoomReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1453;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    repeated uint32 clothesIds = 2 [packed = true];
+    .pbdoll.DollRoomCottageInfo dollBodyItem = 3;
+    repeated .pbdoll.DollRoomCottageInfo dollCottageItems = 4;
+}
+
+message DollChangeBodyAndRoomRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1454;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

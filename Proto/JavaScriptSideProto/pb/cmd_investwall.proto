@@ -1,0 +1,54 @@
+// JsProtoDumper: pb/cmd_investwall.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbinvestwall;
+
+message InvestwallEventData {
+    uint32 scheduleId = 1;
+    repeated .pbinvestwall.InvestwallEventInfo wallEventInfo = 2;
+}
+
+message InvestwallEventInfo {
+    uint32 wallId = 1;
+    uint32 status = 2;
+    repeated .pbinvestwall.InvestwallKeyInfo keyInfo = 3;
+    repeated .pbinvestwall.InvestwallConclusionInfo conclusionInfo = 4;
+}
+
+message InvestwallKeyInfo {
+    uint32 keyId = 1;
+    uint32 status = 2;
+}
+
+message InvestwallConclusionInfo {
+    uint32 conclusionId = 1;
+    uint32 status = 2;
+}
+
+message GetInvestwallDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1543;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+}
+
+message GetInvestwallDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1544;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbinvestwall.InvestwallEventData investwallEventData = 2;
+}

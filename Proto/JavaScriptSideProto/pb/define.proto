@@ -1,0 +1,3412 @@
+// JsProtoDumper: pb/define.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pb;
+
+message CardSkillItem {
+    uint32 skillId = 1;
+    uint32 skillLevel = 2;
+    uint32 isNew = 3;
+}
+
+message CardStarUpRewardItem {
+    uint32 id = 1;
+    uint32 star = 2;
+    uint32 rewardStatus = 3;
+    .pb.RewardDataItem rewardItem = 4;
+}
+
+message CardItem {
+    uint32 cardId = 1;
+    uint32 expLevel = 2;
+    uint32 exp = 3;
+    uint32 star = 4;
+    uint32 evolType = 5;
+    uint32 recvUnixtime = 6;
+    uint32 status = 7;
+    uint32 displayType = 8;
+    repeated .pb.CardSkillItem skillItems = 9;
+    uint32 isNew = 10;
+    uint32 evidentId = 11;
+    uint32 evidentStatus = 12;
+    uint32 evidentShareId = 13;
+    repeated .pb.RewardDataItem evidentShareRewards = 14;
+    repeated .pb.CardStarUpRewardItem starUpRewardItems = 15;
+    uint32 isMarked = 16;
+}
+
+message CardExpEarnItem {
+    .pb.CardItem origCard = 1;
+    uint32 expEarn = 2;
+}
+
+message MaterialItem {
+    uint32 materialId = 1;
+    int32 materialNum = 2;
+    uint32 recircleLefttime = 3;
+    uint32 recvUnixtime = 4;
+    uint32 status = 5;
+    uint32 isNew = 6;
+}
+
+message EvidentItem {
+    uint32 evidentId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message BoxItem {
+    uint32 uniqId = 1;
+    uint32 boxId = 2;
+    int32 boxNum = 3;
+    uint32 recvUnixtime = 4;
+    uint32 isNew = 5;
+    uint32 status = 6;
+}
+
+message ClueItem {
+    uint32 clueId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 notUse = 4;
+}
+
+message ConclusionItem {
+    uint32 conclusionId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message PhraseItem {
+    uint32 phraseId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message GotEvidentItem {
+    uint32 evidentId = 1;
+    uint32 addSucc = 2;
+}
+
+message SpecialBattleItem {
+    int32 battleCount = 1;
+    int64 bossHp = 2;
+    int64 bossMaxHp = 3;
+    map<uint32, int64> voiceHp = 4;
+}
+
+message LevelItem {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    uint32 progress = 3;
+    uint32 curPassCount = 4;
+    uint32 curBuyCount = 5;
+    uint32 topPoint = 6;
+    uint32 hasGotItem = 9;
+    uint32 leftTime = 10;
+    uint32 eval = 11;
+    uint32 openUnixtime = 12;
+    uint32 curResetPassCount = 13;
+    .pb.SpecialBattleItem specialBattleItem = 14;
+}
+
+message LevelGroupExtraOpenInfo {
+    uint32 levelGroupId = 1;
+    uint32 canExtraOpen = 2;
+    uint32 extraPrice = 3;
+    uint32 extraTime = 4;
+    int64 extraOpenEndLeftTime = 5;
+    uint32 openTimeType = 6;
+}
+
+message LevelGroupItem {
+    uint32 levelGroupId = 1;
+    uint32 status = 2;
+    uint32 curPassCount = 4;
+    uint32 curBuyCount = 5;
+    uint32 leftTime = 6;
+    uint32 curResetPassCount = 7;
+    uint32 levelIdUnlock = 10;
+    uint32 lvUnlock = 11;
+    uint32 order = 13;
+    uint32 specialOpen = 14;
+    .pb.LevelGroupExtraOpenInfo extraOpenInfo = 15;
+    uint32 resettableId = 16;
+    int64 nextResetPrice = 17;
+    uint32 isAllLevelDone = 18;
+}
+
+message RewardData {
+    repeated .pb.RewardDataItem itemList = 1;
+    string rewardDesc = 2;
+    string rewardTitle = 3;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}
+
+message RepeatedRewardDataItem {
+    repeated .pb.RewardDataItem rewardItems = 1;
+}
+
+message BoxItemCfgDataItem {
+    uint32 boxId = 1;
+    repeated .pb.RepeatedRewardDataItem repeatedRewardItems = 2;
+}
+
+message TaskItem {
+    uint32 taskId = 1;
+    uint32 status = 2;
+    uint32 progress = 3;
+    int64 leftTime = 4;
+    repeated .pb.RewardDataItem rewardItems = 5;
+}
+
+message RolePaidEventInfo {
+    uint32 eventId = 1;
+    uint32 isnew = 2;
+}
+
+message RoleItem {
+    uint32 roleId = 1;
+    uint32 intimacyLevel = 2;
+    uint32 intimacyExp = 3;
+    uint32 status = 4;
+    string remarkName = 5;
+    .pb.RoleClothItem clothItem = 6;
+    uint32 showIntimacyLevel = 7;
+    uint32 remarkIcon = 8;
+    string remarkDesc = 9;
+    uint32 phoneStatus = 10;
+    int64 phoneEndTime = 11;
+    int64 phoneCdTime = 12;
+    repeated uint32 paidTimeIdList = 13 [packed = true];
+    uint32 hasNewPaidAudio = 14;
+    repeated .pb.RolePaidEventInfo rolePaidEventInfo = 15;
+    uint32 personalClothesId = 16;
+    repeated .pb.OpenClothesItem openClothesList = 17;
+    int64 messageLeftTime = 18;
+    uint32 personalBgId = 19;
+    repeated .pb.OpenBGItem openBgList = 20;
+    repeated uint32 paidAudioIdList = 21 [packed = true];
+    repeated uint32 readPaidAudio = 22 [packed = true];
+}
+
+message OpenClothesItem {
+    uint32 clothesId = 1;
+    int64 leftTime = 2;
+}
+
+message OpenBGItem {
+    uint32 bgId = 1;
+    int64 leftTime = 2;
+}
+
+message RoleClothItem {
+    uint32 suitCid = 1;
+    uint32 faceCid = 2;
+    uint32 earCid = 3;
+    uint32 handCid = 4;
+    uint32 neckCid = 5;
+    uint32 accessoryCid = 6;
+}
+
+message AchieveItem {
+    uint32 achieveId = 1;
+    uint32 status = 2;
+    uint32 progress = 3;
+    repeated .pb.RewardDataItem rewardItems = 4;
+}
+
+message TaskGroupRewardInfo {
+    uint32 completeCnt = 1;
+    repeated .pb.TaskGroupRewardItem rewardItems = 2;
+    uint32 taskGroupType = 3;
+    uint32 taskGroupStatus = 4;
+    uint32 leftTime = 5;
+    uint32 taskGroupRewardId = 6;
+}
+
+message TaskGroupRewardItem {
+    uint32 completeNum = 1;
+    uint32 rewardStatus = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+    uint32 isShow = 4;
+    uint32 isCore = 5;
+}
+
+message InvestPointItem {
+    uint32 investPointId = 1;
+    uint32 investTimestamp = 2;
+}
+
+message EventSubitem {
+    uint32 orderId = 1;
+    uint32 status = 2;
+    uint32 choice = 3;
+    repeated .pb.ClueRoundItem clueRounds = 4;
+    repeated uint32 inquiryKeywordIds = 5 [packed = true];
+    repeated uint32 watchPointIds = 6 [packed = true];
+    int64 timestamp = 7;
+}
+
+message PhoneEventItem {
+    uint32 phoneEventId = 1;
+    uint32 status = 2;
+    uint32 recvUnixTime = 3;
+    repeated .pb.EventSubitem subitems = 4;
+    uint32 closeUnixTime = 5;
+    uint32 moduleId = 6;
+}
+
+message PhoneNewChatItem {
+    uint32 moduleId = 1;
+    repeated .pb.PhoneEventItem phoneEventList = 2;
+}
+
+message CircleEventItem {
+    uint32 circleEventId = 1;
+    uint32 status = 2;
+    uint32 recvUnixTime = 3;
+    repeated .pb.EventSubitem subitems = 4;
+    uint32 choice = 5;
+    uint32 closeUnixTime = 6;
+}
+
+message MessageEventItem {
+    uint32 messageEventId = 1;
+    uint32 status = 2;
+    uint32 recvUnixTime = 3;
+    repeated .pb.EventSubitem subitems = 4;
+    uint32 closeUnixTime = 5;
+    uint32 messageUniqueId = 6;
+    uint32 redHeartStatus = 7;
+}
+
+message StoryEventItem {
+    uint32 storyId = 1;
+    repeated .pb.EventSubitem subitems = 4;
+}
+
+message StoryItem {
+    uint32 storyId = 1;
+    uint32 status = 2;
+}
+
+message StoryGroupRewardItem {
+    uint32 order = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message StoryGroupItem {
+    uint32 storyGroupId = 1;
+    uint32 status = 2;
+    uint32 curOrder = 3;
+    repeated .pb.StoryGroupRewardItem orderRewardItems = 4;
+}
+
+message WhisperItem {
+    uint32 whisperId = 1;
+    uint32 status = 2;
+}
+
+message WhisperGroupRewardItem {
+    uint32 order = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message WhisperGroupItem {
+    uint32 whisperGroupId = 1;
+    uint32 status = 2;
+    uint32 curOrder = 3;
+    repeated .pb.WhisperGroupRewardItem orderRewardItems = 4;
+}
+
+message FutureItem {
+    uint32 futureId = 1;
+    uint32 status = 2;
+}
+
+message TicketItem {
+    uint32 ticketId = 1;
+    int32 ticketNum = 2;
+    uint32 recircleLefttime = 3;
+}
+
+message WalletItem {
+    uint32 coinId = 1;
+    int32 coinNum = 2;
+    uint32 coinMax = 3;
+    uint32 recircleLefttime = 4;
+    .pb.WalletDropLimitItem walletDropLimit = 5;
+}
+
+message GachaGroupPoolItem {
+    uint32 gachaId = 1;
+    repeated uint32 selectCardIdList = 2 [packed = true];
+    uint32 gachaType = 3;
+    uint32 nextChoiceBaodiCount = 4;
+    string bannerPicPath = 5;
+}
+
+message GachaGroupItem {
+    uint32 groupId = 1;
+    repeated .pb.GachaGroupPoolItem poolList = 2;
+    uint32 gachaGroupStatus = 3;
+    uint32 orderId = 4;
+    uint32 maxOrder = 5;
+    uint32 selectUiType = 6;
+    uint32 gachaGroupType = 7;
+    uint32 groupEventId = 8;
+    uint32 materialId = 9;
+    int64 useItemEndTime = 10;
+    uint32 costNum = 11;
+}
+
+message GachaPreviewItem {
+    uint32 previewSubId = 1;
+    uint32 cardId = 2;
+    uint32 evolType = 3;
+    string clickArea = 4;
+}
+
+message GachaBannerItem {
+    uint32 gachaId = 1;
+    uint32 order = 2;
+    uint32 gachaType = 3;
+    uint32 ticketId = 4;
+    uint32 coinId = 5;
+    uint32 coinNum = 6;
+    int64 startTime = 7;
+    int64 endTime = 8;
+    string showPath = 9;
+    string webUrl = 10;
+    uint32 nextSsrBaodi = 11;
+    uint32 nextSrBaodi = 12;
+    uint32 eggCnt = 13;
+    uint32 openType = 14;
+    uint32 cfgEggCnt = 15;
+    string probUrl = 16;
+    uint32 showType = 17;
+    string ext = 18;
+    string keyRewardImgUrl = 19;
+    repeated uint32 choiceUpCardId = 20 [packed = true];
+    uint32 activityTicketId = 21;
+    uint32 accumId = 22;
+    uint32 nextSsrChoiceBaodi = 23;
+    uint32 nextNewSsrBaodi = 24;
+    repeated uint32 choiceOptionCardId = 25 [packed = true];
+    uint32 choiceUpNum = 26;
+    uint32 isCoinAscending = 27;
+    repeated uint32 ssrCardId = 28 [packed = true];
+    repeated .pb.GachaDiscountInfo discountInfo = 29;
+    uint32 curGachaNum = 30;
+    repeated uint32 selectGachaPoolCard = 31 [packed = true];
+    uint32 accumSettleType = 32;
+    .pb.GachaGroupItem groupItem = 33;
+    repeated uint32 sssCardId = 34 [packed = true];
+    repeated .pb.GachaPreviewItem previewItems = 35;
+    uint32 isReprint = 36;
+    string gachaCostRangeText = 37;
+}
+
+message GachaLimitInfo {
+    uint32 limitType = 1;
+    uint32 totalGachaNum = 5;
+    uint32 limitNum = 6;
+    int64 limitLeftTime = 7;
+}
+
+message GachaDiscountInfo {
+    uint32 id = 1;
+    uint32 subId = 2;
+    uint32 discountPrice = 3;
+    uint32 discountNum = 4;
+    uint32 curNum = 5;
+    uint32 discountType = 6;
+    uint32 openType = 7;
+    int64 leftTime = 8;
+    int64 nextDiscountTime = 9;
+}
+
+message GachaItem {
+    uint32 cardId = 1;
+    uint32 decompose = 2;
+    uint32 materialId = 3;
+    uint32 materialNum = 4;
+    uint32 coinId = 5;
+    uint32 coinNum = 6;
+}
+
+message DeckCardGroupItem {
+    uint32 cardId = 1;
+    uint32 addOrder = 2;
+    int64 cdTimestamp = 3;
+}
+
+message DeckCardGroup {
+    repeated .pb.DeckCardGroupItem cardItems = 1;
+}
+
+message DeckCardGroupCfg {
+    repeated .pb.CardItem cardItems = 1;
+}
+
+message DeckItem {
+    uint32 deckId = 1;
+    .pb.DeckCardGroup mainCardGroup = 2;
+    .pb.DeckCardGroup assistCardGroup = 3;
+    string deckName = 4;
+    int64 createTime = 5;
+    uint32 isInit = 6;
+    .pb.DeckCardGroupCfg cardGroupCfg = 7;
+    uint32 deckType = 8;
+    uint32 limitType = 9;
+    uint32 deckNameId = 10;
+    .pb.DeckCardGroup cdCardGroup = 11;
+}
+
+message NxxGiftBattleInfo {
+    uint32 skillId = 1;
+    uint32 skillLevel = 2;
+}
+
+message BattleVoiceHp {
+    uint32 waveId = 1;
+    uint32 voiceIndex = 2;
+    uint32 voiceId = 3;
+    int64 voiceHp = 4;
+}
+
+message BattleBuffExtra {
+    uint32 buffId = 1;
+    uint32 multiplyLayer = 2;
+    uint32 buffConfigType = 3;
+    uint32 buffType = 4;
+    int32 addValue = 5;
+    uint32 targetType = 6;
+}
+
+message BattleLogItem {
+    uint32 cardId = 1;
+    uint32 attackType = 2;
+    uint32 attackHit = 3;
+    int32 bosslifeLeft = 4;
+    uint32 skillId = 5;
+}
+
+message BattleLog {
+    uint32 battleResult = 1;
+    repeated .pb.BattleTickLog tickInfos = 2;
+    uint32 fightValue = 3;
+    uint32 cotinueAdd = 4;
+}
+
+message BuffItem {
+    uint32 buffId = 1;
+    uint32 lastCount = 2;
+    uint32 addValue = 3;
+}
+
+message BattleTickLog {
+    uint32 tick = 1;
+    repeated .pb.BattleTickLogItem logItem = 2;
+}
+
+message BattleTickLogItem {
+    uint32 actionType = 1;
+    uint32 cardId = 3;
+    uint32 targetVoiceId = 4;
+    uint32 voiceId = 5;
+    uint32 addBuffId = 6;
+    uint32 suckHp = 7;
+    uint32 hitValue = 8;
+    repeated uint32 deadVoiceId = 9 [packed = true];
+    uint32 playerDead = 10;
+    uint32 overWaveId = 11;
+    uint32 playerHp = 12;
+    uint32 voiceHp = 13;
+    float atkBuff = 14;
+    float playerAttack = 15;
+    float luaResult = 16;
+    repeated string seedList = 17;
+    float defRate = 18;
+    repeated .pb.BuffItem selfBuffList = 19;
+    repeated .pb.BuffItem targetBuffList = 20;
+}
+
+message MailAttachment {
+    int64 hcoin = 1;
+    int64 scoin = 2;
+    uint32 stamina = 3;
+    uint32 exp = 4;
+    repeated .pb.RewardDataItem rewardItems = 5;
+    int64 ycoin = 6;
+    int64 fpoint = 7;
+    uint32 vipPoint = 8;
+}
+
+message MailItem {
+    uint32 mailId = 1;
+    uint32 mailType = 2;
+    string title = 3;
+    string content = 4;
+    string sender = 5;
+    uint32 deliveryTs = 6;
+    uint32 gotAttachTs = 7;
+    .pb.MailAttachment attachment = 8;
+    uint32 mailStatus = 9;
+    repeated string contentParamList = 10;
+    uint32 expireTs = 11;
+    uint32 isNew = 12;
+    uint32 isImportant = 13;
+    uint32 isStar = 14;
+}
+
+message MailKey {
+    uint32 mailId = 1;
+    uint32 mailType = 2;
+}
+
+message PlayerBriefItem {
+    uint32 uid = 1;
+    string nickname = 2;
+    uint32 expLevel = 3;
+    .pb.CardItem iconCard = 4;
+    uint32 emblemId = 5;
+    uint32 lastLoginTs = 6;
+    uint32 isMyFriend = 7;
+    uint32 lastSendFpointTs = 8;
+    uint32 fpointGift = 9;
+    uint32 isDel = 10;
+    string selfDesc = 11;
+    uint32 recvGiftTs = 12;
+    uint32 askFriendTs = 13;
+    repeated uint32 emblemIdList = 14 [packed = true];
+    uint32 imageCardId = 15;
+    repeated uint32 vipSpLogoItems = 16 [packed = true];
+    uint32 avatarPendantId = 17;
+}
+
+message PlayerDetailItem {
+    uint32 uid = 1;
+    string nickname = 2;
+    uint32 expLevel = 3;
+    .pb.CardItem iconCard = 4;
+    uint32 emblemId = 5;
+    uint32 lastLoginTs = 6;
+    uint32 isMyFriend = 7;
+    uint32 cardNum = 8;
+    uint32 decorationNum = 9;
+    string selfDesc = 10;
+    uint32 power = 11;
+    repeated .pb.CardItem cards = 12;
+    uint32 deskDisplayId = 13;
+    uint32 photoNum = 14;
+    uint32 imageCardId = 15;
+    uint32 furnitureNum = 16;
+    uint32 deskDisplayNum = 17;
+    repeated uint32 emblemIdList = 18 [packed = true];
+    uint32 birthdayMonth = 19;
+    uint32 birthdayDay = 20;
+    uint32 clothesId = 21;
+    uint32 bgId = 22;
+    uint32 doneAchievementNum = 23;
+    uint32 playerStatus = 24;
+    uint32 puzzleNum = 25;
+    repeated uint32 vipSpLogoItems = 26 [packed = true];
+    uint32 clickEffectsId = 27;
+    uint32 avatarPendantId = 28;
+}
+
+message PersonalPlayerBirthdayInfo {
+    uint32 roleId = 1;
+    uint32 state = 2;
+}
+
+message CleanUpPageItem {
+    uint32 littleNum = 1;
+    uint32 bigNum = 2;
+}
+
+message CleanUpStageItem {
+    repeated .pb.CleanUpPageItem pageItems = 1;
+}
+
+message CleanUpHappenPageItem {
+    repeated uint32 steps = 1 [packed = true];
+}
+
+message CleanUpHappenStageItem {
+    repeated .pb.CleanUpHappenPageItem pageItems = 1;
+}
+
+message DeskDisplayItem {
+    uint32 deskDisplayId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message PhotoItem {
+    uint32 photoId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message ChessItem {
+    uint32 chessId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message ShopListItem {
+    uint32 shopId = 1;
+    string nameTextmapId = 2;
+    uint32 bannerType = 3;
+    string banner = 4;
+    uint32 orderNo = 5;
+    uint32 useHcoin = 6;
+    uint32 useScoin = 7;
+    uint32 coinId = 8;
+    uint32 leftTime = 9;
+    uint32 shopStatus = 10;
+    uint32 useFpoint = 11;
+    uint32 useYcoin = 12;
+    string innerBanner = 13;
+    uint32 exchangeType = 14;
+}
+
+message ShopDataItem {
+    uint32 itemId = 1;
+    .pb.RewardDataItem shopItem = 2;
+    uint32 price = 3;
+    uint32 orderNo = 4;
+    uint32 configLimit = 5;
+    uint32 buyNum = 6;
+    uint32 refreshType = 7;
+    uint32 leftTime = 8;
+    uint32 isShow = 9;
+    uint32 shopId = 10;
+    uint32 shopItemStatus = 11;
+    uint32 refreshLeftTime = 12;
+    uint32 exchangeGroup = 13;
+    uint32 discountPrice = 14;
+    uint32 discountLeftTime = 15;
+    uint32 important = 16;
+}
+
+message SignDayItem {
+    uint32 day = 1;
+    repeated .pb.RewardDataItem dayRewards = 2;
+}
+
+message SignInfo {
+    uint32 id = 1;
+    uint32 signDay = 2;
+    uint32 today = 3;
+    repeated .pb.RewardDataItem rewards = 4;
+    uint32 isDone = 5;
+    repeated .pb.SignDayItem dayItems = 6;
+}
+
+message MonthSignDetail {
+    uint32 order = 1;
+    .pb.RewardDataItem reward = 2;
+    uint32 isKeyDay = 3;
+}
+
+message SessionEntryInfo {
+    uint32 uid = 1;
+    uint64 recordVersion = 2;
+    uint32 expLevel = 3;
+    uint64 tag = 4;
+    int64 geoCountryId = 5;
+    int64 geoCityId = 6;
+    string lang = 7;
+}
+
+message RichManBattleInfo {
+    uint32 order = 1;
+    uint32 difficultType = 2;
+    uint32 levelId = 3;
+    repeated .pb.RewardDataItem reward = 4;
+    repeated .pb.RewardDataItem lostReward = 5;
+    uint32 unlock = 6;
+}
+
+message RichManBlockInfoBattle {
+    repeated .pb.RichManBattleInfo info = 1;
+    uint32 status = 2;
+    uint32 lastChoiceDifficultType = 3;
+    uint32 seed = 4;
+}
+
+message RichManBlockInfoBattleground {
+    repeated .pb.RichManBattleInfo info = 1;
+    uint32 status = 2;
+    uint32 lastChoiceDifficultType = 3;
+    uint32 seed = 4;
+}
+
+message RichManBlockInfoReward {
+    repeated .pb.RewardDataItem reward = 1;
+}
+
+message RichManBlockInfoCoin {
+    .pb.RewardDataItem reward = 1;
+}
+
+message RichManBlockInfoExp {
+    .pb.RewardDataItem reward = 1;
+}
+
+message RichManBlockInfoQuestion {
+    uint32 questionId = 1;
+    .pb.RewardDataItem riddleManRewardItem = 2;
+}
+
+message RichManBlockInfoDice {
+    .pb.RewardDataItem reward = 1;
+}
+
+message RichManBonus {
+    uint32 bonusType = 1;
+    uint32 multiple = 2;
+    uint32 remainNum = 3;
+    uint32 order = 4;
+}
+
+message RichManBuff {
+    uint32 buffId = 1;
+    uint32 remainNum = 2;
+}
+
+message RichManShopInfo {
+    uint32 order = 1;
+    .pb.RewardDataItem rewardItem = 2;
+    uint32 off = 3;
+    uint32 price = 4;
+    uint32 coinId = 5;
+    uint32 isScoin = 6;
+    uint32 isHcoin = 7;
+    uint32 isPaycoin = 8;
+    uint32 isFpoint = 9;
+    uint32 buyCount = 10;
+    uint32 buyLimit = 11;
+    uint32 groupId = 12;
+}
+
+message RichManBlockInfoShop {
+    repeated .pb.RichManShopInfo shops = 1;
+}
+
+message RichManCompleted {
+    repeated .pb.RewardDataItem rewardIds = 1;
+    uint32 shopOpen = 2;
+    uint32 newScheduleId = 4;
+    .pb.RichManWishBoxInfo wishBox = 5;
+}
+
+message RichManTaskDetail {
+    uint32 taskId = 1;
+    uint32 progress = 2;
+    uint32 aim = 3;
+    int32 remainNum = 4;
+    uint32 taskClass = 5;
+    uint32 groupId = 6;
+    uint32 taskOrder = 7;
+    repeated .pb.RewardDataItem rewards = 8;
+    uint32 uniqueId = 9;
+}
+
+message RichManTaskInfo {
+    repeated .pb.RichManTaskDetail inProgress = 1;
+    repeated .pb.RichManTaskDetail success = 2;
+    repeated .pb.RichManTaskDetail failure = 3;
+}
+
+message RichManBossInfo {
+    uint32 richManBossId = 1;
+    int64 bossHp = 2;
+    int64 bossMaxHp = 3;
+    uint32 bossPowerId = 4;
+    uint32 bossOrder = 5;
+    uint32 haltRound = 6;
+    uint32 isMaxPower = 7;
+    map<uint32, int64> voiceHp = 8;
+    uint32 seed = 9;
+    uint32 levelId = 10;
+    repeated .pb.RewardDataItem rewards = 11;
+    uint32 viewId = 12;
+    uint32 bossPowerType = 13;
+    uint32 bossType = 14;
+}
+
+message RichManBossChoiceInfo {
+    uint32 levelId = 1;
+    int64 bossMaxHp = 2;
+    uint32 bossPowerId = 3;
+    repeated .pb.RewardDataItem rewards = 4;
+}
+
+message RichManBossCatch {
+    .pb.RichManBossInfo info = 1;
+    uint32 status = 4;
+    repeated .pb.RichManBossChoiceInfo availableBossPower = 5;
+    uint32 lastChoice = 6;
+    uint32 maxPowerId = 7;
+}
+
+message RichManBossMove {
+    .pb.RichManBossInfo info = 1;
+}
+
+message RichManBossBorn {
+    .pb.RichManBossInfo info = 1;
+    uint32 fromOrder = 2;
+    uint32 toOrder = 3;
+}
+
+message RichManPortalItem {
+    uint32 groupId = 1;
+    uint32 blockOrder = 2;
+    uint32 scheduleId = 3;
+    uint32 nextBornStep = 4;
+}
+
+message RichManMoveInfo {
+    uint32 newOrder = 1;
+    .pb.RichManNewBlockInfo blockInfo = 2;
+    .pb.RichManCompleted completed = 3;
+    .pb.RichManTaskInfo taskInfo = 4;
+    .pb.RichManBossCatch bossCatch = 5;
+    repeated .pb.RichManBossMove bossMove = 6;
+    uint32 meetLuckyGroup = 7;
+    uint32 remainMove = 8;
+    uint32 oneStepNum = 9;
+    uint32 meetPortalGroup = 10;
+    repeated .pb.RichManPortalItem portalList = 11;
+}
+
+message RichManBlockInfoLandmark {
+    uint32 levelId = 1;
+}
+
+message RichManBlockInfoDash {
+    uint32 distance = 1;
+    .pb.RichManMoveInfo moveInfo = 2;
+}
+
+message RichManBlockInfoHalt {
+    uint32 haltRound = 1;
+}
+
+message RichManWishBoxItem {
+    uint32 boxId = 1;
+    repeated .pb.RewardDataItem reward = 2;
+}
+
+message RichManBlockInfoWishBox {
+    uint32 status = 1;
+    repeated .pb.RichManWishBoxItem boxList = 2;
+}
+
+message RichManWishBoxGroupInfo {
+    uint32 groupId = 1;
+    repeated .pb.RichManWishBoxItem boxList = 2;
+}
+
+message RichManWishBoxInfo {
+    uint32 level = 1;
+    repeated uint32 groupIdList = 2 [packed = true];
+    uint32 nextLevelupCompleteCount = 3;
+    repeated .pb.RichManWishBoxGroupInfo groupList = 4;
+}
+
+message RichManNewBlockInfo {
+    uint32 blockType = 1;
+    .pb.RichManBlockInfoBattle battle = 3;
+    .pb.RichManBlockInfoReward reward = 4;
+    .pb.RichManBlockInfoCoin coin = 5;
+    .pb.RichManBlockInfoExp exp = 6;
+    .pb.RichManBlockInfoQuestion question = 7;
+    .pb.RichManBlockInfoDice dice = 8;
+    .pb.RichManBonus bonus = 9;
+    .pb.RichManBlockInfoShop shop = 10;
+    .pb.RichManBlockInfoDash dash = 12;
+    .pb.RichManBlockInfoHalt halt = 13;
+    .pb.RichManBonus effectBonus = 14;
+    repeated uint32 effectSkills = 15 [packed = true];
+    .pb.RichManBlockInfoBattleground battleground = 16;
+    .pb.RichManBlockInfoWishBox wishBox = 17;
+}
+
+message RichManBattleRecord {
+    uint32 order = 1;
+    uint32 rewardOrder = 2;
+    uint32 status = 3;
+}
+
+message RichManQuestionRecord {
+    uint32 questionId = 1;
+}
+
+message RichManShopRecord {
+    repeated .pb.RichManShopInfo shops = 1;
+}
+
+message RichManLandmarkRecord {
+    uint32 levelId = 1;
+}
+
+message RichManBlockInfo {
+    uint32 blockType = 1;
+    .pb.RichManBlockInfoBattle battle = 2;
+    .pb.RichManQuestionRecord question = 3;
+    .pb.RichManShopRecord shop = 4;
+    .pb.RichManBlockInfoBattleground battleground = 5;
+    .pb.RichManBlockInfoWishBox wishBox = 6;
+    uint32 hasReward = 7;
+}
+
+message LevelStarItem {
+    uint32 starNum = 1;
+    uint32 rewardStatus = 2;
+    repeated .pb.RewardDataItem dropItems = 3;
+}
+
+message LevelStarGroupItem {
+    uint32 levelStarGroupId = 1;
+    uint32 curStarNum = 2;
+    repeated .pb.LevelStarItem starItemList = 3;
+    uint32 status = 4;
+}
+
+message HandbookItem {
+    uint32 handbookId = 1;
+    uint32 sourceId = 2;
+    uint32 sourceType = 3;
+    uint32 status = 4;
+    uint32 recvUnixtime = 5;
+}
+
+message GuideItem {
+    uint32 guideId = 1;
+    uint32 status = 2;
+}
+
+message SurveyItem {
+    uint32 surveyId = 1;
+    uint32 order = 2;
+    uint32 status = 3;
+    string site = 4;
+    int64 leftTime = 5;
+    repeated .pb.RewardDataItem rewardItems = 6;
+    uint32 titleNameId = 7;
+}
+
+message RichManBlockReplace {
+    uint32 order = 1;
+    uint32 newBlockType = 2;
+}
+
+message SkipPlayItem {
+    uint32 levelId = 1;
+    uint32 value = 2;
+}
+
+message ClueCombinationItem {
+    uint32 combinId = 1;
+    repeated uint32 clueIds = 2 [packed = true];
+}
+
+message ClueRoundItem {
+    uint32 roundId = 1;
+    repeated .pb.ClueCombinationItem combineItems = 2;
+}
+
+message StoryGlobalOptionItem {
+    uint32 globalOptionId = 1;
+    uint32 optionValue = 2;
+    uint32 status = 3;
+}
+
+message NxxosData {
+    uint32 id = 1;
+    uint32 recvUnixTime = 2;
+    uint32 isNew = 3;
+    uint32 isHide = 4;
+}
+
+message RichManScheduleInfo {
+    uint32 scheduleId = 1;
+    uint32 openType = 2;
+    int64 startTime = 3;
+    int64 endTime = 4;
+    uint32 inProgress = 5;
+    int64 nextDiceRestoreTime = 6;
+}
+
+message ExpireItem {
+    uint32 uniqId = 1;
+    uint32 materialId = 2;
+    int32 materialNum = 3;
+    uint32 recvUnixtime = 4;
+    uint32 expireLeftTime = 5;
+    uint32 isNew = 6;
+    uint32 status = 7;
+}
+
+message ClothItem {
+    uint32 clothId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message TopicItem {
+    uint32 topicId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+}
+
+message EmblemItem {
+    uint32 emblemId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+}
+
+message ImageCardItem {
+    uint32 imageCardId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+}
+
+message ClothesItem {
+    uint32 clothesId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 leftTime = 5;
+}
+
+message BgItem {
+    uint32 bgId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 leftTime = 5;
+}
+
+message ProfileItem {
+    uint32 profileId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+}
+
+message BlueprintItem {
+    uint32 blueprintId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int32 blueprintNum = 5;
+}
+
+message ClickEffectsItem {
+    uint32 clickEffectsId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 showTime = 5;
+    int32 isGot = 6;
+}
+
+message AvatarPendantItem {
+    uint32 avatarPendantId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 showTime = 5;
+    int32 isGot = 6;
+}
+
+message DollClothesItem {
+    uint32 dollClothesId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 showTime = 5;
+    uint32 isGot = 6;
+    int64 jumpExpireTime = 7;
+}
+
+message DollClothesPrintItem {
+    uint32 dollClothesPrintId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    uint32 finishStage = 5;
+    int64 showTime = 6;
+    uint32 isGot = 7;
+    int64 jumpExpireTime = 8;
+}
+
+message DollCottageItem {
+    uint32 dollCottageId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    int64 showTime = 5;
+    uint32 isGot = 6;
+    int64 jumpExpireTime = 7;
+}
+
+message DollCottagePrintItem {
+    uint32 dollCottagePrintId = 1;
+    uint32 recvUnixtime = 2;
+    uint32 isNew = 3;
+    uint32 status = 4;
+    uint32 finishStage = 5;
+    int64 showTime = 6;
+    uint32 isGot = 7;
+    int64 jumpExpireTime = 8;
+}
+
+message TowerBuffData {
+    uint32 buffId = 1;
+    uint32 buffRound = 2;
+    uint32 gotRow = 3;
+    uint32 multiplyLayer = 4;
+}
+
+message TowerBlockReward {
+    repeated .pb.RewardDataItem rewards = 1;
+}
+
+message TowerBlockBattle {
+    uint32 levelId = 1;
+    repeated .pb.RewardDataItem rewards = 2;
+    uint32 status = 3;
+    uint32 seed = 4;
+}
+
+message TowerBlockBuff {
+    repeated .pb.TowerBuffData buff = 1;
+}
+
+message TowerBlockBoss {
+    uint32 levelId = 1;
+    repeated .pb.RewardDataItem rewards = 2;
+    uint32 status = 3;
+    repeated .pb.RewardDataItem firstRewards = 4;
+    uint32 seed = 5;
+}
+
+message TowerBlockQuestion {
+    uint32 questionId = 1;
+    uint32 status = 2;
+}
+
+message TowerBlock {
+    uint32 row = 1;
+    uint32 column = 2;
+    uint32 blockType = 3;
+    .pb.TowerBlockReward reward = 4;
+    .pb.TowerBlockBattle battle = 5;
+    .pb.TowerBlockBuff buff = 6;
+    .pb.TowerBlockBoss boss = 7;
+    .pb.TowerBlockQuestion question = 8;
+}
+
+message TowerBlockBrief {
+    uint32 column = 1;
+    uint32 viewIndex = 2;
+    uint32 forbidMoveTo = 3;
+}
+
+message TowerRow {
+    uint32 rowId = 1;
+    repeated .pb.TowerBlockBrief blocks = 2;
+}
+
+message TowerSettlementInfo {
+    uint32 towerId = 1;
+    repeated .pb.RewardDataItem rewards = 2;
+    int64 hcoinLimit = 3;
+    int64 hcoinReward = 4;
+    repeated uint32 newUnlockTower = 5 [packed = true];
+    uint32 status = 6;
+}
+
+message TowerScheduleInfo {
+    uint32 towerScheduleId = 1;
+    uint32 openType = 2;
+    int64 startTime = 3;
+    int64 endTime = 4;
+    uint32 stage = 5;
+    uint32 lastPassTowerId = 6;
+    uint32 isUnlock = 7;
+    uint32 batch = 8;
+}
+
+message TowerBlockInfo {
+    uint32 blockType = 1;
+    .pb.TowerBlockBattle battle = 2;
+    .pb.TowerBlockBoss boss = 3;
+    .pb.TowerBlockQuestion question = 4;
+}
+
+message TowerMapStatus {
+    uint32 towerId = 1;
+    uint32 status = 2;
+}
+
+message BillingPageItem {
+    uint32 pageId = 1;
+    uint32 pageOrder = 2;
+    repeated .pb.BillingBannerItem bannerInfos = 3;
+    uint32 status = 4;
+    uint32 leftTime = 5;
+    uint32 closeType = 6;
+    uint32 pageTextmapId = 7;
+}
+
+message BillingBannerItem {
+    uint32 windowId = 1;
+    string pictureId = 2;
+    uint32 productType = 3;
+    uint32 productId = 4;
+    uint32 jumpType = 5;
+}
+
+message BillingYCoinProductItem {
+    uint32 productId = 1;
+    uint32 order = 2;
+    string productName = 3;
+    uint32 productNameTextmapId = 4;
+    string productImage = 5;
+    int64 ycoinNum = 6;
+    int64 extraHcoinNum = 7;
+    uint32 bannerTextmapId = 8;
+    uint32 leftTime = 9;
+    uint32 firstChargeAward = 10;
+    uint32 firstChargeLeftTime = 11;
+    uint32 status = 12;
+    uint32 vipPoint = 13;
+    uint32 rmbPrice = 14;
+    string priceTier = 15;
+    string productWindowImage = 16;
+    string ptHintTextmap = 17;
+}
+
+message BillingMonthCardItem {
+    uint32 monthCardId = 1;
+    uint32 directAwardYcoin = 2;
+    uint32 dailyAwardStamina = 3;
+    uint32 dailyAwardHcoin = 4;
+    uint32 dayDuration = 5;
+    uint32 maxStock = 6;
+    uint32 eventDailyAwardStamina = 7;
+    uint32 eventDailyAwardHcoin = 8;
+    uint32 eventLeftTime = 9;
+    uint32 expireLeftDay = 10;
+    uint32 nextRewardLeftTime = 11;
+    uint32 status = 12;
+    repeated .pb.RewardDataItem dailyRewardItems = 13;
+    repeated .pb.RewardDataItem eventDailyRewardItems = 14;
+    uint32 dailyAddIntimacy = 15;
+    uint32 displayExpeditionNum = 16;
+    uint32 expeditionNumTogether = 17;
+    uint32 dailyLevelPassResetCnt = 18;
+    uint32 expireTime = 19;
+    uint32 isImportant = 20;
+    repeated .pb.RewardDataItem directRewardItems = 21;
+    uint32 signInReward = 22;
+    uint32 needNotice = 23;
+}
+
+message BillingFundItem {
+    uint32 fundId = 1;
+    uint32 directAwardYcoin = 2;
+    uint32 directAwardHcoin = 3;
+}
+
+message BillingPackageItem {
+    uint32 packageId = 1;
+    uint32 ycoin = 2;
+    uint32 hcoin = 3;
+    repeated .pb.RewardDataItem rewardItems = 4;
+}
+
+message BillingPackageProductItem {
+    uint32 productId = 1;
+    string productName = 2;
+    uint32 tag = 3;
+    uint32 order = 4;
+    uint32 packageType = 5;
+    uint32 packageTitleTextmapId = 6;
+    string packageImage = 7;
+    .pb.BillingMonthCardItem monthCardInfo = 8;
+    .pb.BillingPackageItem packageItemInfo = 9;
+    uint32 refreshType = 10;
+    uint32 limitNum = 11;
+    uint32 curNum = 12;
+    uint32 leftTime = 13;
+    uint32 bannerTextmapId = 14;
+    uint32 purchaseType = 15;
+    uint32 currencyDiscount = 16;
+    uint32 originCoinPrice = 17;
+    uint32 realCoinPrice = 18;
+    uint32 discountLeftTime = 19;
+    uint32 status = 20;
+    uint32 discountStatus = 21;
+    uint32 refreshLeftTime = 22;
+    uint32 vipPoint = 23;
+    uint32 expLevelRequired = 24;
+    uint32 firstChargePurchaseRequired = 25;
+    uint32 rmbPrice = 26;
+    uint32 packageDescTextmapId = 27;
+    uint32 showTemplate = 28;
+    string priceTier = 29;
+    uint32 levelIdRequired = 30;
+    uint32 battlePassId = 31;
+    uint32 important = 32;
+    uint32 monthCardPurchaseRequired = 33;
+    uint32 mainScreenShow = 34;
+    uint32 fundId = 35;
+    repeated uint32 oldPlayerIds = 36 [packed = true];
+    uint32 callLockedRequired = 37;
+    uint32 paidAudioId = 38;
+    uint32 taskIdRequired = 39;
+    uint32 monthCardPurchase = 40;
+    uint32 couponIdRequired = 41;
+    uint32 clothId = 42;
+    uint32 bgId = 43;
+    repeated uint32 triggerGachaPoolId = 44 [packed = true];
+    uint32 invitationId = 45;
+    repeated uint32 showGachaIdList = 46 [packed = true];
+    string ptHintTextmap = 47;
+    uint32 rmbOriginalPrice = 48;
+    string originalPriceTier = 49;
+    uint32 needOpenDelaySync = 50;
+    .pb.BillingPackageProductItem originPricePackageItem = 51;
+    uint32 showOnSale = 52;
+    uint32 recommend = 53;
+}
+
+message BillingLuckyBagItem {
+    uint32 luckyBagId = 1;
+    uint32 remainBaodiCount = 2;
+}
+
+message BillingRecommendationInfoItem {
+    uint32 id = 1;
+    uint32 inProgress = 2;
+    uint32 endTime = 3;
+}
+
+message MonthCardRewardDataItem {
+    uint32 monthCardId = 1;
+    repeated .pb.RewardDataItem rewardItemList = 2;
+}
+
+message NxxBaseFarmItem {
+    uint32 status = 1;
+    uint32 leftTime = 2;
+    uint32 rewardSc = 3;
+    uint32 rewardExp = 4;
+    bool hasEffect = 5;
+}
+
+message NxxBaseExpeditionItem {
+    uint32 status = 1;
+    uint32 id = 2;
+    uint32 needTime = 3;
+    uint32 leftTime = 4;
+    uint32 needCardLevel = 5;
+    uint32 needCardNum = 6;
+    repeated .pb.RewardDataItem reward = 7;
+    repeated uint32 cards = 8 [packed = true];
+    uint32 promote = 9;
+    uint32 uniqId = 10;
+    uint32 rank = 11;
+    uint32 greaterSuccessProb = 12;
+    bool hasEffect = 13;
+}
+
+message NxxBaseExpeditionRewardItem {
+    uint32 uniqId = 1;
+    repeated .pb.RewardDataItem reward = 2;
+    uint32 isGreaterSuccess = 3;
+}
+
+message PieceSlotItem {
+    uint32 slotId = 1;
+    uint32 completeStatus = 2;
+    uint32 materialId = 3;
+    uint32 curPieceId = 4;
+}
+
+message ActivityRewardItem {
+    uint32 completeNum = 1;
+    uint32 rewardStatus = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+    uint32 isShow = 4;
+    uint32 isCore = 5;
+}
+
+message ActivityItem {
+    uint32 activityId = 1;
+    uint32 activityType = 2;
+    uint32 status = 3;
+    uint32 leftTime = 4;
+    uint32 puzzleCurRepeatCnt = 5;
+    repeated .pb.PieceSlotItem puzzleSlots = 6;
+    repeated .pb.ActivityRewardItem puzzleRewards = 7;
+    string MiscData = 8;
+    uint32 uniqueProgressId = 9;
+    uint32 progressRewardId = 10;
+}
+
+message DaySignItem {
+    uint32 day = 1;
+    uint32 status = 2;
+    uint32 flag = 3;
+}
+
+message DaySign {
+    repeated .pb.DaySignItem daySigns = 1;
+}
+
+message HeartValueRewardState {
+    uint32 indexId = 1;
+    uint32 storyState = 2;
+}
+
+message HeartValue {
+    uint32 curValue = 1;
+    uint32 status = 2;
+    repeated .pb.HeartValueRewardState rewatdStatus = 3;
+}
+
+message MapNpcItem {
+    uint32 npcId = 1;
+    uint32 invalidCnt = 2;
+    uint32 status = 3;
+    uint32 levelId = 4;
+    uint32 levelType = 5;
+    uint32 itemRefreshTime = 6;
+    repeated uint32 invalidIds = 7 [packed = true];
+}
+
+message MapNpc {
+    uint32 nextRefreshTime = 1;
+    uint32 refreshCnt = 2;
+    uint32 tiredValue = 3;
+    repeated .pb.MapNpcItem npcs = 4;
+}
+
+message RoomItem {
+    uint32 itemId = 1;
+    uint32 status = 2;
+}
+
+message RoomDecorate {
+    uint32 decorateValue = 1;
+    repeated .pb.RoomItem roomItems = 2;
+}
+
+message NxxBaseTaskItem {
+    uint32 taskId = 1;
+    uint32 status = 2;
+    uint32 taskExpNum = 3;
+    uint32 process = 4;
+    uint32 targetProcess = 5;
+    uint32 cardId = 6;
+}
+
+message NxxBaseGiftSkillItem {
+    uint32 giftSkillId = 1;
+    uint32 isUnlock = 2;
+    uint32 giftLevel = 3;
+    uint32 maxGiftLevel = 4;
+    uint32 needGiftLevel = 5;
+    uint32 needPoint = 6;
+    uint32 giftSkillType = 7;
+    uint32 prop1 = 8;
+    uint32 prop2 = 9;
+    uint32 nextLevelProp1 = 10;
+    uint32 nextLevelProp2 = 11;
+}
+
+message NxxBaseCardItem {
+    uint32 cardId = 1;
+    uint32 curExp = 2;
+    uint32 maxExp = 3;
+    uint32 canRewardNum = 4;
+}
+
+message MTPItem {
+    uint32 mtpId = 1;
+    string desc = 2;
+}
+
+message ChapterItem {
+    uint32 chapter = 1;
+    uint32 openType = 2;
+    int64 leftTime = 3;
+    int64 showLeftTime = 4;
+}
+
+message VipItem {
+    uint32 vipLevel = 1;
+    uint32 rewardStatus = 2;
+    uint32 recvUnixtime = 3;
+    repeated .pb.RewardDataItem rewardItems = 4;
+}
+
+message TotalRechargeVipItem {
+    uint32 vipLevel = 1;
+    uint32 rewardStatus = 2;
+    uint32 recvUnixtime = 3;
+    repeated .pb.RewardDataItem rewardItems = 4;
+}
+
+message TotalRechargeItem {
+    uint32 rechargeId = 1;
+    uint64 vipExp = 2;
+    uint32 vipLevel = 3;
+    repeated .pb.TotalRechargeVipItem vipItems = 4;
+    uint32 status = 6;
+    int64 leftTime = 7;
+}
+
+message HomeLandFurnitureItem {
+    uint32 furnitureId = 1;
+    uint32 isNew = 2;
+}
+
+message HomeLandRoomItem {
+    uint32 roomId = 1;
+    uint32 themeId = 2;
+    repeated .pb.HomeLandFurnitureItem furnitureItems = 3;
+}
+
+message HomeLandThemeItem {
+    uint32 themeId = 1;
+    repeated .pb.HomeLandFurnitureItem furnitureItems = 2;
+    float handbookProcess = 3;
+    int64 startTimeLeft = 4;
+}
+
+message RichManPropItem {
+    uint32 propType = 1;
+    uint32 materialId = 2;
+    int32 prop1 = 3;
+}
+
+message BattlePassLevelItem {
+    uint32 battlePassLevel = 1;
+    repeated .pb.RewardDataItem rewardItems = 2;
+    repeated uint32 rewardStatusArr = 3 [packed = true];
+    repeated .pb.RewardDataItem upgradeRewardItems = 4;
+    repeated uint32 upgradeRewardStatusArr = 5 [packed = true];
+    uint32 needExp = 6;
+    uint32 showStatus = 7;
+    uint32 upgradeShowStatus = 8;
+    uint32 isKeyLevel = 9;
+}
+
+message BattlePassPurchaseLevelRewardItem {
+    uint32 isKeyReward = 1;
+    .pb.RewardDataItem rewards = 2;
+}
+
+message BattlePassItem {
+    uint32 battlePassId = 1;
+    uint32 status = 2;
+    uint32 battlePassLevel = 3;
+    uint32 battlePassExp = 4;
+    repeated .pb.BattlePassLevelItem battlePassLevelInfo = 5;
+    uint32 leftTime = 6;
+    uint32 battlePassProductId = 7;
+    uint32 ycoinLevelBuy = 8;
+    uint32 hcoinLevelBuy = 9;
+    uint32 expMaterialId = 10;
+    uint32 battlePassEventId = 11;
+    uint32 openType = 12;
+    uint32 battlePassUpgradeStatus = 13;
+    uint32 battlePassPurchaseExpStatus = 14;
+    uint32 battlePassFullProductId = 15;
+    uint32 battlePassExpProductId = 16;
+    int64 expPerHCoin = 17;
+    uint32 noticeTime = 18;
+    repeated .pb.BattlePassPurchaseLevelRewardItem purchaseLevelRewards = 19;
+    repeated .pb.RewardDataItem purchaseFullRewards = 20;
+    uint32 battlePassType = 21;
+    uint32 eventScheduleId = 22;
+    uint32 discountBattlePassProductId = 23;
+    uint32 discountBattlePassFullProductId = 24;
+    uint32 prefabType = 25;
+}
+
+message TakeBattlePassRewardParam {
+    uint32 battlePassId = 1;
+    uint32 battlePassLevel = 2;
+    uint32 getReward = 3;
+    uint32 getUpgradeReward = 4;
+    uint32 getRewardIdx = 5;
+    uint32 getUpgradeRewardIdx = 6;
+}
+
+message TakeBattlePassRewardItem {
+    uint32 battlePassId = 1;
+    uint32 battlePassLevel = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+    repeated .pb.RewardDataItem upgradeRewardItems = 4;
+}
+
+message BoxGachaDataItem {
+    uint32 boxGachaItemId = 1;
+    .pb.RewardDataItem rewardItem = 2;
+    uint32 isKey = 3;
+    uint32 count = 4;
+    uint32 curCount = 5;
+    bool isSpecialShow = 6;
+}
+
+message BoxGachaHistoryItem {
+    uint32 boxGachaItemId = 1;
+    uint32 slot = 2;
+}
+
+message BoxGachaSubGroupItem {
+    uint32 boxGachaSubGroupId = 1;
+    uint32 preSubGroupId = 2;
+    uint32 status = 3;
+    repeated .pb.BoxGachaDataItem dataItems = 4;
+    repeated .pb.BoxGachaHistoryItem historyItems = 5;
+}
+
+message BoxGachaGroupItem {
+    uint32 boxGachaGroupId = 1;
+    uint32 boxGachaEventId = 2;
+    uint32 status = 3;
+    uint32 isKeyItemNextGacha = 4;
+    uint32 walletId = 5;
+    int32 walletNum = 6;
+    uint32 repeatedBoxGachaSubGroupId = 7;
+    repeated .pb.BoxGachaSubGroupItem subGroupItems = 8;
+    uint32 leftTime = 9;
+}
+
+message BoxGachaItem {
+    uint32 boxGachaItemId = 1;
+    repeated .pb.RewardDataItem rewardItems = 2;
+    uint32 isKey = 3;
+}
+
+message CardSkillId {
+    uint32 cardId = 1;
+    repeated uint32 skillIdList = 2 [packed = true];
+}
+
+message IslandResourceInfoItem {
+    uint32 resourceType = 1;
+    uint32 materialId = 2;
+}
+
+message IslandScheduleInfo {
+    uint32 scheduleId = 1;
+    uint32 openType = 2;
+    int64 startTime = 3;
+    int64 endTime = 4;
+    uint32 islandFarmId = 5;
+    uint32 facilityProjectId = 6;
+    repeated .pb.IslandResourceInfoItem resourceInfo = 7;
+    uint32 walletCoinId = 8;
+    uint32 landId = 9;
+    uint32 notebookId = 10;
+    repeated .pb.IslandClueItem clueList = 11;
+    int64 farmSpeedUpBeginTime = 12;
+    int64 farmSpeedUpEndTime = 13;
+    int64 showTime = 14;
+    int64 reviewTime = 15;
+}
+
+message IslandFarmRoleCollectInfoItem {
+    uint32 resourceType = 1;
+    int64 duration = 2;
+    uint32 unitResourceNum = 3;
+    uint32 isActive = 4;
+}
+
+message IslandFarmInfoItem {
+    uint32 roleId = 1;
+    int64 endLeftTime = 2;
+    uint32 resourceType = 3;
+    uint32 doneUnitNum = 4;
+    uint32 doneUnitLimit = 5;
+    repeated .pb.IslandResourceItem doneResourceList = 6;
+    int64 duration = 7;
+    repeated .pb.IslandFarmRoleCollectInfoItem roleCollectInfo = 8;
+}
+
+message IslandFarmAccInfo {
+    uint32 rate = 2;
+    uint32 staUsed = 3;
+    uint32 staLimit = 4;
+    int64 nextStaUsedRefresh = 5;
+    int64 startTime = 6;
+    int64 endTime = 7;
+}
+
+message IslandResourceItem {
+    uint32 resourceType = 1;
+    int32 num = 2;
+}
+
+message IslandFacilityInfoItem {
+    uint32 facilityId = 1;
+    uint32 level = 2;
+    uint32 maxLevel = 3;
+    .pb.IslandResourceItem upgradeCost = 4;
+    uint32 prop1 = 5;
+    uint32 nextProp1 = 6;
+    uint32 targetType = 7;
+    repeated uint32 resourceType = 8 [packed = true];
+    uint32 skillType = 9;
+    uint32 buffType = 10;
+}
+
+message IslandShopRewardItem {
+    uint32 id = 1;
+    repeated .pb.RewardDataItem reward = 2;
+    uint32 boughtNum = 3;
+    uint32 amountNum = 4;
+    repeated .pb.IslandResourceItem cost = 5;
+    uint32 ifHighlight = 6;
+}
+
+message IslandShopInfoItem {
+    uint32 rank = 1;
+    uint32 isUnlock = 2;
+    repeated .pb.IslandShopRewardItem itemList = 3;
+}
+
+message IslandSuddenEvent {
+    uint32 eventType = 1;
+    uint32 id = 2;
+    uint32 levelId = 3;
+}
+
+message IslandLandTileItem {
+    uint32 landTileId = 1;
+    uint32 tileStatus = 2;
+    uint32 siteStatus = 3;
+    uint32 siteType = 4;
+    uint32 levelId = 5;
+    uint32 mapId = 6;
+    uint32 siteOrderId = 8;
+    repeated uint32 missingClue = 9 [packed = true];
+    .pb.ExploreDegreeInfo exploreDegree = 10;
+    repeated .pb.IslandResourceItem unlockCost = 11;
+    .pb.IslandSuddenEvent suddenEvent = 12;
+}
+
+message IslandNotebookLevelItem {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    int64 firstPassTime = 3;
+}
+
+message IslandNotebookItem {
+    uint32 partId = 1;
+    repeated .pb.IslandNotebookLevelItem levelList = 2;
+}
+
+message IslandClueItem {
+    uint32 clueId = 1;
+    uint32 materialId = 2;
+    uint32 status = 3;
+}
+
+message IslandUnitRecordItem {
+    uint32 unitType = 1;
+    uint32 lastUnlockLandTileId = 2;
+    uint32 lastBattleLandTileId = 3;
+}
+
+message ExploreAction {
+    uint32 actionType = 1;
+    uint32 levelId = 2;
+    repeated uint32 rewardId = 3 [packed = true];
+    uint32 storyId = 4;
+    uint32 x = 5;
+    uint32 y = 6;
+    uint32 modelId = 7;
+    int32 rotate = 8;
+    uint32 mapId = 9;
+    uint32 waitSeconds = 10;
+    uint32 textId = 11;
+    uint32 missionId = 12;
+    uint32 animatId = 13;
+    uint32 audioId = 14;
+    uint32 triggerId = 15;
+    uint32 active = 16;
+    repeated .pb.RewardDataItem reward = 17;
+    uint32 seed = 18;
+    uint32 explorePointId = 19;
+    .pb.ExploreMissionItem missionItem = 20;
+    .pb.ExploreDegreeInfo degreeInfo = 21;
+    uint32 doorId = 22;
+    uint32 status = 23;
+    uint32 evidenceId = 24;
+    uint32 correct = 25;
+    uint32 changeType = 26;
+    uint32 pos = 28;
+    uint32 bornType = 29;
+    uint32 chessmanId = 30;
+    uint32 listId = 31;
+    repeated .pb.ExploreOptionItem optionList = 32;
+    .pb.ExploreTriggerLayerItem triggerItem = 33;
+    uint32 exploreEntranceId = 34;
+    uint32 roleId = 35;
+    uint32 idleId = 36;
+    uint32 gameType = 37;
+    uint32 gameLevel = 38;
+    repeated int32 miscParam = 39 [packed = true];
+}
+
+message ExploreOptionMissionItem {
+    uint32 missionId = 1;
+    uint32 status = 2;
+}
+
+message ExploreOptionItem {
+    uint32 listId = 1;
+    uint32 optionType = 2;
+    uint32 orderId = 3;
+    .pb.ExploreOptionMissionItem missionAdd = 4;
+    .pb.ExploreOptionMissionItem missionReward = 5;
+}
+
+message ExploreTriggerItem {
+    uint32 triggerId = 1;
+    bool active = 2;
+    uint32 mapId = 3;
+    uint32 isDynamic = 4;
+}
+
+message ExploreModelLayerItem {
+    uint32 pos = 1;
+    uint32 modelId = 2;
+    int32 rotate = 3;
+}
+
+message ExploreTriggerLayerItem {
+    uint32 triggerId = 1;
+    uint32 pos = 2;
+    uint32 active = 3;
+    repeated uint32 triggerTypeList = 4 [packed = true];
+    uint32 isKey = 5;
+    uint32 isDynamic = 6;
+    repeated uint32 missionAddIdList = 7 [packed = true];
+    repeated uint32 missionRewardIdList = 8 [packed = true];
+    uint32 enterToMapId = 9;
+    uint32 statusType = 10;
+    uint32 statusParam = 11;
+}
+
+message ExploreBarrierLayerItem {
+    uint32 pos = 1;
+    uint32 status = 2;
+}
+
+message ExploreTriggerIndex {
+    uint32 mapId = 1;
+    uint32 triggerId = 2;
+}
+
+message ExploreMissionItem {
+    uint32 missionId = 1;
+    uint32 isMainMission = 2;
+    uint32 missionType = 3;
+    uint32 progress = 4;
+    uint32 targetProgress = 5;
+    repeated .pb.RewardDataItem rewards = 6;
+    uint32 progressOnly = 7;
+    uint32 periodType = 8;
+    uint32 status = 9;
+    repeated .pb.ExploreTriggerIndex progressTriggerList = 10;
+    int64 unlockLeftTime = 11;
+    uint32 isNew = 12;
+}
+
+message ExploreMissionItemLua {
+    uint32 missionId = 1;
+    uint32 status = 2;
+}
+
+message ExploreMapDegreeItem {
+    uint32 mapId = 1;
+    uint32 donePoint = 2;
+    uint32 totalPoint = 3;
+}
+
+message ExploreDegreeInfo {
+    uint32 donePoint = 1;
+    uint32 totalPoint = 2;
+    repeated .pb.ExploreMapDegreeItem mapDegree = 3;
+}
+
+message ExploreDoorItem {
+    uint32 doorId = 1;
+    uint32 status = 2;
+}
+
+message ExploreGroupData {
+    uint32 group_ = 1; // JS name: group
+    repeated .pb.ExploreMissionItem missionList = 2;
+    .pb.ExploreDegreeInfo exploreDegree = 3;
+}
+
+message ExploreDynamicTriggerItem {
+    uint32 triggerId = 1;
+    uint32 mapId = 2;
+    uint32 pos = 3;
+}
+
+message ExploreDynamicTrigger {
+    repeated .pb.ExploreDynamicTriggerItem items = 1;
+}
+
+message ExploreTeamInfo {
+    repeated uint32 teammateList = 1 [packed = true];
+    uint32 showChessmanId = 2;
+}
+
+message ExploreEventData {
+    uint32 eventType = 1;
+    repeated .pb.ExploreDoorItem doorList = 2;
+    repeated uint32 visitedMapIdList = 3 [packed = true];
+    repeated .pb.ExploreGroupData groupList = 4;
+    repeated .pb.ExploreMissionItem globalMissionList = 5;
+    .pb.ExploreDynamicTrigger dynamicTrigger = 6;
+    repeated uint32 traceMissionId = 7 [packed = true];
+    .pb.ExploreTeamInfo team = 8;
+    repeated .pb.ExploreEntranceItem entranceList = 9;
+    repeated .pb.ExploreRoleItem roleList = 10;
+    repeated .pb.ExploreChapterData chapterList = 11;
+    repeated .pb.ExploreEventStatus eventStatusList = 12;
+}
+
+message ExploreEventStatus {
+    uint32 eventStatusType = 1;
+    uint32 param = 2;
+}
+
+message ExploreEventInfoData {
+    uint32 eventType = 1;
+    uint32 allMission = 2;
+    repeated .pb.ExploreMissionItem globalMissionList = 3;
+    uint32 allEntrance = 4;
+    repeated .pb.ExploreEntranceItem entranceList = 5;
+    uint32 allRole = 6;
+    repeated .pb.ExploreRoleItem roleList = 7;
+    uint32 allChapter = 8;
+    repeated .pb.ExploreChapterData chapterList = 9;
+    uint32 allEventStatus = 10;
+    repeated .pb.ExploreEventStatus eventStatusList = 11;
+}
+
+message ExploreChapterData {
+    uint32 chapterId = 1;
+    uint32 partId = 2;
+    uint32 partStatus = 3;
+    int64 openTimeLeft = 4;
+    uint32 initChapter = 5;
+}
+
+message ExploreMissionActiveItem {
+    uint32 missionId = 1;
+    uint32 eventType = 2;
+    repeated .pb.ExploreAction actionList = 3;
+    .pb.ExploreMissionItem missionItem = 4;
+}
+
+message ExploreHandleActionItem {
+    uint32 eventType = 1;
+    repeated .pb.ExploreAction actionList = 2;
+}
+
+message UrbanLegendWatchItem {
+    uint32 watchId = 1;
+    uint32 status = 2;
+}
+
+message UrbanLegendTruthItem {
+    uint32 truthId = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message UrbanLegendClueItem {
+    uint32 clueId = 1;
+    uint32 status = 2;
+    int64 lastPickTime = 3;
+    int64 gotUnixTime = 4;
+    uint32 choiceId = 5;
+}
+
+message UrbanLegendNpcTalkItem {
+    uint32 npcTalkId = 1;
+    uint32 status = 2;
+}
+
+message UrbanLegendTaskGroupItem {
+    uint32 taskGroupId = 1;
+    int64 leftTime = 2;
+    uint32 requiredTruthId = 3;
+    uint32 inLock = 4;
+}
+
+message UrbanLegendItem {
+    uint32 eventId = 1;
+    uint32 status = 2;
+    uint32 leftTime = 3;
+    uint32 curTaskGroupId = 4;
+    uint32 taskDataAll = 5;
+    repeated .pb.TaskItem taskItemList = 6;
+    uint32 watchDataAll = 7;
+    repeated .pb.UrbanLegendWatchItem watchItemList = 8;
+    uint32 truthDataAll = 9;
+    repeated .pb.UrbanLegendTruthItem truthItemList = 10;
+    uint32 clueDataAll = 11;
+    repeated .pb.UrbanLegendClueItem clueItemList = 12;
+    int64 nextTaskOpenLeftTime = 13;
+    uint32 npcTalkDataAll = 14;
+    repeated .pb.UrbanLegendNpcTalkItem npcTalkItemList = 15;
+    repeated .pb.UrbanLegendTaskGroupItem taskGroupItemList = 16;
+}
+
+message OldPlayerReturnItem {
+    uint32 eventId = 1;
+    uint32 status = 2;
+    uint32 leftTime = 3;
+    uint32 curTaskGroupId = 4;
+    uint32 taskDataAll = 5;
+    repeated .pb.TaskItem taskItemList = 6;
+    int64 nextTaskOpenLeftTime = 7;
+    int64 startTime = 8;
+    uint32 openDay = 9;
+    int64 leaveTime = 10;
+    int64 registTime = 11;
+    repeated .pb.OldPlayerSelectBingoItem bingoList = 12;
+    .pb.OldPlayerSelectBingoItem selectBingo = 14;
+    uint32 selectGacha = 15;
+    repeated .pb.RewardDataItem rewardItems = 16;
+    uint32 selectLongtermMr = 17;
+    repeated uint32 longtermMrIdList = 18 [packed = true];
+}
+
+message OldPlayerSelectBingoItem {
+    uint32 bingoId = 1;
+    uint32 roleId = 2;
+    .pb.RewardDataItem rewardItem = 3;
+}
+
+message AnnounceInfoItem {
+    uint32 announceId = 1;
+    string centerSystemText = 2;
+    string deepConfirmText = 3;
+    string countDownText = 4;
+    uint32 centerSystemFrequency = 5;
+    uint32 countDownFrequency = 7;
+    int64 leftTime = 8;
+    uint32 isRollFrequencyNotify = 9;
+}
+
+message ShowBattlePassItemParam {
+    uint32 battlePassId = 1;
+    uint32 battlePassLevel = 2;
+    uint32 showStatus = 3;
+    uint32 upgradeShowStatus = 4;
+}
+
+message FundLevelItem {
+    uint32 fundLevel = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message FundInfoItem {
+    uint32 fundId = 1;
+    uint32 isActive = 2;
+    repeated .pb.FundLevelItem levelItem = 3;
+}
+
+message IcelandScheduleInfo {
+    uint32 scheduleId = 1;
+    uint32 openType = 2;
+    int64 startTime = 3;
+    int64 endTime = 4;
+    int64 showTime = 5;
+    int64 reviewTime = 6;
+    uint32 walletCoinId = 7;
+    uint32 icelandId = 8;
+    uint32 isFuncOpen = 9;
+}
+
+message IcelandSceneInteractItem {
+    uint32 interactId = 1;
+    uint32 interactType = 2;
+    uint32 npcId = 3;
+    uint32 spotId = 4;
+    uint32 siteId = 5;
+    uint32 isShow = 6;
+    uint32 siteUniqId = 7;
+    uint32 levelId = 8;
+    uint32 storyId = 9;
+    repeated uint32 showFlagType = 10 [packed = true];
+    repeated uint32 siteUnlockFlagType = 11 [packed = true];
+}
+
+message IcelandStoryRollItem {
+    uint32 id = 1;
+    uint32 npcId = 2;
+    uint32 randomPart = 3;
+    uint32 storyId = 4;
+    uint32 spotId = 5;
+    uint32 isNew = 6;
+}
+
+message IcelandSceneItem {
+    uint32 sceneId = 1;
+    repeated .pb.IcelandSceneInteractItem interactList = 2;
+    uint32 interactDataAll = 3;
+    repeated .pb.IcelandStoryRollItem storyRollList = 4;
+    uint32 storyRollDataAll = 5;
+}
+
+message IcelandJobItem {
+    uint32 jobId = 1;
+    uint32 npcId = 2;
+    uint32 status = 3;
+    repeated .pb.RewardDataItem reward = 5;
+    repeated .pb.RewardDataItem trustReward = 6;
+    repeated .pb.RewardDataItem reputationReward = 7;
+}
+
+message IcelandJobGroup {
+    uint32 jobType = 1;
+    repeated .pb.IcelandJobItem jobList = 2;
+    uint32 dataAll = 3;
+}
+
+message IcelandNotebookStoryItem {
+    uint32 storyId = 1;
+    uint32 status = 2;
+    int64 firstPassTime = 3;
+}
+
+message IcelandNotebookItem {
+    uint32 partId = 1;
+    repeated .pb.IcelandNotebookStoryItem storyList = 2;
+}
+
+message IcelandNPCItem {
+    uint32 npcId = 1;
+    uint32 trustLevel = 2;
+    uint32 trustExp = 3;
+    uint32 trustMaxExp = 4;
+}
+
+message IcelandNPCInfo {
+    uint32 dataAll = 1;
+    repeated .pb.IcelandNPCItem npcList = 2;
+}
+
+message IcelandReputationLevelItem {
+    uint32 level = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem reward = 3;
+}
+
+message IcelandReputation {
+    uint32 level = 1;
+    uint32 exp = 2;
+    uint32 maxExp = 3;
+    uint32 dataAll = 4;
+    repeated .pb.IcelandReputationLevelItem levelList = 5;
+}
+
+message IcelandChallengeInfo {
+    uint32 turn = 1;
+    uint32 levelId = 2;
+    int64 bossHp = 3;
+    int64 bossMaxHp = 4;
+    map<uint32, int64> voiceHp = 5;
+    repeated .pb.RewardDataItem rewards = 6;
+    uint32 seed = 7;
+    repeated .pb.RewardDataItem turnEndRewards = 8;
+    uint32 turnEndStoryId = 9;
+}
+
+message IcelandChessmanItem {
+    uint32 chessmanId = 1;
+    uint32 roleId = 2;
+    uint32 isLock = 3;
+}
+
+message IcelandRoleInfo {
+    uint32 unlockMaterialId = 1;
+    repeated .pb.IcelandChessmanItem chessmanList = 2;
+}
+
+message GridItemInfo {
+    uint32 gridId = 1;
+    uint32 gridState = 2;
+    .pb.RewardDataItem rewardItem = 3;
+}
+
+message LineItemInfo {
+    uint32 lineId = 1;
+    uint32 lineRewardState = 2;
+    .pb.RewardDataItem lineRewardItem = 3;
+}
+
+message BingoItemInfo {
+    .pb.RewardDataItem rewardItem = 1;
+    uint32 roleId = 2;
+    uint32 rewardState = 3;
+    repeated .pb.GridItemInfo gridList = 4;
+    repeated .pb.LineItemInfo lineList = 5;
+}
+
+message TrainLineBriefInfo {
+    uint32 lineId = 1;
+    uint32 status = 2;
+    repeated uint32 productId = 3 [packed = true];
+}
+
+message TrainInviteCardInfo {
+    uint32 status = 1;
+    int64 discountEndTimeLeft = 2;
+}
+
+message TrainVipTicketInfo {
+    uint32 status = 1;
+    int64 openTimeLeft = 2;
+    uint32 shopId = 3;
+    uint32 shopItemId = 4;
+}
+
+message TrainScheduleInfo {
+    uint32 scheduleId = 1;
+    int64 startTimeLeft = 2;
+    int64 endTimeLeft = 3;
+    int64 showTimeLeft = 4;
+    int64 reviewTimeLeft = 5;
+    repeated .pb.TrainLineBriefInfo lineList = 6;
+    uint32 curLineId = 7;
+    repeated uint32 finalTask = 8 [packed = true];
+    .pb.TrainInviteCardInfo inviteCard = 9;
+    .pb.TrainVipTicketInfo vipTicket = 10;
+}
+
+message TrainTalkItem {
+    uint32 talkId = 1;
+    uint32 status = 2;
+}
+
+message TrainTalkData {
+    uint32 dataAll = 1;
+    repeated .pb.TrainTalkItem talkList = 2;
+}
+
+message TrainStationLevelItem {
+    uint32 stationId = 1;
+    uint32 levelId = 2;
+    uint32 status = 3;
+}
+
+message TrainStationItem {
+    uint32 stationId = 1;
+    uint32 status = 2;
+    repeated .pb.TrainStationLevelItem levelList = 3;
+    repeated .pb.RewardDataItem reward = 4;
+    int64 spotCrowdParameter = 5;
+    uint32 startSpotLevel = 6;
+    uint32 endSpotLevel = 7;
+}
+
+message TrainStationPageItem {
+    uint32 pageId = 1;
+    int64 startTimeLeft = 2;
+    int64 endTimeLeft = 3;
+    repeated uint32 stationIdList = 4 [packed = true];
+}
+
+message TrainStationPageData {
+    uint32 dataAll = 1;
+    repeated .pb.TrainStationPageItem pageList = 2;
+}
+
+message TrainLineRandomEventData {
+    uint32 currLevelId = 1;
+}
+
+message TrainStationData {
+    uint32 dataAll = 1;
+    repeated .pb.TrainStationItem stationList = 2;
+    .pb.TrainLineRandomEventData randomEvent = 3;
+    uint32 enterLineLevel = 4;
+    uint32 finishLineLevel = 5;
+}
+
+message ReputationEnergyInfo {
+    uint32 scheduleId = 1;
+    uint32 energyNow = 2;
+    uint32 energyMax = 3;
+    uint32 purchasePrice = 4;
+    uint32 purchaseItem = 5;
+    uint32 purchaseNum = 6;
+    uint32 purchaseCount = 7;
+    uint32 purchaseLimit = 8;
+}
+
+message ReputationScheduleInfo {
+    uint32 scheduleId = 1;
+    int64 startTimeLeft = 2;
+    int64 endTimeLeft = 3;
+    int64 showTimeLeft = 4;
+    repeated uint32 districtIdList = 5 [packed = true];
+    repeated uint32 bossCoinId = 6 [packed = true];
+    .pb.ReputationEnergyInfo energy = 7;
+    repeated uint32 shopId = 8 [packed = true];
+    uint32 autoBattleLimit = 9;
+    uint32 autoBattleStaminaCost = 10;
+    repeated uint32 autoBattleCoinId = 11 [packed = true];
+    uint32 autoBattleCoinNum = 12;
+    uint32 openType = 13;
+}
+
+message ReputationSiteBossInfo {
+    int64 bossHp = 1;
+    int64 bossMaxHp = 2;
+    map<uint32, int64> voiceHp = 3;
+}
+
+message ReputationSiteItem {
+    uint32 siteId = 1;
+    uint32 siteType = 2;
+    uint32 energyConsume = 3;
+    uint32 levelId = 4;
+    uint32 status = 5;
+    uint32 locationId = 6;
+    uint32 seed = 7;
+    .pb.ReputationSiteBossInfo bossInfo = 8;
+    int64 leftTime = 9;
+    uint32 battleCount = 10;
+    int64 battleTimeLimit = 11;
+}
+
+message ReputationGradeItem {
+    uint32 grade = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem reward = 3;
+    uint32 starShow = 4;
+}
+
+message ReputationSiteInfo {
+    uint32 dataAll = 1;
+    repeated .pb.ReputationSiteItem siteList = 2;
+    uint32 refreshPurchase = 3;
+    uint32 purchaseTimesNow = 4;
+    uint32 purchaseTimesMax = 5;
+    uint32 siteBattleWinCount = 6;
+    int64 nextRefreshLeftTime = 7;
+}
+
+message ReputationGradeInfo {
+    uint32 curGrade = 1;
+    uint32 curExp = 2;
+    uint32 maxExp = 3;
+    uint32 dataAll = 4;
+    repeated .pb.ReputationGradeItem gradeList = 5;
+}
+
+message ReputationDistrictInfo {
+    uint32 scheduleId = 1;
+    uint32 districtId = 2;
+    uint32 hasSiteInfo = 3;
+    .pb.ReputationSiteInfo siteInfo = 4;
+    uint32 hasGradeInfo = 5;
+    .pb.ReputationGradeInfo gradeInfo = 6;
+    uint32 lastWinBossSiteId = 7;
+}
+
+message ReputationDistrictTypeInfo {
+    uint32 districtType = 1;
+    uint32 currentLevel = 2;
+    uint32 selectLevel = 3;
+    uint32 maxLevel = 4;
+}
+
+message ReputationBattleQuizChoiceItem {
+    uint32 quizId = 1;
+    uint32 choice = 2;
+}
+
+message ItemExcessDecomposeInfo {
+    uint32 fromRewardType = 1;
+    uint32 fromItemId = 2;
+    uint32 fromItemLevel = 3;
+    uint32 fromItemNum = 4;
+    .pb.RewardDataItem toReward = 5;
+    uint32 ruleId = 6;
+}
+
+message ItemExcessData {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    int64 curNum = 3;
+    int64 maxNum = 4;
+}
+
+message PhonePaidCallItem {
+    uint32 paidTimeId = 1;
+    uint32 status = 2;
+}
+
+message GachaAccumRewardItem {
+    uint32 progressId = 1;
+    uint32 progressNum = 2;
+    uint32 status = 3;
+    repeated .pb.RewardDataItem rewards = 4;
+    uint32 isCore = 5;
+}
+
+message GachaAccumConsumeInfo {
+    int32 nextRewardNum = 1;
+    uint32 consumeNum = 2;
+    uint32 totalNum = 3;
+    repeated .pb.RewardDataItem insteadReward = 4;
+    uint32 totalLimitNum = 5;
+}
+
+message GachaAccumItem {
+    uint32 accumId = 1;
+    uint32 curNum = 2;
+    repeated .pb.GachaAccumRewardItem rewardItems = 3;
+    uint32 accumSettleType = 4;
+    .pb.GachaAccumConsumeInfo info = 5;
+}
+
+message ExploreGlobalOptionItem {
+    uint32 optionId = 1;
+    uint32 value = 2;
+}
+
+message AchievementRewardItem {
+    uint32 id = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+    uint32 num = 4;
+}
+
+message AchievementInfoItem {
+    uint32 achieveType = 1;
+    uint32 totalNum = 2;
+    uint32 doneNum = 3;
+}
+
+message AnniversaryInfoItem {
+    uint32 scheduleId = 1;
+    int64 startTimeLeft = 2;
+    int64 endTimeLeft = 3;
+    int64 showTimeLeft = 4;
+    int64 reviewTimeLeft = 5;
+    uint32 maleRole = 6;
+    uint32 gameProjectId = 7;
+}
+
+message AnniversaryGameRewardItem {
+    uint32 rewardStatus = 1;
+    repeated .pb.RewardDataItem rewardItems = 2;
+}
+
+message AnniversaryGameLevelInfo {
+    uint32 level = 1;
+    uint32 maxScore = 2;
+    uint32 totalScore = 3;
+    uint32 scoreLimit = 4;
+    uint32 openLeftTime = 5;
+    map<uint32, .pb.AnniversaryGameRewardItem> rewards = 6;
+}
+
+message AnniversaryGameInfo {
+    uint32 gameId = 1;
+    map<uint32, .pb.AnniversaryGameLevelInfo> gameLevelInfo = 2;
+}
+
+message AnniversaryGameQuizData {
+    uint32 levelId = 1;
+    uint32 role = 2;
+    uint32 curQuestionId = 3;
+    uint32 curIdx = 4;
+    uint32 totalScore = 5;
+    uint32 curScore = 6;
+}
+
+message PokerJokerData {
+    uint32 jokerStatus = 1;
+    uint32 jokerMaxNum = 2;
+    uint32 jokerCurNum = 3;
+    uint32 jokerScore = 4;
+}
+
+message AnniversaryPokerData {
+    uint32 levelId = 1;
+    uint32 roleId = 2;
+    uint32 showNum = 3;
+    uint32 showDecor = 4;
+    uint32 curScore = 5;
+    uint32 curTurn = 6;
+    .pb.PokerJokerData jokerData = 7;
+}
+
+message AnniversaryPokerResult {
+    uint32 rightTurnNum = 1;
+    uint32 rightAddScore = 2;
+    uint32 falseCutScore = 3;
+    uint32 baseScore = 4;
+    uint32 additionalScore = 5;
+    uint32 jokerScore = 6;
+}
+
+message AnniversaryPaintingData {
+    uint32 mapId = 1;
+    uint32 gridNum = 2;
+    uint32 arrivedEndNum = 3;
+    uint32 bonusScore = 4;
+    uint32 totalScore = 5;
+}
+
+message AnniversarySeniorShopPhaseData {
+    uint32 phaseId = 1;
+    uint32 rewardStatus = 2;
+    repeated .pb.RewardDataItem phaseRewards = 3;
+}
+
+message AnniversarySeniorShopData {
+    repeated .pb.AnniversarySeniorShopPhaseData phase = 1;
+}
+
+message AnniversaryTaskData {
+    uint32 phaseId = 1;
+    int64 openTimeLeft = 2;
+}
+
+message AnniversaryChapterData {
+    uint32 chapterId = 1;
+    uint32 chapterStatus = 2;
+    int64 openTimeLeft = 3;
+}
+
+message RankItemInfoData {
+    uint32 rank = 1;
+    uint32 point = 2;
+    .pb.PlayerDetailItem playerInfo = 3;
+}
+
+message Birthday2021ScheduleData {
+    uint32 scheduleId = 1;
+    int64 showTimeLeft = 2;
+    int64 beginTimeLeft = 3;
+    int64 endTimeLeft = 4;
+    int64 reviewTimeLeft = 5;
+}
+
+message Birthday2021IncidentData {
+    uint32 incidentId = 1;
+    uint32 incidentPosition = 2;
+}
+
+message Birthday2021DateData {
+    uint32 dateId = 1;
+    uint32 dateStatus = 2;
+    uint32 wishId = 3;
+    int64 dateLeftTime = 4;
+    int64 incidentRefreshLeftTime = 5;
+    uint32 refreshIncidentNum = 6;
+    repeated .pb.Birthday2021IncidentData randomIncidents = 7;
+}
+
+message Birthday2021WishData {
+    uint32 wishId = 1;
+    int64 unlockTimeLeft = 2;
+    uint32 wishState = 3;
+    uint32 dateNum = 4;
+    .pb.Birthday2021DateData currentDate = 5;
+}
+
+message Birthday2021BattleData {
+    uint32 lastNum = 1;
+    int64 lastTime = 2;
+}
+
+message DLCData {
+    uint32 dlcId = 1;
+    uint32 dlcStatus = 2;
+    uint32 isNew = 3;
+}
+
+message LevelSkipRewardData {
+    uint32 expEarn = 1;
+    int64 scoinEarn = 2;
+    uint32 isLevelUp = 3;
+    uint32 cardExp = 4;
+    repeated .pb.RewardDataItem dropItems = 5;
+}
+
+message PersonalRPGScheduleData {
+    uint32 scheduleId = 1;
+    int64 showTimeLeft = 2;
+    int64 beginTimeLeft = 3;
+    int64 endTimeLeft = 4;
+    int64 reviewTimeLeft = 5;
+}
+
+message PersonalRPGTaskData {
+    uint32 phaseId = 1;
+    int64 openTimeLeft = 2;
+}
+
+message ExploreEntranceItem {
+    uint32 entranceId = 1;
+    uint32 status = 2;
+    uint32 timeStatus = 3;
+    int64 openLastTime = 4;
+    int64 closeLastTime = 5;
+}
+
+message ExploreRoleItem {
+    uint32 roleId = 1;
+    uint32 locate = 2;
+}
+
+message PersonalRPGStoryItem {
+    uint32 partId = 1;
+    uint32 storyId = 2;
+    uint32 storyStatus = 3;
+}
+
+message PersonalRPGRoleChapterItem {
+    uint32 chapterId = 1;
+    uint32 partId = 2;
+    int64 openTimeLeft = 3;
+}
+
+message PersonalRPGRoleEpisodeItem {
+    uint32 episodeId = 1;
+    int64 openTimeLeft = 2;
+}
+
+message EgyptScheduleItem {
+    uint32 scheduleId = 1;
+    int64 showTime = 2;
+    int64 beginTime = 3;
+    int64 endTime = 4;
+    int64 reviewTime = 5;
+    uint32 openType = 6;
+    uint32 status = 7;
+}
+
+message TaskPhaseItem {
+    uint32 phaseId = 1;
+    int64 openTimeLeft = 2;
+}
+
+message EgyptGradeDataItem {
+    uint32 grade = 1;
+    uint32 exp = 2;
+    uint32 giftSkillPoint = 3;
+}
+
+message EgyptChapterDataItem {
+    uint32 chapterId = 1;
+    uint32 chapterStatus = 2;
+    int64 openTimeLeft = 3;
+}
+
+message EgyptMapItem {
+    uint32 itemId = 1;
+    uint32 itemType = 2;
+    uint32 position = 3;
+    uint32 status = 4;
+    uint32 itemNum = 5;
+}
+
+message EgyptMapTools {
+    uint32 toolsId = 1;
+    uint32 toolsStatus = 2;
+    uint32 useNum = 3;
+}
+
+message EgyptMapLucky {
+    uint32 luckyId = 1;
+    uint32 triggerNum = 2;
+}
+
+message EgyptDiscoveryData {
+    uint32 levelId = 1;
+    uint32 levelMapType = 2;
+    uint32 mapId = 3;
+    uint32 score = 4;
+    uint32 energy = 5;
+    uint32 costEnergy = 6;
+    uint32 playerPosition = 7;
+    uint32 playerAngle = 8;
+    uint32 exitPosition = 9;
+    uint32 allMapItems = 10;
+    repeated .pb.EgyptMapItem rockItems = 11;
+    repeated .pb.EgyptMapItem treasureItems = 12;
+    repeated .pb.EgyptMapItem luckItems = 13;
+    repeated .pb.EgyptMapItem toolsItems = 14;
+    repeated .pb.EgyptMapTools effectTools = 15;
+    repeated .pb.EgyptGiftSkillData effectGift = 16;
+    repeated .pb.EgyptMapLucky effectLucky = 17;
+}
+
+message EgyptDiscoveryOperateData {
+    uint32 operateType = 1;
+    uint32 playerPosition = 2;
+    uint32 playerAngle = 3;
+    repeated .pb.EgyptMapItem target = 4;
+    repeated uint32 useSkill = 5 [packed = true];
+}
+
+message EgyptDiscoveryOperateResult {
+    int32 energyChange = 1;
+    uint32 addScore = 2;
+    repeated uint32 effectTools = 3 [packed = true];
+    repeated uint32 effectGiftSkill = 4 [packed = true];
+    repeated uint32 effectLucky = 5 [packed = true];
+    uint32 getLucky = 6;
+}
+
+message EgyptMainData {
+    uint32 selectRole = 1;
+    uint32 totalExp = 2;
+    uint32 totalCoin = 3;
+    uint32 curLevel = 4;
+}
+
+message EgyptPhaseData {
+    uint32 phaseId = 1;
+    int64 openTimeLeft = 2;
+}
+
+message EgyptResultDataItem {
+    uint32 num = 1;
+    uint32 score = 2;
+    uint32 giftAdd = 3;
+}
+
+message EgyptResultData {
+    uint32 exp = 1;
+    uint32 coinNum = 2;
+    .pb.EgyptResultDataItem level = 3;
+    .pb.EgyptResultDataItem lowRock = 4;
+    .pb.EgyptResultDataItem middleRock = 5;
+    .pb.EgyptResultDataItem hightRock = 6;
+    .pb.EgyptResultDataItem treasure = 7;
+}
+
+message EgyptGiftSkillData {
+    uint32 skillId = 1;
+    uint32 skillLevel = 2;
+    uint32 isUnlock = 3;
+    uint32 needPoint = 4;
+    uint32 useNum = 5;
+}
+
+message TaskPhaseDataItem {
+    uint32 scheduleId = 1;
+    uint32 phaseId = 2;
+    int64 openTimeLeft = 3;
+}
+
+message EgyptGalleryDataItem {
+    uint32 pageId = 1;
+    uint32 pageRewardStatus = 2;
+    repeated .pb.RewardDataItem rewards = 3;
+}
+
+message BigInvestNpcItem {
+    uint32 npcId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestOptionItem {
+    uint32 optionId = 1;
+    uint32 status = 2;
+    uint32 optionRequire = 3;
+}
+
+message BigInvestEventItem {
+    uint32 triggerId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestKeyPointItem {
+    uint32 keyPointId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestObserveItem {
+    uint32 observeId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestLocationItem {
+    uint32 locationId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestAreaItem {
+    uint32 areaId = 1;
+    uint32 status = 2;
+}
+
+message BigInvestLevelItem {
+    uint32 bigInvestId = 1;
+    uint32 status = 2;
+    repeated .pb.BigInvestAreaItem areaInfo = 3;
+    repeated .pb.BigInvestLocationItem locationInfo = 4;
+    repeated .pb.BigInvestObserveItem observeInfo = 5;
+    repeated .pb.BigInvestNpcItem npcInfo = 6;
+    repeated .pb.BigInvestOptionItem optionInfo = 7;
+    repeated .pb.BigInvestEventItem eventInfo = 8;
+    repeated .pb.BigInvestKeyPointItem keyPointInfo = 9;
+}
+
+message NegotiationTopicGroupItem {
+    uint32 topicGroupId = 1;
+    uint32 isRead = 2;
+}
+
+message NegotiationRewardItem {
+    uint32 negotiationRewardId = 1;
+    uint32 levelProgress = 2;
+    repeated .pb.RewardDataItem rewards = 3;
+    uint32 rewardStatus = 4;
+}
+
+message NegotiationLevelItem {
+    uint32 negotiationLevelId = 1;
+    repeated .pb.NegotiationTopicGroupItem topicGroupItems = 2;
+    repeated .pb.NegotiationRewardItem rewardItems = 3;
+    uint32 currentTopicProgress = 4;
+}
+
+message RankStatusInfo {
+    uint32 status = 1;
+}
+
+message GeneralActivityPhaseData {
+    uint32 phaseId = 1;
+    int64 startTimeLeft = 2;
+}
+
+message GeneralActivityRewardPreviewItem {
+    uint32 previewId = 1;
+    .pb.RewardDataItem reward = 2;
+    uint32 progress = 3;
+    uint32 maxProgress = 4;
+}
+
+message GeneralActivityData {
+    uint32 activityId = 1;
+    uint32 scheduleId = 2;
+    uint32 openType = 3;
+    uint32 openStatus = 4;
+    int64 showTimeLeft = 5;
+    int64 beginTimeLeft = 6;
+    int64 endTimeLeft = 7;
+    int64 reviewTimeLeft = 8;
+    uint32 selectRoleId = 9;
+    uint32 phaseProjectId = 10;
+    uint32 shopProjectId = 11;
+    uint32 taskPhaseProjectId = 12;
+    uint32 walletId = 13;
+    repeated .pb.GeneralActivityPhaseData phaseData = 14;
+    int64 invitationDiscountLeftTime = 15;
+    string miscData = 16;
+    uint32 boxgachaGroupId = 17;
+    repeated .pb.GeneralActivityRewardPreviewItem previewItems = 18;
+    uint32 rewardPreviewExpand = 19;
+    repeated uint32 progressRewardId = 20 [packed = true];
+    uint32 newPhase = 21;
+    uint32 newMessageModuleId = 22;
+    uint32 isDlc = 23;
+}
+
+message AncientGameLevelData {
+    uint32 levelId = 1;
+    uint32 levelStatus = 2;
+    uint32 getAllCollection = 3;
+    uint32 getAllTreasure = 4;
+    repeated .pb.RewardDataItem reward = 5;
+}
+
+message AncientThemeData {
+    uint32 themeId = 1;
+    uint32 themeStatus = 2;
+    int64 startTimeLeft = 3;
+    uint32 progress = 4;
+    repeated .pb.AncientGameLevelData levelData = 5;
+    repeated .pb.RewardDataItem themeFinishReward = 6;
+}
+
+message AncientCollentData {
+    repeated uint32 collection = 1 [packed = true];
+    repeated uint32 treasure = 2 [packed = true];
+}
+
+message AncientWingRoomData {
+    uint32 roomId = 1;
+    uint32 roomStateId = 2;
+    uint32 roomStatus = 3;
+    uint32 failedNum = 4;
+}
+
+message AncientProcess {
+    uint32 allThemeProcess = 1;
+    uint32 rewardStatus = 2;
+    repeated .pb.RewardDataItem reward = 3;
+}
+
+message AncientGameTreasure {
+    uint32 treasureId = 1;
+    repeated .pb.RewardDataItem reward = 2;
+}
+
+message AnyActionData {
+    repeated .pb.RewardDataItem reward = 1;
+    repeated uint32 actionId = 2 [packed = true];
+    repeated string stringInfo = 3;
+}
+
+message PersonalRPGIdleItem {
+    uint32 idleId = 1;
+    uint32 status = 2;
+    uint32 eventType = 3;
+    int64 beginLeftTime = 4;
+    int64 endLeftTime = 5;
+    int64 curIdleLeftTime = 6;
+    int64 speedUpBeginLeftTime = 7;
+    repeated uint32 readyStory = 8 [packed = true];
+    repeated uint32 allGetStory = 9 [packed = true];
+}
+
+message BlindBoxItem {
+    uint32 boxId = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem reward = 3;
+}
+
+message BlindBoxGiftItem {
+    uint32 giftId = 1;
+    int64 leftTime = 2;
+}
+
+message BlindBoxRecord {
+    uint32 activityId = 1;
+    uint32 groupId = 2;
+    repeated .pb.BlindBoxItem boxList = 3;
+    uint32 finalRewardFlag = 4;
+    repeated .pb.RewardDataItem finalReward = 5;
+    .pb.BlindBoxGiftItem gift = 6;
+}
+
+message PetActivityNeedTaskData {
+    uint32 id = 1;
+    uint32 status = 2;
+    uint32 progress = 3;
+}
+
+message PetActivityTranslatorData {
+    uint32 translatorId = 1;
+    uint32 level = 2;
+    int64 needTaskRefreshLeftTime = 3;
+    repeated .pb.PetActivityNeedTaskData taskList = 4;
+    uint32 finishedTaskNum = 5;
+    uint32 status = 6;
+}
+
+message PetActivityFoodData {
+    uint32 interactionGroupId = 1;
+    uint32 interactionId = 2;
+    int64 remainEatLeftTime = 3;
+    uint32 notEatNum = 4;
+    int64 quickEatHcoinCost = 5;
+}
+
+message PetActivityOutsideData {
+    int64 restLeftTime = 1;
+    uint32 skipRestNum = 2;
+    uint32 levelId = 3;
+    uint32 storyLevelLeftRound = 4;
+    int64 skipLimitChangeLeftTime = 5;
+    uint32 skipRestLimit = 6;
+}
+
+message PetActivityMemoryData {
+    uint32 memoryGroupId = 1;
+    uint32 memoryId = 2;
+    uint32 status = 3;
+    repeated .pb.RewardDataItem rewards = 4;
+}
+
+message PetActivityTrustLimitData {
+    uint32 trustLimitGroupId = 1;
+    int32 currentTrust = 2;
+}
+
+message PetActivityRoleData {
+    uint32 roleId = 1;
+    uint32 stomach = 2;
+    uint32 bodyClean = 3;
+    int32 totalTrust = 4;
+    uint32 petLevel = 5;
+    uint32 hungerStatus = 6;
+    int64 hungerDownLeftTime = 7;
+    uint32 roleStatus = 8;
+    repeated uint32 bubbleIndex = 9 [packed = true];
+    uint32 hasFoodData = 10;
+    .pb.PetActivityFoodData foodData = 11;
+    uint32 hasTranslatorData = 12;
+    .pb.PetActivityTranslatorData translatorData = 13;
+    uint32 hasOutsideData = 14;
+    .pb.PetActivityOutsideData outsideData = 15;
+    uint32 hasMemoryData = 16;
+    repeated .pb.PetActivityMemoryData memoryData = 17;
+    uint32 hasTrustLimitData = 18;
+    repeated .pb.PetActivityTrustLimitData trustLimitData = 19;
+}
+
+message StoryReleaseFunction {
+    uint32 functionId = 1;
+    float prop = 2;
+}
+
+message StoryReleaseBuffData {
+    repeated .pb.StoryReleaseFunction functions = 1;
+}
+
+message StoryReleasePuzzleData {
+    uint32 puzzleId = 1;
+    uint32 photoId = 2;
+    repeated uint32 materialId = 3 [packed = true];
+    uint32 rewardFlag = 4;
+}
+
+message StoryReleaseRecord {
+    uint32 scheduleId = 1;
+    uint32 storyReleaseEventId = 2;
+    uint32 hasBuffData = 3;
+    .pb.StoryReleaseBuffData buff = 4;
+    uint32 hasPuzzleData = 5;
+    .pb.StoryReleasePuzzleData puzzle = 6;
+    int64 leftTime = 7;
+    int64 beginTime = 8;
+    uint32 phaseId = 9;
+    uint32 phaseStatus = 10;
+    repeated int64 phaseTimestamps = 11 [packed = true];
+}
+
+message Anniversary2ndGameLevelData {
+    uint32 gameId = 1;
+    uint32 levelId = 2;
+    uint32 score = 3;
+    uint32 gameStatus = 4;
+}
+
+message Anniversary2ndBoothData {
+    uint32 boothId = 1;
+    uint32 status = 2;
+    repeated .pb.Anniversary2ndGameLevelData gameData = 3;
+}
+
+message Anniversary2ndParkData {
+    uint32 parkId = 1;
+    uint32 status = 2;
+    int64 openTimeLeft = 3;
+    repeated .pb.Anniversary2ndBoothData boothData = 4;
+}
+
+message Anniversary2ndRandomEventData {
+    uint32 randomEventId = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem reward = 3;
+}
+
+message MiniGameLoopWaveDataItem {
+    uint32 waveId = 1;
+    repeated uint32 elementId = 2 [packed = true];
+    uint32 isCombo = 3;
+}
+
+message MiniGamePostcardData {
+    uint32 npcId = 1;
+    repeated uint32 roleId = 2 [packed = true];
+    .pb.MiniGamePostcardNpcData npcData = 3;
+}
+
+message MiniGamePostcardNpcData {
+    uint32 lastOptionText = 1;
+    uint32 lastBackground = 2;
+    uint32 lastTypesetting = 3;
+}
+
+message MiniGameScrabbleData {
+    uint32 subLevel = 1;
+    repeated uint32 answer = 2 [packed = true];
+    uint32 isHint = 3;
+    uint32 isOverTime = 4;
+}
+
+message MiniGameGetGiftData {
+    uint32 giftType = 1;
+    uint32 fever = 2;
+}
+
+message MiniGameSearchData {
+    uint32 searchId = 1;
+    repeated uint32 itemId = 2 [packed = true];
+}
+
+message MiniGameGhostData {
+    uint32 ghostId = 1;
+    repeated uint32 optionalId = 2 [packed = true];
+}
+
+message Birthday2022LevelItem {
+    uint32 id = 1;
+    uint32 status = 2;
+}
+
+message Birthday2022MiniStoryItem {
+    uint32 storyId = 1;
+    int32 seconds = 2;
+}
+
+message Birthday2022DateData {
+    uint32 date = 1;
+    uint32 status = 2;
+    int64 leftTime = 3;
+    uint32 hasBattleData = 4;
+    repeated .pb.Birthday2022LevelItem morningLevelId = 5;
+    repeated .pb.Birthday2022LevelItem afternoonLevelId = 6;
+    uint32 hasMemoryData = 7;
+    repeated uint32 memory = 8 [packed = true];
+    uint32 hasMiniStoryData = 9;
+    .pb.Birthday2022MiniStoryItem miniStory = 10;
+    uint32 ghostStoryId = 11;
+}
+
+message SwitchCrystalData {
+    uint32 index = 1;
+    uint32 status = 2;
+    uint32 modelId = 3;
+}
+
+message SwitchCrystalLevelData {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    repeated .pb.SwitchCrystalData crystalData = 3;
+}
+
+message RailCruisePuzzleData {
+    uint32 roomId = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem reward = 3;
+}
+
+message NumDrawLevelItem {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    int64 openLeftTime = 3;
+}
+
+message NumDrawRewardItem {
+    uint32 rewardId = 1;
+    uint32 status = 2;
+    uint32 needClearNum = 3;
+    repeated .pb.RewardDataItem rewardItems = 4;
+}
+
+message DeskDisplaySwitchInfo {
+    uint32 switchModeType = 1;
+    uint32 switchFrequencyType = 2;
+}
+
+message ProfessionNoteStoryReward {
+    uint32 noteId = 1;
+    uint32 storyId = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message ProfessionEntrustReward {
+    uint32 id = 1;
+    uint32 unlockThumbs = 2;
+    repeated .pb.RewardDataItem rewardItems = 3;
+}
+
+message ProfessionCombineStory {
+    uint32 keyId = 1;
+    uint32 storyId = 2;
+    uint32 isUsed = 3;
+}
+
+message CafePropItem {
+    uint32 propId = 1;
+    int32 value = 2;
+    int32 maxValue = 3;
+    int32 envEffectRate = 4;
+}
+
+message CafeActionItem {
+    uint32 actionId = 1;
+    uint32 level = 2;
+    repeated .pb.CafePropAddItem addProp = 3;
+}
+
+message CafeGuestRecordItem {
+    uint32 guestId = 1;
+    uint32 status = 2;
+}
+
+message CafeLevelItem {
+    uint32 levelId = 1;
+    int32 maxScore = 2;
+    repeated .pb.CafeGuestRecordItem specialGuests = 3;
+    uint32 enterNum = 4;
+}
+
+message CafePropAddItem {
+    uint32 propId = 1;
+    int32 finalAddValue = 2;
+}
+
+message CafeGuestItem {
+    uint32 guestId = 1;
+    uint32 progress = 2;
+    uint32 levelId = 3;
+    uint32 playNum = 4;
+    uint32 maxProgress = 5;
+    uint32 guestStatus = 6;
+    uint32 actionId = 7;
+    repeated uint32 optionRecords = 8 [packed = true];
+}
+
+message CafeReceptionItem {
+    uint32 levelGroupId = 1;
+    uint32 levelId = 2;
+    uint32 turnNum = 3;
+    uint32 turnStatus = 4;
+    repeated .pb.CafePropItem cafePropItems = 5;
+    repeated .pb.CafeActionItem cafeActionItems = 6;
+    repeated .pb.CafeGuestItem cafeGuestItem = 7;
+    uint32 maxTurnNum = 8;
+    uint32 restStoryId = 9;
+}
+
+message CafeRewardItem {
+    uint32 requiredScore = 1;
+    uint32 isDone = 2;
+    repeated .pb.RewardDataItem rewards = 3;
+}
+
+message CafeLevelGroupItem {
+    uint32 levelGroupId = 1;
+    repeated .pb.CafeLevelItem cafeLevelItems = 2;
+    repeated .pb.CafeRewardItem cafeRewardItems = 3;
+    uint32 levelGroupStatus = 4;
+    int64 openTimestamp = 5;
+}
+
+message CafeCollectionItem {
+    uint32 id = 1;
+    uint32 status = 2;
+    repeated .pb.RewardDataItem rewards = 3;
+}
+
+message CafeReceptionResult {
+    uint32 levelId = 1;
+    repeated .pb.CafePropItem props = 2;
+    int32 score = 3;
+    repeated .pb.CafeGuestItem specialGuests = 4;
+}
+
+message WalletDropLimitItem {
+    uint32 dropLimitId = 1;
+    int64 currentDropNum = 2;
+    uint32 offShow = 3;
+    int64 limitDropNum = 4;
+    uint32 limitType = 5;
+}
+
+message ShareDataInfo {
+    uint32 shareId = 1;
+    uint32 shareType = 2;
+    uint32 shareState = 3;
+    uint32 moduleId = 4;
+    repeated .pb.RewardDataItem shareReward = 5;
+}
+
+message RedPointData {
+    uint32 redPointType = 1;
+    uint32 contentId = 2;
+    uint32 showType = 3;
+}
+
+message ActivityMissionItem {
+    uint32 missionId = 1;
+    uint32 missionGroupId = 2;
+    uint32 status = 3;
+    int64 unlockTime = 4;
+    repeated uint32 premissionIds = 5 [packed = true];
+    repeated uint32 aftermissionIds = 6 [packed = true];
+    uint32 currentProgress = 7;
+    uint32 maxProgress = 8;
+}

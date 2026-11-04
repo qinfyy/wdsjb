@@ -1,0 +1,190 @@
+// JsProtoDumper: pb/cmd_birthday2025.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbbirthday2025;
+
+message Birthday2025EventItem {
+    uint32 uniqueId = 1;
+    uint32 eventId = 2;
+    uint32 type = 3;
+    uint32 chatId = 4;
+}
+
+message GetBirthday2025DataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1733;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetBirthday2025DataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1734;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 status = 3;
+    uint32 dayId = 4;
+    int64 currentTime = 5;
+    int64 nextStatusTime = 6;
+    uint32 hasEvent = 7;
+    repeated .pbbirthday2025.Birthday2025EventItem eventItems = 8;
+    uint32 hasHeartbeat = 9;
+    repeated uint32 heartbeatItems = 10 [packed = true];
+    uint32 hasWeb = 11;
+    repeated uint32 webItems = 12 [packed = true];
+    uint32 currentEvent = 13;
+    string playerNickname = 14;
+    string roleNickname = 15;
+}
+
+message Birthday2025DoHeartbeatReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1735;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message Birthday2025DoHeartbeatRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1736;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2025DoEventReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1737;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 uniqueId = 2;
+    uint32 webId = 3;
+}
+
+message Birthday2025DoEventRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1738;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 timeCost = 2;
+}
+
+message Birthday2025ChangeNicknameReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1739;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    bool isPlayer = 2;
+    string nickname = 3;
+}
+
+message Birthday2025ChangeNicknameRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1740;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2025BubbleReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1741;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 status = 2;
+}
+
+message Birthday2025BubbleRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1742;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2025MissingReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1743;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message Birthday2025MissingRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1744;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 eventId = 2;
+}

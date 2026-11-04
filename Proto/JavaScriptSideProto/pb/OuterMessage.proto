@@ -1,0 +1,34 @@
+// JsProtoDumper: pb/OuterMessage.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package NiceET;
+
+message PetActivityTakeNeedTaskRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1015;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+    uint32 taskId = 3;
+}
+
+message PetActivityTakeNeedTaskRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1016;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}

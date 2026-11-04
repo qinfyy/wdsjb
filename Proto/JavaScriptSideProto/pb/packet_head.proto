@@ -1,0 +1,38 @@
+// JsProtoDumper: pb/packet_head.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package baseproto;
+
+message PacketHead {
+    uint32 packetId = 1;
+    uint32 rpcId = 2;
+    uint32 clientSequenceId = 3;
+    uint32 enetChannelId = 4;
+    uint32 enetIsReliable = 5;
+    int64 clientTs = 6;
+    uint32 userId = 11;
+    uint32 userIp = 12;
+    uint32 userSessionId = 13;
+    bytes sessionValue1 = 14;
+    bytes sessionValue2 = 15;
+    string sessionValue3 = 16;
+    int64 sessionValue4 = 17;
+    int64 recvTime = 21;
+    uint32 rpcBeginTimeMs = 22;
+    uint32 targetService = 23;
+    uint32 dispatchId = 24;
+    uint32 gameserverId = 25;
+    uint32 nodeserverId = 26;
+    uint32 dbgateId = 27;
+    uint32 multiserverId = 28;
+    uint32 gateserverId = 29;
+    uint32 authserverId = 30;
+    string traceSeq = 31;
+    uint64 tag = 32;
+    uint32 isBind = 33;
+    bytes spanTracer = 34;
+    int64 gatesvrStartRand = 35;
+    repeated string stringRsvd = 36;
+}

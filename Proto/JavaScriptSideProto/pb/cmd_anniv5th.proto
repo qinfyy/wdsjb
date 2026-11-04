@@ -1,0 +1,243 @@
+// JsProtoDumper: pb/cmd_anniv5th.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbanniv5th;
+
+message Anniv5thScheduleData {
+    uint32 scheduleId = 1;
+    uint32 inProcessRoleId = 2;
+    uint32 newGameNum = 3;
+    int64 changeEntranceDesignTime = 4;
+    int64 nextNewGameOpenTime = 5;
+    repeated .pbanniv5th.Anniv5thRoleLineData roleLineData = 6;
+    uint32 fullData = 7;
+}
+
+message Anniv5thRoleLineData {
+    uint32 roleId = 1;
+    uint32 phaseId = 2;
+    uint32 levelId = 3;
+    uint32 lineStatus = 4;
+    int64 nextStepTime = 5;
+    uint32 waitStoryId = 6;
+    repeated .pbanniv5th.GeneralActivityRewardPreviewItem finalItems = 7;
+    repeated .pbanniv5th.GeneralActivityRewardPreviewItem phaseItems = 8;
+    uint32 beforeLineStatus = 9;
+    repeated uint32 doneLevels = 10 [packed = true];
+}
+
+message GetAnniv5ThScheduleDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1711;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetAnniv5ThScheduleDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1712;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    .pbanniv5th.Anniv5thScheduleData scheduleData = 3;
+    repeated .pbanniv5th.RewardDataItem gotReward = 4;
+}
+
+message GetAnniv5ThRoleLineDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1713;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 roleId = 2;
+}
+
+message GetAnniv5ThRoleLineDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1714;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 roleId = 2;
+    .pbanniv5th.Anniv5thRoleLineData roleLineData = 3;
+    repeated .pbanniv5th.RewardDataItem gotReward = 4;
+}
+
+message Anniv5ThStartRoleLineReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1715;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+}
+
+message Anniv5ThStartRoleLineRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1716;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+}
+
+message Anniv5ThPlayAnimReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1717;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+    uint32 animType = 3;
+}
+
+message Anniv5ThPlayAnimRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1718;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+    uint32 animType = 4;
+}
+
+message Anniv5ThPlayLevelGameReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1719;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+    uint32 levelId = 3;
+    uint32 levelGameType = 4;
+}
+
+message Anniv5ThPlayLevelGameRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1720;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+    uint32 levelId = 4;
+    uint32 levelGameType = 5;
+}
+
+message Anniv5ThPlayMiniStoryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1721;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+    uint32 levelId = 3;
+    uint32 miniStoryType = 4;
+}
+
+message Anniv5ThPlayMiniStoryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1722;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+    uint32 levelId = 4;
+    uint32 miniStoryType = 5;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}
+
+message GeneralActivityRewardPreviewItem {
+    uint32 previewId = 1;
+    .pbanniv5th.RewardDataItem reward = 2;
+    uint32 progress = 3;
+    uint32 maxProgress = 4;
+}

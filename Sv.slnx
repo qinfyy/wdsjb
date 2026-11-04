@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Proto/Proto.csproj" Id="fd5eeac1-0061-4a40-8e79-58573f7eacb4" />
+  <Project Path="Sv/Sv.csproj" />
+  <Project Path="Sv.Tests/Sv.Tests.csproj" />
+</Solution>

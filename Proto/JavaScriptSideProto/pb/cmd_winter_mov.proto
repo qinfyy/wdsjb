@@ -1,0 +1,337 @@
+// JsProtoDumper: pb/cmd_winter_mov.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbwintermov;
+
+message WinterMovData {
+    uint32 scheduleId = 1;
+    uint32 isAll = 2;
+    int64 nextMissionOpenTimestamp = 3;
+    repeated .pbwintermov.WinterMovLocationInfo locationInfo = 4;
+    repeated .pbwintermov.WinterMovEventInfo eventInfo = 5;
+    repeated .pbwintermov.WinterMovMissionInfo missionList = 6;
+    repeated .pbwintermov.WinterMovCardGameInfo cardGameInfo = 7;
+    repeated .pbwintermov.WinterMovCardPictureInfo cardPictureInfo = 8;
+    uint32 storyCardLevelId = 9;
+}
+
+message WinterMovLocationInfo {
+    uint32 locationId = 1;
+    uint32 status = 2;
+}
+
+message WinterMovEventInfo {
+    uint32 eventId = 1;
+    uint32 status = 2;
+}
+
+message WinterMovMissionInfo {
+    uint32 missionId = 1;
+    uint32 status = 2;
+    string progressStr = 3;
+}
+
+message WinterMovCardGameInfo {
+    uint32 levelId = 1;
+    uint32 round = 2;
+    uint32 cardLimit = 3;
+    uint32 inWaitThrow = 4;
+    repeated .pbwintermov.WinterMovCardNpcInfo cardNpcInfo = 5;
+    .pbwintermov.WinterMovCardDesktopInfo cardDesktopInfo = 6;
+}
+
+message WinterMovCardNpcInfo {
+    uint32 cardId = 1;
+    uint32 visible = 2;
+}
+
+message WinterMovCardDesktopInfo {
+    repeated .pbwintermov.WinterMovCardGroupInfo cardGroupList = 1;
+    repeated .pbwintermov.WinterMovCardInfo cardList = 2;
+    repeated .pbwintermov.WinterMovCardGroupInfo missionNewCardGroupList = 3;
+    repeated .pbwintermov.WinterMovCardInfo missionNewCardList = 4;
+}
+
+message WinterMovCardGroupInfo {
+    uint32 posX = 1;
+    uint32 posY = 2;
+    repeated .pbwintermov.WinterMovCardInfo cardList = 3;
+    uint32 layer = 4;
+    uint32 progress = 5;
+}
+
+message WinterMovCardInfo {
+    uint32 cardId = 1;
+    uint32 posX = 2;
+    uint32 posY = 3;
+    uint32 cardLife = 4;
+    uint32 cardSatiety = 5;
+    uint32 cardExplore = 6;
+    uint32 layer = 7;
+}
+
+message WinterMovCardPictureInfo {
+    uint32 cardId = 1;
+    uint32 isGot = 2;
+    uint32 isNew = 3;
+}
+
+message GetWinterMovDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1755;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+}
+
+message GetWinterMovDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1756;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbwintermov.WinterMovData winterMovData = 2;
+}
+
+message WinterMovGameEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1761;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+}
+
+message WinterMovGameEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1762;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovCardGameSaveReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1763;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+    .pbwintermov.WinterMovCardDesktopInfo cardDesktopInfo = 4;
+    repeated uint32 doneMissionList = 5 [packed = true];
+}
+
+message WinterMovCardGameSaveRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1764;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovCardGameRoundEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1765;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+    uint32 currRoundId = 4;
+    .pbwintermov.WinterMovCardDesktopInfo cardDesktopInfo = 5;
+    uint32 doneMissionId = 6;
+    uint32 progressMissionId = 7;
+    string progressStr = 8;
+}
+
+message WinterMovCardGameRoundEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1766;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovCardGameThrowReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1767;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+    uint32 currRoundId = 4;
+    .pbwintermov.WinterMovCardDesktopInfo cardDesktopInfo = 5;
+}
+
+message WinterMovCardGameThrowRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1768;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovCardGameGotNewCardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1769;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 cardId = 2 [packed = true];
+}
+
+message WinterMovCardGameGotNewCardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1770;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovCardGameStoryBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1771;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+}
+
+message WinterMovCardGameStoryBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1772;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovReadCardPictureReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1773;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 cardId = 2 [packed = true];
+}
+
+message WinterMovReadCardPictureRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1774;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WinterMovGameFailedReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1775;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    uint32 levelId = 3;
+    uint32 reason = 4;
+}
+
+message WinterMovGameFailedRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1776;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}

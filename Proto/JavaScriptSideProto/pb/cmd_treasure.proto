@@ -1,0 +1,118 @@
+// JsProtoDumper: pb/cmd_treasure.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbtreasure;
+
+message TreasureData {
+    uint32 scheduleId = 1;
+    uint32 isAll = 2;
+    int64 nextMissionOpenTimestamp = 3;
+    repeated .pbtreasure.TreasureLocationInfo locationInfo = 4;
+    repeated .pbtreasure.TreasureMissionInfo missionInfo = 5;
+    repeated .pbtreasure.TreasureCommissionInfo commissionInfo = 6;
+    uint32 currentMissionId = 7;
+    repeated uint32 lastMissionId = 8 [packed = true];
+    repeated int64 missionUnlockTime = 9 [packed = true];
+    uint32 totalTicketNum = 10;
+}
+
+message TreasureLocationInfo {
+    uint32 locationId = 1;
+    uint32 status = 2;
+}
+
+message TreasureMissionInfo {
+    uint32 missionId = 1;
+    uint32 status = 2;
+}
+
+message TreasureCommissionInfo {
+    uint32 commissionId = 1;
+    uint32 status = 2;
+    uint32 storyId = 3;
+}
+
+message GetTreasureDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1827;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetTreasureDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1828;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbtreasure.TreasureData treasureData = 2;
+}
+
+message TreasureCommissionUnLockReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1829;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 commissionId = 2;
+}
+
+message TreasureCommissionUnLockRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1830;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message TreasureLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1831;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 levelType = 3;
+    uint32 appraisalResult = 4;
+}
+
+message TreasureLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1832;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}

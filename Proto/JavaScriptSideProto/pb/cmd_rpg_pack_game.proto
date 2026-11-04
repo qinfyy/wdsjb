@@ -1,0 +1,77 @@
+// JsProtoDumper: pb/cmd_rpg_pack_game.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbrpgpackgame;
+
+message RPGPackGameLevelData {
+    uint32 levelId = 1;
+    uint32 maxScore = 2;
+}
+
+message RPGPackGameData {
+    uint32 packGameId = 1;
+    uint32 personalRpgId = 2;
+    uint32 personalRpgScheduleId = 3;
+    uint32 status = 4;
+    repeated .pbrpgpackgame.RPGPackGameLevelData levelList = 5;
+}
+
+message GetRPGPackGameDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1145;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 allPackGame = 1;
+    repeated uint32 packGameId = 2 [packed = true];
+}
+
+message GetRPGPackGameDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1146;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbrpgpackgame.RPGPackGameData packData = 2;
+}
+
+message RPGPackGameFinishReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1147;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 packGameId = 1;
+    uint32 levelId = 2;
+    uint32 score = 3;
+    repeated uint32 finishItemList = 4 [packed = true];
+}
+
+message RPGPackGameFinishRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1148;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 score = 2;
+}

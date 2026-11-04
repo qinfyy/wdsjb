@@ -1,0 +1,364 @@
+// JsProtoDumper: pb/cmd_larp.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pblarp;
+
+message LarpPuzzleItem {
+    uint32 id = 1;
+    repeated uint32 filledEvidenceId = 2 [packed = true];
+    repeated uint32 choosedWrongId = 3 [packed = true];
+    uint32 isFinish = 4;
+}
+
+message LarpGuessItem {
+    uint32 id = 1;
+    uint32 targetNum = 2;
+    uint32 currType = 3;
+}
+
+message ParkourLevelItem {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    uint32 maxScore = 3;
+    uint32 starNum = 4;
+}
+
+message ParkourSkillItem {
+    uint32 skillId = 1;
+    uint32 skillLevel = 2;
+}
+
+message GetLarpDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1120;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetLarpDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1121;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 currPhaseId = 3;
+    repeated .pblarp.LarpPuzzleItem puzzleList = 4;
+    repeated .pblarp.LarpGuessItem guessList = 5;
+    repeated uint32 finishedConclusions = 6 [packed = true];
+    repeated uint32 finishedEndings = 7 [packed = true];
+    uint32 isVoteEnding = 8;
+    uint32 isPhaseOver = 9;
+    uint32 outsidePhaseId = 10;
+    repeated uint32 canSeeThreadId = 11 [packed = true];
+    repeated uint32 gottenFragmentId = 12 [packed = true];
+    uint32 isReceivedReward = 13;
+    uint32 isReceivedStoryReward = 14;
+    repeated .pblarp.RewardDataItem rewards = 15;
+    repeated .pblarp.RewardDataItem treasureGatheringReward = 16;
+}
+
+message LarpPuzzleClueMatchingReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1122;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 puzzleId = 2;
+    repeated uint32 choosedEvidenceList = 3 [packed = true];
+}
+
+message LarpPuzzleClueMatchingRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1123;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 puzzleId = 3;
+    repeated uint32 choosedEvidenceList = 4 [packed = true];
+    repeated uint32 answerTypeList = 5 [packed = true];
+}
+
+message LarpGuessChooseReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1124;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    .pblarp.LarpGuessItem guessItem = 2;
+}
+
+message LarpGuessChooseRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1125;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    .pblarp.LarpGuessItem guessItem = 3;
+}
+
+message LarpGuessVerifyReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1126;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message LarpGuessVerifyRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1127;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    repeated .pblarp.LarpGuessItem guessList = 3;
+}
+
+message LarpVoteReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1128;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 endingId = 2;
+}
+
+message LarpVoteRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1129;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 endingId = 3;
+    uint32 endingStoryId = 4;
+}
+
+message LarpEndingResetReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1130;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message LarpEndingResetRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1131;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+}
+
+message GetParkourDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1132;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 parkourId = 1;
+}
+
+message GetParkourDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1133;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 parkourId = 2;
+    uint32 allLevel = 3;
+    repeated .pblarp.ParkourLevelItem levelList = 4;
+    repeated .pblarp.ParkourSkillItem parkourSkill = 5;
+}
+
+message ParkourLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1134;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 parkourId = 1;
+    uint32 levelId = 2;
+    uint32 gameGear = 3;
+    uint32 extraGear = 4;
+    uint32 distance = 5;
+    int64 timeCost = 6;
+    uint32 score = 7;
+}
+
+message ParkourLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1135;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 levelId = 2;
+    uint32 score = 3;
+    uint32 star = 4;
+    uint32 gameGear = 5;
+    uint32 extraGear = 6;
+    uint32 distance = 7;
+}
+
+message ParkourSkillLevelUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1136;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 parkourId = 1;
+    uint32 skillId = 2;
+}
+
+message ParkourSkillLevelUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1137;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message LarpReceiveRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1138;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message LarpReceiveRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1139;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    repeated .pblarp.RewardDataItem rewardItems = 3;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

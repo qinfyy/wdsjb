@@ -1,0 +1,227 @@
+// JsProtoDumper: pb/cmd_birthday2026.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbbirthday2026;
+
+message Birthday2026EventState {
+    uint32 eventId = 1;
+    uint32 status = 2;
+    repeated uint32 packedIds = 3 [packed = true];
+}
+
+message Birthday2026CarryItem {
+    uint32 itemId = 1;
+    uint32 itemType = 2;
+    uint32 status = 3;
+    uint32 obtainDay = 4;
+    uint32 score = 5;
+    uint32 orderId = 6;
+    uint32 itineraryId = 7;
+}
+
+message Birthday2026DiaryDialog {
+    uint32 dialogId = 1;
+    int64 createTime = 2;
+}
+
+message Birthday2026DiaryItem {
+    uint32 diaryUid = 1;
+    uint32 diaryId = 2;
+    repeated .pbbirthday2026.Birthday2026DiaryDialog dialogs = 3;
+    uint32 status = 4;
+    uint32 relatedItemId = 5;
+    int64 createTime = 6;
+    uint32 isRead = 7;
+    uint32 roleId = 8;
+}
+
+message Birthday2026TravelItem {
+    uint32 itemId = 1;
+    uint32 isRequired = 2;
+}
+
+message Birthday2026MainData {
+    uint32 scheduleId = 1;
+    uint32 status = 2;
+    uint32 dayId = 3;
+    uint32 itineraryId = 4;
+    int64 nextStatusTime = 5;
+    uint32 todayCarryItemId = 6;
+    uint32 battleCount = 7;
+    uint32 isAllEvent = 8;
+    repeated .pbbirthday2026.Birthday2026EventState eventStates = 9;
+    uint32 isAllCarry = 10;
+    repeated .pbbirthday2026.Birthday2026CarryItem carryItems = 11;
+    uint32 isAllDiary = 12;
+    repeated .pbbirthday2026.Birthday2026DiaryItem diaryItems = 13;
+    repeated uint32 carryCandidates = 14 [packed = true];
+    repeated .pbbirthday2026.Birthday2026TravelItem travelItems = 15;
+    repeated int64 carryItemsOrderTimestamps = 16 [packed = true];
+}
+
+message GetBirthday2026DataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1931;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetBirthday2026DataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1932;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbbirthday2026.Birthday2026MainData mainData = 2;
+}
+
+message Birthday2026FinishPackingReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1933;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 eventId = 2;
+    repeated uint32 packedItemIds = 3 [packed = true];
+}
+
+message Birthday2026FinishPackingRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1934;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2026SelectCarryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1935;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 carryItemId = 2;
+}
+
+message Birthday2026SelectCarryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1936;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2026ScoreCarryItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1937;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 carryItemId = 2;
+    uint32 score = 3;
+}
+
+message Birthday2026ScoreCarryItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1938;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2026SendDiaryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1939;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 diaryUid = 2;
+    uint32 choiceDialogId = 3;
+}
+
+message Birthday2026SendDiaryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1940;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Birthday2026ReadDiaryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1941;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 diaryUids = 2 [packed = true];
+}
+
+message Birthday2026ReadDiaryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1942;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}

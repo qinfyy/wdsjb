@@ -1,0 +1,184 @@
+// JsProtoDumper: pb/cmd_red_pack.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbredpack;
+
+message RedPackDataItem {
+    uint32 redPackId = 1;
+    uint32 status = 2;
+    repeated .pbredpack.RewardDataItem todayRewards = 3;
+    int64 startTime = 4;
+    int64 endTime = 5;
+    .pbredpack.BillingPackageProductItem multiRewardProductItem = 6;
+    uint32 multiIndex = 7;
+}
+
+message GetRedPackDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1140;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 dataAll = 1;
+    repeated uint32 redPackId = 2 [packed = true];
+}
+
+message GetRedPackDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1141;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 redPackAll = 2;
+    repeated .pbredpack.RedPackDataItem redPackItems = 3;
+}
+
+message RedPackRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1142;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 redPackId = 1;
+}
+
+message RedPackRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1143;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbredpack.RewardDataItem rewards = 2;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}
+
+message BillingMonthCardItem {
+    uint32 monthCardId = 1;
+    uint32 directAwardYcoin = 2;
+    uint32 dailyAwardStamina = 3;
+    uint32 dailyAwardHcoin = 4;
+    uint32 dayDuration = 5;
+    uint32 maxStock = 6;
+    uint32 eventDailyAwardStamina = 7;
+    uint32 eventDailyAwardHcoin = 8;
+    uint32 eventLeftTime = 9;
+    uint32 expireLeftDay = 10;
+    uint32 nextRewardLeftTime = 11;
+    uint32 status = 12;
+    repeated .pbredpack.RewardDataItem dailyRewardItems = 13;
+    repeated .pbredpack.RewardDataItem eventDailyRewardItems = 14;
+    uint32 dailyAddIntimacy = 15;
+    uint32 displayExpeditionNum = 16;
+    uint32 expeditionNumTogether = 17;
+    uint32 dailyLevelPassResetCnt = 18;
+    uint32 expireTime = 19;
+    uint32 isImportant = 20;
+    repeated .pbredpack.RewardDataItem directRewardItems = 21;
+    uint32 signInReward = 22;
+    uint32 needNotice = 23;
+}
+
+message BillingPackageItem {
+    uint32 packageId = 1;
+    uint32 ycoin = 2;
+    uint32 hcoin = 3;
+    repeated .pbredpack.RewardDataItem rewardItems = 4;
+}
+
+message BillingPackageProductItem {
+    uint32 productId = 1;
+    string productName = 2;
+    uint32 tag = 3;
+    uint32 order = 4;
+    uint32 packageType = 5;
+    uint32 packageTitleTextmapId = 6;
+    string packageImage = 7;
+    .pbredpack.BillingMonthCardItem monthCardInfo = 8;
+    .pbredpack.BillingPackageItem packageItemInfo = 9;
+    uint32 refreshType = 10;
+    uint32 limitNum = 11;
+    uint32 curNum = 12;
+    uint32 leftTime = 13;
+    uint32 bannerTextmapId = 14;
+    uint32 purchaseType = 15;
+    uint32 currencyDiscount = 16;
+    uint32 originCoinPrice = 17;
+    uint32 realCoinPrice = 18;
+    uint32 discountLeftTime = 19;
+    uint32 status = 20;
+    uint32 discountStatus = 21;
+    uint32 refreshLeftTime = 22;
+    uint32 vipPoint = 23;
+    uint32 expLevelRequired = 24;
+    uint32 firstChargePurchaseRequired = 25;
+    uint32 rmbPrice = 26;
+    uint32 packageDescTextmapId = 27;
+    uint32 showTemplate = 28;
+    string priceTier = 29;
+    uint32 levelIdRequired = 30;
+    uint32 battlePassId = 31;
+    uint32 important = 32;
+    uint32 monthCardPurchaseRequired = 33;
+    uint32 mainScreenShow = 34;
+    uint32 fundId = 35;
+    repeated uint32 oldPlayerIds = 36 [packed = true];
+    uint32 callLockedRequired = 37;
+    uint32 paidAudioId = 38;
+    uint32 taskIdRequired = 39;
+    uint32 monthCardPurchase = 40;
+    uint32 couponIdRequired = 41;
+    uint32 clothId = 42;
+    uint32 bgId = 43;
+    repeated uint32 triggerGachaPoolId = 44 [packed = true];
+    uint32 invitationId = 45;
+    repeated uint32 showGachaIdList = 46 [packed = true];
+    string ptHintTextmap = 47;
+    uint32 rmbOriginalPrice = 48;
+    string originalPriceTier = 49;
+    uint32 needOpenDelaySync = 50;
+    .pbredpack.BillingPackageProductItem originPricePackageItem = 51;
+    uint32 showOnSale = 52;
+    uint32 recommend = 53;
+}

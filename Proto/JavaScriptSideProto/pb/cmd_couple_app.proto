@@ -1,0 +1,638 @@
+// JsProtoDumper: pb/cmd_couple_app.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbcoupleapp;
+
+message CoupleAppRoleItem {
+    uint32 roleId = 1;
+    string nickname = 2;
+    uint32 avatarId = 3;
+    int64 lastChangeNicknameTime = 4;
+    uint32 currentCoinGotNum = 5;
+    uint32 currentExpGotNum = 6;
+    uint32 currentGoOutItem = 7;
+    uint32 nextGoOutItem = 8;
+    uint32 currentBehaviorGroupId = 9;
+    int64 behaviorGroupFinishTime = 10;
+    uint32 shareMoodRemainTimes = 11;
+    uint32 hasNewMoment = 12;
+    uint32 hasNewDynamic = 13;
+    string playerNickname = 14;
+    uint32 playerAvatarId = 15;
+    uint32 isOnline = 16;
+    uint32 deleteHabitRemainTimes = 17;
+    uint32 maxDynamicUuid = 18;
+    uint32 maxMomentUuid = 19;
+    uint32 behaviorGroupStoryId = 20;
+    repeated uint32 bringBackPresentIds = 21 [packed = true];
+    int64 lastPlayerChangeNicknameTime = 22;
+    uint32 minDynamicUuid = 23;
+    uint32 readTodoGroupId = 24;
+}
+
+message CoupleAppSignItem {
+    uint32 roleId = 1;
+    uint32 isSigned = 2;
+    uint32 signDay = 3;
+    repeated uint32 signExp = 4 [packed = true];
+}
+
+message CoupleAppDynamicItem {
+    uint32 dynamicUuid = 1;
+    uint32 dynamicType = 2;
+    int64 time = 3;
+    uint32 replyEmojiId = 4;
+    uint32 dynamicId = 5;
+    uint32 locationId = 6;
+    uint32 destinationId = 7;
+    uint32 batteryLevel = 8;
+    uint32 habitId = 9;
+    uint32 wifiId = 10;
+    uint32 behaviorId = 11;
+    uint32 behaviorGroupId = 12;
+    bool isDelete = 13;
+    uint32 goOutItemId = 14;
+}
+
+message CoupleAppMomentItem {
+    uint32 uuid = 1;
+    uint32 momentId = 2;
+    int64 time = 3;
+    uint32 replyChoiceId = 4;
+}
+
+message CoupleAppPropItem {
+    uint32 itemId = 1;
+    bool isNew = 2;
+}
+
+message CoupleAppEmojiItem {
+    uint32 emojiId = 1;
+}
+
+message CoupleAppAvatarItem {
+    uint32 avatarId = 1;
+    uint32 status = 2;
+    int64 jumpExpireTime = 3;
+}
+
+message CoupleAppTaskItem {
+    uint32 taskId = 1;
+    uint32 progress = 2;
+    uint32 status = 3;
+    repeated .pbcoupleapp.RewardDataItem rewards = 4;
+}
+
+message CoupleAppHabitItem {
+    uint32 uuid = 1;
+    uint32 habitId = 2;
+    uint32 currentTimes = 3;
+    uint32 targetTimes = 4;
+    uint32 roleId = 5;
+    string habitName = 6;
+    string habitDesc = 7;
+    uint32 color = 8;
+    int64 addTime = 9;
+    uint32 totalFinishTimes = 10;
+    repeated uint32 weekFinishRecord = 11 [packed = true];
+}
+
+message CoupleAppTodoListItem {
+    uint32 todoId = 1;
+    uint32 status = 2;
+}
+
+message CoupleAppMomentCollectItem {
+    uint32 momentId = 1;
+    int64 recvTime = 2;
+    bool isNew = 3;
+    uint32 status = 4;
+}
+
+message CoupleAppWeatherItem {
+    uint32 weatherTypeId = 1;
+    int32 minTemp = 2;
+    int32 maxTemp = 3;
+}
+
+message CoupleAppUnreadMomentItem {
+    uint32 roleId = 1;
+    repeated .pbcoupleapp.CoupleAppMomentItem momentItems = 2;
+}
+
+message GetCoupleAppDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1671;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 roleAll = 1;
+    uint32 signAll = 2;
+    uint32 propAll = 3;
+    uint32 taskAll = 4;
+    uint32 habitAll = 5;
+    uint32 todoListAll = 6;
+    uint32 momentCollectAll = 7;
+    uint32 emojiAll = 8;
+    uint32 avatarAll = 9;
+    uint32 unreadMomentAll = 10;
+}
+
+message GetCoupleAppDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1672;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 currentRoleId = 2;
+    .pbcoupleapp.CoupleAppWeatherItem todayWeather = 3;
+    .pbcoupleapp.CoupleAppWeatherItem tomorrowWeather = 4;
+    uint32 roleAll = 5;
+    repeated .pbcoupleapp.CoupleAppRoleItem roleItems = 6;
+    uint32 signAll = 7;
+    repeated .pbcoupleapp.CoupleAppSignItem signItems = 8;
+    uint32 propAll = 9;
+    repeated .pbcoupleapp.CoupleAppPropItem propItems = 10;
+    uint32 taskAll = 11;
+    repeated .pbcoupleapp.CoupleAppTaskItem taskItems = 12;
+    uint32 habitAll = 13;
+    repeated .pbcoupleapp.CoupleAppHabitItem habitItems = 14;
+    uint32 todoListAll = 15;
+    repeated .pbcoupleapp.CoupleAppTodoListItem todoListItems = 16;
+    uint32 momentCollectionAll = 17;
+    repeated .pbcoupleapp.CoupleAppMomentCollectItem momentCollectItems = 18;
+    uint32 emojiAll = 19;
+    repeated .pbcoupleapp.CoupleAppEmojiItem emojiItems = 20;
+    uint32 avatarAll = 21;
+    repeated .pbcoupleapp.CoupleAppAvatarItem avatarItems = 22;
+    uint32 unreadMomentAll = 23;
+    repeated .pbcoupleapp.CoupleAppUnreadMomentItem unreadMomentItems = 24;
+    uint32 entrancePreviewStatus = 25;
+    uint32 guideStatus = 26;
+}
+
+message GetCoupleAppDynamicDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1673;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 roleId = 1;
+    uint32 fromUuid = 2;
+}
+
+message GetCoupleAppDynamicDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1674;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 roleId = 2;
+    uint32 fromUuid = 3;
+    repeated .pbcoupleapp.CoupleAppDynamicItem dynamicItems = 4;
+}
+
+message GetCoupleAppMomentDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1675;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 roleId = 1;
+    uint32 fromUuid = 2;
+    uint32 showMomentType = 3;
+}
+
+message GetCoupleAppMomentDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1676;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 roleId = 2;
+    uint32 fromUuid = 3;
+    repeated .pbcoupleapp.CoupleAppMomentItem momentItems = 4;
+    uint32 showMomentType = 5;
+}
+
+message CoupleAppSelectRoleReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1677;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+}
+
+message CoupleAppSelectRoleRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1678;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 currentRoleId = 2;
+}
+
+message CoupleAppChangeNicknameReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1679;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    string nickname = 2;
+    uint32 isPlayer = 3;
+}
+
+message CoupleAppChangeNicknameRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1680;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppChangeGoOutItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1681;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 currentGoOutItem = 2;
+    uint32 nextGoOutItem = 3;
+}
+
+message CoupleAppChangeGoOutItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1682;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppOperateHabitReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1683;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 uuid = 1;
+    uint32 roleId = 2;
+    uint32 operateType = 3;
+    uint32 targetNum = 4;
+    string habitName = 5;
+    string habitDesc = 6;
+    uint32 color = 7;
+    uint32 habitId = 8;
+}
+
+message CoupleAppOperateHabitRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1684;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppAddToDoItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1685;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 todoListScheduleId = 1;
+    repeated uint32 addItemIds = 2 [packed = true];
+}
+
+message CoupleAppAddToDoItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1686;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppReadItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1687;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    repeated uint32 momentReplyUuids = 2 [packed = true];
+    uint32 readMoment = 3;
+    uint32 readDynamic = 4;
+    uint32 readEntrancePreview = 5;
+    uint32 readBringBackPresent = 6;
+    repeated uint32 propIds = 7 [packed = true];
+    repeated uint32 avatarIds = 8 [packed = true];
+    repeated uint32 momentCollectionIds = 9 [packed = true];
+    uint32 todoGroupId = 10;
+}
+
+message CoupleAppReadItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1688;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppShareMomentReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1689;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 momentId = 2;
+}
+
+message CoupleAppShareMomentRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1690;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppReplyMomentReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1691;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 uuid = 2;
+    uint32 choiceId = 3;
+}
+
+message CoupleAppReplyMomentRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1692;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 uuid = 2;
+}
+
+message CoupleAppTaskRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1693;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    repeated uint32 taskIdList = 1 [packed = true];
+}
+
+message CoupleAppTaskRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1694;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbcoupleapp.RewardDataItem rewards = 2;
+}
+
+message CoupleAppDailySignReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1695;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+}
+
+message CoupleAppDailySignRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1696;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppReplyDynamicReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1697;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 uuid = 2;
+    uint32 emojiId = 3;
+}
+
+message CoupleAppReplyDynamicRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1698;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 uuid = 2;
+}
+
+message CoupleAppChangeAvatarReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1699;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 avatar = 2;
+    uint32 isPlayer = 3;
+}
+
+message CoupleAppChangeAvatarRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1700;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message CoupleAppChangeAvatarGroupReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1811;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    repeated uint32 avatarGroupIds = 1 [packed = true];
+}
+
+message CoupleAppChangeAvatarGroupRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1812;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

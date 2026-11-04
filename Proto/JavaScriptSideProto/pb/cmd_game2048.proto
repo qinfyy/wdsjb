@@ -1,0 +1,137 @@
+// JsProtoDumper: pb/cmd_game2048.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbgame2048;
+
+message Game2048LevelData {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    uint32 step = 3;
+    repeated uint32 value = 4 [packed = true];
+}
+
+message GetGame2048DataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1329;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+}
+
+message GetGame2048DataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1330;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    uint32 game2048Id = 3;
+    .pbgame2048.Game2048LevelData levelData = 4;
+}
+
+message Game2048LevelStartReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1331;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 game2048Id = 2;
+    uint32 levelId = 3;
+}
+
+message Game2048LevelStartRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1332;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    uint32 game2048Id = 3;
+    uint32 levelId = 4;
+    .pbgame2048.Game2048LevelData levelData = 5;
+}
+
+message Game2048SaveReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1333;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+    uint32 game2048Id = 2;
+    uint32 levelId = 3;
+    uint32 step = 4;
+    repeated uint32 value = 5 [packed = true];
+}
+
+message Game2048SaveRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1334;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+}
+
+message Game2048LevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1335;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 game2048Id = 2;
+    uint32 levelId = 3;
+    uint32 endType = 4;
+    uint32 step = 5;
+    repeated uint32 value = 6 [packed = true];
+}
+
+message Game2048LevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1336;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 levelId = 2;
+    uint32 endType = 3;
+}

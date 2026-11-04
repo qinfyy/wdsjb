@@ -1,0 +1,136 @@
+// JsProtoDumper: pb/cmd_misc.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbmisc;
+
+message GmTalkReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 2;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+    string msg = 1;
+}
+
+message GmTalkRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 3;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+    }
+    int32 retcode = 1;
+    string noteStr = 2;
+    string msg = 50;
+}
+
+message PingReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 5;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+        IS_ALLOW_UNVERIFIED_CLIENT = 1;
+        NEVER_SPAN = 1;
+    }
+    uint32 seq = 1;
+}
+
+message PingRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 6;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        NEVER_SPAN = 1;
+    }
+    uint32 seq = 1;
+}
+
+message SetLangReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 7;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+    string lang = 1;
+    uint32 accountType = 2;
+    string accountUid = 3;
+}
+
+message SetLangRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 8;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+    }
+    int32 retcode = 1;
+    string msg = 50;
+}
+
+message GetWebAuthKeyReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 9;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+    string authAppid = 1;
+    uint32 signType = 2;
+}
+
+message GetWebAuthKeyRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 10;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+    }
+    int32 retcode = 1;
+    string authKey = 2;
+    uint32 authVer = 3;
+    string authAppid = 4;
+    uint32 signType = 5;
+    string msg = 50;
+}
+
+message QuitReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 11;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 1;
+    }
+}
+
+message QuitRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 12;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        IS_ALLOW_CLIENT = 0;
+    }
+}

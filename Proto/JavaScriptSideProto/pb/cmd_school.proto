@@ -1,0 +1,454 @@
+// JsProtoDumper: pb/cmd_school.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbschool;
+
+message SchoolRoleItem {
+    uint32 roleId = 1;
+    uint32 loveLevel = 2;
+    uint32 currentLevelExp = 3;
+    uint32 nextLevelExp = 4;
+}
+
+message SchoolLessonItem {
+    uint32 lessonId = 1;
+    uint32 isUnlock = 2;
+    uint32 lessonExp = 3;
+}
+
+message SchoolAttributeItem {
+    uint32 attributeId = 1;
+    uint32 level = 2;
+    uint32 attributeExp = 3;
+}
+
+message SchoolBigEventItem {
+    uint32 bigEventId = 1;
+    uint32 eventType = 2;
+    uint32 levelId = 3;
+    uint32 storyId = 4;
+    uint32 score = 5;
+    uint32 isFinish = 6;
+    uint32 scoreLevel = 7;
+    uint32 roleId = 8;
+}
+
+message SchoolBaseInfo {
+    uint32 getUnlimitedTicketLeftRoundNum = 1;
+    int64 unlimitedExchangeTicketTimestamp = 2;
+    uint32 exchangeTicketLeftTimes = 3;
+    repeated .pbschool.SchoolRoleItem roleItems = 4;
+    repeated .pbschool.SchoolLessonItem lessonItems = 5;
+    repeated .pbschool.SchoolAttributeItem attributeItems = 6;
+    repeated .pbschool.SchoolBigEventItem bigEventItems = 7;
+}
+
+message SchoolLetterItem {
+    uint32 letterId = 1;
+    uint32 isRead = 2;
+}
+
+message SchoolArrangeItem {
+    uint32 arrangeNo = 1;
+    uint32 arrangeType = 2;
+    uint32 itemId = 3;
+    uint32 isFinished = 4;
+    uint32 lessonResult = 5;
+    repeated .pbschool.SchoolRewardAttrItem rewardAttrItems = 6;
+    uint32 choiceIndex = 7;
+}
+
+message SchoolRoundTaskItem {
+    uint32 roundTaskId = 1;
+    uint32 isFinished = 2;
+    uint32 remainRound = 3;
+}
+
+message SchoolSettleItem {
+    uint32 settleType = 1;
+    repeated uint32 settlementIds = 2 [packed = true];
+}
+
+message SchoolTriggerStoryItem {
+    uint32 storyId = 1;
+    uint32 isFinish = 2;
+}
+
+message SchoolRoundInfo {
+    uint32 roundId = 1;
+    uint32 roundStatus = 2;
+    uint32 noticeId = 3;
+    repeated .pbschool.SchoolLetterItem letterItems = 4;
+    repeated uint32 walkAroundIds = 5 [packed = true];
+    repeated .pbschool.SchoolArrangeItem arrangeItems = 6;
+    repeated .pbschool.SchoolTriggerStoryItem arrangeTriggerStorys = 7;
+    uint32 bigEventId = 8;
+    uint32 meetId = 9;
+    uint32 meetStoryId = 10;
+    repeated .pbschool.SchoolRoundTaskItem roundTaskItems = 11;
+    uint32 showRoundId = 12;
+    uint32 lessonPartnerId = 13;
+    repeated .pbschool.SchoolSettleItem settlementIds = 14;
+    uint32 settlementRoleLetterId = 15;
+    uint32 settlementRoleStoryId = 16;
+    uint32 noticeRoleId = 17;
+    repeated .pbschool.SchoolTriggerStoryItem preStorys = 18;
+    uint32 easterEggStoryId = 19;
+    uint32 playthroughCount = 20;
+}
+
+message SchoolRoleStoryItem {
+    uint32 roleId = 1;
+    uint32 loveLevel = 2;
+    uint32 storyId = 3;
+    uint32 isAfterStory = 4;
+    repeated .pbschool.RewardDataItem afterStoryReward = 5;
+    uint32 isEasterEggStory = 6;
+}
+
+message SchoolRewardAttrItem {
+    uint32 attrId = 1;
+    uint32 num = 2;
+}
+
+message SchoolRewardLoveExpItem {
+    uint32 roleId = 1;
+    uint32 num = 2;
+}
+
+message GetSchoolDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1367;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetSchoolDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1368;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 hasBaseInfo = 3;
+    .pbschool.SchoolBaseInfo baseInfo = 4;
+    uint32 hasRoundInfo = 5;
+    .pbschool.SchoolRoundInfo roundInfo = 6;
+    repeated .pbschool.SchoolRoleStoryItem storyInfo = 7;
+}
+
+message SchoolStartRoundReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1369;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 costTicketNum = 2;
+    uint32 costStaminaNum = 3;
+    uint32 useUnlimitedTicket = 4;
+}
+
+message SchoolStartRoundRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1370;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message SchoolReadLetterReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1371;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 readLetterId = 2;
+}
+
+message SchoolReadLetterRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1372;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message SchoolWalkAroundReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1373;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 walkAroundId = 3;
+}
+
+message SchoolWalkAroundRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1374;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbschool.SchoolRewardAttrItem rewardAttrItems = 2;
+    repeated .pbschool.SchoolRewardLoveExpItem rewardLoveExpItems = 3;
+}
+
+message SchoolArrangeLessonReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1375;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 selectLessonId = 2 [packed = true];
+    uint32 lessonPartner = 3;
+}
+
+message SchoolArrangeLessonRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1376;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message SchoolArrangeActionReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1377;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 arrangeNo = 2;
+    uint32 arrangeChoice = 3;
+}
+
+message SchoolArrangeActionRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1378;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbschool.SchoolRewardAttrItem rewardAttrItems = 2;
+    uint32 lessonResult = 3;
+}
+
+message SchoolBigEventReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1379;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 bigEventScore = 2;
+}
+
+message SchoolBigEventRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1380;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbschool.SchoolRewardAttrItem rewardAttrItems = 2;
+}
+
+message SchoolRoundEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1381;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message SchoolRoundEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1382;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    .pbschool.SchoolRewardLoveExpItem rewardLoveExpItem = 2;
+    uint32 rewardWalletNum = 3;
+    repeated .pbschool.SchoolRoundTaskItem roundTaskItems = 4;
+}
+
+message SchoolMeetChoiceReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1383;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 index = 2;
+}
+
+message SchoolMeetChoiceRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1384;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message SchoolBigEventChoicePartnerReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1385;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 bigEventPartner = 2;
+}
+
+message SchoolBigEventChoicePartnerRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1386;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message SchoolSettlementReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1387;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message SchoolSettlementRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1388;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

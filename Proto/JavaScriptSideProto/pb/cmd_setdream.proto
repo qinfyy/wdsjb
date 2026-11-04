@@ -1,0 +1,108 @@
+// JsProtoDumper: pb/cmd_setdream.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbsetdream;
+
+message SetDreamLevelItem {
+    uint32 levelId = 1;
+    uint32 levelStatus = 2;
+    uint32 maxScore = 3;
+    int64 unlockTime = 4;
+}
+
+message GetSetDreamDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1951;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetSetDreamDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1952;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    .pbsetdream.SetDreamLevelItem normalLevelItem = 3;
+    .pbsetdream.SetDreamLevelItem challengeLevelItem = 4;
+}
+
+message SetDreamLevelBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1953;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 currentStamina = 3;
+}
+
+message SetDreamLevelBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1954;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+}
+
+message SetDreamLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1955;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 result = 3;
+    uint32 score = 4;
+    repeated uint32 orderId = 5 [packed = true];
+    repeated uint32 failedOrderId = 6 [packed = true];
+}
+
+message SetDreamLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1956;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 result = 4;
+    uint32 score = 5;
+    uint32 maxScore = 6;
+}

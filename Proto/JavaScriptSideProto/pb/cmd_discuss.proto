@@ -1,0 +1,66 @@
+// JsProtoDumper: pb/cmd_discuss.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbdiscuss;
+
+message DiscussData {
+    uint32 discussId = 1;
+    uint32 choiceId = 2;
+}
+
+message GetDiscussDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1667;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+}
+
+message GetDiscussDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1668;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbdiscuss.DiscussData discussData = 2;
+}
+
+message DiscussChoiceReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1669;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 discussId = 1;
+    uint32 choiceId = 2;
+}
+
+message DiscussChoiceRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1670;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 discussId = 2;
+    uint32 choiceId = 3;
+}

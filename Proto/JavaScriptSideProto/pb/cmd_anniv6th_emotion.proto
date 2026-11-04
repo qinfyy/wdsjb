@@ -1,0 +1,215 @@
+// JsProtoDumper: pb/cmd_anniv6th_emotion.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbanniv6themotion;
+
+message Anniv6thEmotionScheduleData {
+    uint32 scheduleId = 1;
+    uint32 status = 2;
+    uint32 selectedRoleId = 3;
+    uint32 signInDayNum = 4;
+    int64 lastSignInTime = 5;
+    int64 signInEndTime = 6;
+    int64 openAwardTime = 7;
+    repeated .pbanniv6themotion.Anniv6thEmotionRoleData roleData = 8;
+    repeated .pbanniv6themotion.Anniv6thEmotionDayData dayData = 9;
+    repeated .pbanniv6themotion.Anniv6thEmotionLotteryData lotteryData = 10;
+    uint32 gotLotteryAward = 11;
+}
+
+message Anniv6thEmotionRoleData {
+    uint32 roleId = 1;
+    uint32 textUseVersion = 2;
+    uint32 playerReplyEmoji = 3;
+    uint32 roleReplyEmoji = 4;
+    repeated .pbanniv6themotion.Anniv6thEmotionCoupleAppData coupleAppData = 5;
+    int64 playerReplyEmojiTime = 6;
+    int64 roleReplyEmojiTime = 7;
+}
+
+message Anniv6thEmotionDayData {
+    uint32 dayId = 1;
+    uint32 isGot = 2;
+    int64 rewardDisplayTime = 3;
+    repeated .pbanniv6themotion.RewardDataItem rewardData = 4;
+}
+
+message Anniv6thEmotionLotteryData {
+    string awardCode = 1;
+    uint32 awardType = 2;
+    uint32 awardId = 3;
+}
+
+message Anniv6thEmotionCoupleAppData {
+    uint32 dataType = 1;
+    uint32 dataValue = 2;
+}
+
+message GetAnniv6ThEmotionDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1891;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetAnniv6ThEmotionDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1892;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbanniv6themotion.Anniv6thEmotionScheduleData scheduleData = 2;
+}
+
+message Anniv6ThEmotionSelectRoleReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1893;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+}
+
+message Anniv6ThEmotionSelectRoleRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1894;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+}
+
+message Anniv6ThEmotionSignInReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1895;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message Anniv6ThEmotionSignInRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1896;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+}
+
+message Anniv6ThEmotionSignInRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1897;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 rewardLastDay = 2;
+}
+
+message Anniv6ThEmotionSignInRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1898;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 rewardLastDay = 3;
+    repeated .pbanniv6themotion.RewardDataItem rewardData = 4;
+}
+
+message Anniv6ThEmotionReplyReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1899;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+    uint32 emojiId = 3;
+}
+
+message Anniv6ThEmotionReplyRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1900;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 roleId = 3;
+    uint32 emojiId = 4;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

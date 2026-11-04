@@ -1,0 +1,236 @@
+// JsProtoDumper: pb/cmd_kitchen.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbkitchen;
+
+message KitchenIngredientData {
+    uint32 ingredientId = 1;
+    int32 curNum = 2;
+    uint32 wishLeftNum = 3;
+}
+
+message KitchenRoleData {
+    uint32 roleId = 1;
+    uint32 status = 2;
+    int64 letterTime = 3;
+}
+
+message KitchenRewardData {
+    uint32 id = 1;
+    uint32 completeNum = 2;
+    uint32 isDone = 3;
+    uint32 isCore = 4;
+    repeated .pbkitchen.RewardDataItem reward = 5;
+}
+
+message KitchenWishData {
+    uint32 curWishId = 1;
+    uint32 todayWishNum = 2;
+    int64 wishEndTime = 3;
+    int64 speedUpStartTime = 4;
+}
+
+message GetKitchenDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1171;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+}
+
+message GetKitchenDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1172;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    uint32 kitchenId = 3;
+    uint32 allData = 4;
+    .pbkitchen.KitchenWishData wishData = 5;
+    repeated uint32 finishFoodList = 6 [packed = true];
+    repeated .pbkitchen.KitchenIngredientData ingredientList = 7;
+    repeated .pbkitchen.KitchenRoleData roleData = 8;
+    repeated .pbkitchen.KitchenRewardData rewardList = 9;
+}
+
+message KitchenMakeFoodReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1173;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    repeated uint32 ingredientId = 2 [packed = true];
+}
+
+message KitchenMakeFoodRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1174;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 status = 2;
+    uint32 foodId = 3;
+    uint32 helpFood = 4;
+}
+
+message KitchenWishIngredientReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1175;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 ingredientId = 2;
+    uint32 isTake = 3;
+}
+
+message KitchenWishIngredientRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1176;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 ingredientId = 2;
+    uint32 isTake = 3;
+}
+
+message KitchenRoleLetterReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1177;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 roleId = 2;
+    uint32 opType = 3;
+}
+
+message KitchenRoleLetterRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1178;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 roleId = 2;
+    uint32 opType = 3;
+}
+
+message KitchenSpeedUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1179;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 hcoinNum = 2;
+}
+
+message KitchenSpeedUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1180;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 costHcoin = 2;
+}
+
+message KitchenGetRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1181;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    repeated uint32 rewardId = 2 [packed = true];
+}
+
+message KitchenGetRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1182;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbkitchen.RewardDataItem rewards = 2;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

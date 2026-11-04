@@ -1,0 +1,152 @@
+// JsProtoDumper: pb/cmd_match.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbmatch;
+
+message MatchGameItem {
+    uint32 gameId = 1;
+    uint32 gameStatus = 2;
+}
+
+message MatchDataItem {
+    uint32 matchId = 1;
+    repeated .pbmatch.MatchGameItem games = 2;
+    uint32 aGroupScore = 3;
+    uint32 bGroupScore = 4;
+    uint32 isDone = 5;
+}
+
+message MatchDayItem {
+    uint32 dayId = 1;
+    repeated .pbmatch.MatchDataItem matchDataItems = 2;
+    int64 unlockTimestamp = 3;
+    uint32 matchDayStatus = 4;
+}
+
+message MatchBadgeItem {
+    uint32 slot = 1;
+    uint32 badgeId = 2;
+}
+
+message MatchTeamInfo {
+    repeated .pbmatch.MatchBadgeItem badges = 1;
+    string teamName = 2;
+}
+
+message MatchRewardInfo {
+    repeated .pbmatch.RewardDataItem rewardItems = 1;
+    uint32 rewardStatus = 2;
+}
+
+message GetMatchDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1183;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetMatchDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1184;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 hasTeamInfo = 3;
+    .pbmatch.MatchTeamInfo teamInfo = 4;
+    uint32 currentDayId = 5;
+    uint32 hasMatchRecord = 6;
+    repeated .pbmatch.MatchDayItem matchRecord = 7;
+    uint32 hasRewardInfo = 8;
+    .pbmatch.MatchRewardInfo rewardInfo = 9;
+}
+
+message MatchSetTeamInfoReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1185;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    .pbmatch.MatchTeamInfo teamInfo = 2;
+}
+
+message MatchSetTeamInfoRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1186;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message MatchChampionRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1187;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message MatchChampionRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1188;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbmatch.RewardDataItem rewardItems = 2;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

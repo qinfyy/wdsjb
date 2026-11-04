@@ -1,0 +1,110 @@
+// JsProtoDumper: pb/cmd_personal_bighouse.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbpersonalbighouse;
+
+message PersonalBighouseInfo {
+    uint32 bighouseId = 1;
+    repeated .pbpersonalbighouse.PersonalBighouseStoryInfo rewardInfo = 2;
+}
+
+message PersonalBighouseStoryInfo {
+    uint32 storyId = 1;
+    repeated .pbpersonalbighouse.RewardDataItem rewardItem = 2;
+}
+
+message PersonalRPGFinalInfo {
+    uint32 scheduleId = 1;
+    uint32 personalRpgId = 2;
+    uint32 eventId = 3;
+    uint32 bighouseId = 4;
+    repeated .pbpersonalbighouse.PersonalRPGFinalSearch2DInfo search2dInfos = 5;
+    uint32 isOpen = 6;
+}
+
+message PersonalRPGFinalSearch2DInfo {
+    uint32 search2dId = 1;
+    repeated uint32 search2dStoryId = 2 [packed = true];
+    uint32 status = 3;
+}
+
+message GetPersonalBighouseDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1325;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 bighouseAll = 1;
+    repeated uint32 bighouseId = 2 [packed = true];
+}
+
+message GetPersonalBighouseDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1326;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbpersonalbighouse.PersonalBighouseInfo bighouseInfos = 2;
+}
+
+message GetPersonalRPGFinalDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1327;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 isAll = 1;
+    repeated uint32 scheduleIds = 2 [packed = true];
+}
+
+message GetPersonalRPGFinalDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1328;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbpersonalbighouse.PersonalRPGFinalInfo finalInfo = 2;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

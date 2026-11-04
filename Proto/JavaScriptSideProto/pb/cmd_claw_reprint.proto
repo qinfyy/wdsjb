@@ -1,0 +1,191 @@
+// JsProtoDumper: pb/cmd_claw_reprint.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbclawreprint;
+
+message ClawReprintSubActivityInfo {
+    uint32 activityId = 1;
+    uint32 cardId = 2;
+    uint32 goldBallNum = 3;
+    uint32 goldBallNeed = 4;
+    uint32 getCard = 5;
+    uint32 status = 6;
+}
+
+message ClawReprintChooseData {
+    uint32 activityId = 1;
+    uint32 choicedActivityId = 2;
+    repeated .pbclawreprint.ClawReprintSubActivityInfo subList = 3;
+    uint32 coinId = 4;
+    int32 curCoinNum = 5;
+}
+
+message ClawReprintData {
+    uint32 machineId = 1;
+    uint32 activityId = 2;
+    uint32 freeNum = 3;
+    uint32 nextGoldBaodiNum = 4;
+    repeated .pbclawreprint.ClawBoxInfo boxData = 5;
+    uint32 coinId = 6;
+    int32 curCoinNum = 7;
+    uint32 cardId = 8;
+    uint32 goldBallNum = 9;
+    uint32 goldBallNeed = 10;
+    uint32 getCard = 11;
+}
+
+message GetClawReprintChooseDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1913;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+}
+
+message GetClawReprintChooseDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1914;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbclawreprint.ClawReprintChooseData data = 2;
+}
+
+message ClawReprintSelectReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1915;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 chooseActivityId = 2;
+}
+
+message ClawReprintSelectRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1916;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 choicedActivityId = 2;
+}
+
+message GetClawReprintDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1917;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+}
+
+message GetClawReprintDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1918;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbclawreprint.ClawReprintData data = 2;
+}
+
+message ClawReprintGachaReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1919;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 gachaNum = 2;
+    uint32 free = 3;
+    int32 curCoinNum = 4;
+}
+
+message ClawReprintGachaRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1920;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbclawreprint.ClawResult result = 2;
+}
+
+message ClawBoxReward {
+    uint32 weight = 1;
+    repeated .pbclawreprint.RewardDataItem rewards = 2;
+}
+
+message ClawBoxInfo {
+    uint32 boxId = 1;
+    uint32 boxNum = 2;
+    uint32 weight = 3;
+    repeated .pbclawreprint.ClawBoxReward clawReward = 4;
+}
+
+message ClawResult {
+    uint32 boxId = 1;
+    uint32 guarantee = 2;
+    repeated .pbclawreprint.RewardDataItem rewards = 3;
+    .pbclawreprint.RewardDataItem cardReward = 4;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

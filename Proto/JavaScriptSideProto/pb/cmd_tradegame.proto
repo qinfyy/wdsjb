@@ -1,0 +1,556 @@
+// JsProtoDumper: pb/cmd_tradegame.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbtradegame;
+
+message TradegameGridInfo {
+    uint32 orderId = 1;
+    uint32 gridType = 2;
+    uint32 param = 3;
+    uint32 ownerId = 4;
+    repeated uint32 nextGrid = 5 [packed = true];
+    repeated uint32 nextGridReverse = 6 [packed = true];
+    uint32 npcBuffId = 7;
+    uint32 hasRoadblock = 8;
+}
+
+message TradegameChessInfo {
+    uint32 chessId = 1;
+    repeated .pbtradegame.TradegameNpcBuffInfo npcBuffInfo = 2;
+    uint32 isReverse = 3;
+    repeated .pbtradegame.TradegameCrossRoadInfo crossRoadInfo = 4;
+    uint32 money = 5;
+    repeated .pbtradegame.TradegameChessRecordInfo recordInfo = 6;
+    uint32 gridId = 7;
+    uint32 inLeaveStatus = 8;
+    uint32 leaveRound = 9;
+    int64 bankruptcyTimestamp = 10;
+}
+
+message TradegameChessRecordInfo {
+    uint32 recordType = 1;
+    uint32 recordNum = 2;
+}
+
+message TradegameCrossRoadInfo {
+    uint32 orderId = 1;
+    repeated uint32 choicedNextId = 2 [packed = true];
+}
+
+message TradegameGlobalBuffInfo {
+    uint32 globalBuffId = 1;
+    uint32 remainRound = 2;
+    uint32 moneyRatio = 3;
+    repeated uint32 storeType = 4 [packed = true];
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+}
+
+message TradegameNpcBuffInfo {
+    uint32 npcBuffId = 1;
+    uint32 remainRound = 2;
+}
+
+message TradegameLogInfo {
+    uint32 indexId = 1;
+    uint32 round = 2;
+    uint32 logType = 3;
+    .pbtradegame.TradegameLogBodyInfo logBody = 4;
+    uint32 isNew = 5;
+}
+
+message TradegameLogBodyInfo {
+    uint32 subType = 1;
+    uint32 optChessId = 2;
+    uint32 gridId = 3;
+    uint32 buffId = 4;
+    repeated .pbtradegame.TradegameLogBodyRewardInfo rewardList = 5;
+    uint32 moneyRatio = 6;
+    uint32 upgradeCnt = 7;
+    uint32 itemId = 8;
+    uint32 diceNum = 9;
+    uint32 storeId = 10;
+    uint32 isSuccess = 11;
+    uint32 moneyChange = 12;
+    uint32 payForChessId = 13;
+    uint32 eventTargetType = 14;
+    uint32 addRoadBlockNum = 15;
+    uint32 afterStoreId = 16;
+    repeated uint32 storeType = 17 [packed = true];
+}
+
+message TradegameLogBodyRewardInfo {
+    uint32 materialId = 1;
+    uint32 materialNum = 2;
+}
+
+message TradegameLevelInfo {
+    uint32 levelId = 1;
+    uint32 status = 2;
+    repeated .pbtradegame.TradegameGridInfo gridInfo = 3;
+    .pbtradegame.TradegameGlobalBuffInfo globalBuffInfo = 4;
+    repeated .pbtradegame.TradegameChessInfo chessInfo = 5;
+    uint32 optChessId = 6;
+    uint32 remainStep = 7;
+    uint32 round = 8;
+    repeated .pbtradegame.TradegameLogInfo logInfo = 9;
+    uint32 choiceTableId = 10;
+}
+
+message TradegameStorePayStepInfo {
+    uint32 basePrice = 1;
+    uint32 roadPrice = 2;
+    uint32 globalBuffPrice = 3;
+    uint32 npcBuffPrice = 4;
+}
+
+message TradegameScheduleInfo {
+    uint32 scheduleId = 1;
+    repeated .pbtradegame.TradegameLevelInfo levelInfo = 2;
+    repeated uint32 finishedLevel = 3 [packed = true];
+    int64 textureSwitchTime = 4;
+}
+
+message GetTradegameDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1571;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 levelId = 2 [packed = true];
+}
+
+message GetTradegameDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1572;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbtradegame.TradegameScheduleInfo scheduleInfo = 2;
+    uint32 isAll = 3;
+}
+
+message TradegameLevelStartReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1573;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+}
+
+message TradegameLevelStartRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1574;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    repeated .pbtradegame.RewardDataItem rewards = 4;
+    .pbtradegame.TradegameLevelInfo levelInfo = 5;
+}
+
+message TradegameUseItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1575;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 itemId = 3;
+    uint32 param = 4;
+}
+
+message TradegameUseItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1576;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 itemId = 4;
+    uint32 param = 5;
+    repeated .pbtradegame.RewardDataItem rewards = 6;
+    .pbtradegame.TradegameLevelInfo levelInfo = 7;
+}
+
+message TradegameDiceReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1577;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+}
+
+message TradegameDiceRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1578;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 diceNum = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    repeated uint32 gridList = 6 [packed = true];
+    .pbtradegame.TradegameLevelInfo levelInfo = 7;
+    .pbtradegame.TradegameStorePayStepInfo storePayStepInfo = 8;
+}
+
+message TradegameRoadChoiceReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1579;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 nextGridId = 3;
+}
+
+message TradegameRoadChoiceRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1580;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 nextGridId = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    repeated uint32 gridList = 6 [packed = true];
+    .pbtradegame.TradegameLevelInfo levelInfo = 7;
+    .pbtradegame.TradegameStorePayStepInfo storePayStepInfo = 8;
+}
+
+message TradegameStoreOptReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1581;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 isOpt = 3;
+}
+
+message TradegameStoreOptRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1582;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 isOpt = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    .pbtradegame.TradegameLevelInfo levelInfo = 6;
+}
+
+message TradegameQuestionReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1583;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 answerCorrect = 3;
+}
+
+message TradegameQuestionRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1584;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 answerCorrect = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    .pbtradegame.TradegameLevelInfo levelInfo = 6;
+}
+
+message TradegameEventChoiceReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1585;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 eventChoice = 3;
+}
+
+message TradegameEventChoiceRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1586;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 eventChoice = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    .pbtradegame.TradegameLevelInfo levelInfo = 6;
+}
+
+message TradegameAIStepReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1587;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 chessId = 3;
+}
+
+message TradegameAIStepRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1588;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 chessId = 4;
+    repeated .pbtradegame.RewardDataItem rewards = 5;
+    .pbtradegame.TradegameLevelInfo levelInfo = 6;
+    repeated uint32 gridList = 7 [packed = true];
+    repeated string aiMsg = 8;
+    .pbtradegame.TradegameStorePayStepInfo storePayStepInfo = 9;
+}
+
+message TradegameLevelFinishReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1589;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+}
+
+message TradegameLevelFinishRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1590;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    .pbtradegame.TradegameLevelInfo levelInfo = 4;
+}
+
+message TradegameShowLogReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1591;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    repeated uint32 logIndex = 3 [packed = true];
+}
+
+message TradegameShowLogRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1592;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    repeated uint32 logIndex = 4 [packed = true];
+    .pbtradegame.TradegameLevelInfo levelInfo = 5;
+}
+
+message GetTradegameLogReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1593;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 logIndex = 3;
+}
+
+message GetTradegameLogRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1594;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 logIndex = 4;
+    repeated .pbtradegame.TradegameLogInfo logInfo = 5;
+}
+
+message GetTradegameTickReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1595;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+}
+
+message GetTradegameTickRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1596;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

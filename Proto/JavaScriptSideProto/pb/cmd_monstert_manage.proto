@@ -1,0 +1,112 @@
+// JsProtoDumper: pb/cmd_monstert_manage.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbmonstertmanage;
+
+message MonsterManageBaseData {
+    uint32 organizationLevel = 1;
+    uint32 maxOrganizationLevel = 2;
+    uint32 girlBubbleId = 3;
+    uint32 miniStoryId = 4;
+    int64 unlockMonsterTime = 5;
+}
+
+message MonsterManageDistributeCaseItem {
+    repeated uint32 monsterIdList = 1 [packed = true];
+    uint32 acceptMonsterId = 2;
+    uint32 fundsGot = 3;
+}
+
+message MonsterManageExploreData {
+    uint32 exploreStatus = 1;
+    uint32 levelId = 2;
+    uint32 roleId = 3;
+    string levelSaveData = 4;
+    repeated .pbmonstertmanage.MonsterManageDistributeCaseItem distributeCaseItems = 5;
+}
+
+message MonsterManageMaterialItem {
+    uint32 type = 1;
+    uint32 materialId = 2;
+    uint32 currentGotNum = 3;
+    uint32 currentMaxGotNum = 4;
+    int64 newMaxGotNumTime = 5;
+    uint32 newMaxGotNum = 6;
+    uint32 exchangeCost = 7;
+}
+
+message MonsterManageOrganizationDecoItem {
+    uint32 decoType = 1;
+    uint32 level = 2;
+}
+
+message MonsterManageLevelItem {
+    uint32 levelId = 1;
+    uint32 levelStatus = 2;
+}
+
+message MonsterManageMonsterItem {
+    uint32 monsterId = 1;
+    uint32 isUnlock = 2;
+    uint32 gotTimes = 3;
+}
+
+message MonsterManagerCaseItem {
+    uint32 caseId = 1;
+    uint32 level = 2;
+}
+
+message MonsterManageTalentItem {
+    uint32 talentId = 1;
+    uint32 level = 2;
+}
+
+message MonsterManageRoleItem {
+    uint32 roleId = 1;
+    repeated uint32 healLevelIds = 2 [packed = true];
+}
+
+message GetMonsterManageDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1621;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetMonsterManageDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1622;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 hasBaseData = 3;
+    .pbmonstertmanage.MonsterManageBaseData baseData = 4;
+    uint32 hasExploreData = 5;
+    .pbmonstertmanage.MonsterManageExploreData exploreData = 6;
+    uint32 materialAll = 7;
+    repeated .pbmonstertmanage.MonsterManageMaterialItem materialItems = 8;
+    uint32 organizationDecoAll = 9;
+    repeated .pbmonstertmanage.MonsterManageOrganizationDecoItem organizationDecoItems = 10;
+    uint32 levelAll = 11;
+    repeated .pbmonstertmanage.MonsterManageLevelItem levelItems = 12;
+    uint32 monsterAll = 13;
+    repeated .pbmonstertmanage.MonsterManageMonsterItem monsterItems = 14;
+    uint32 caseAll = 15;
+    repeated .pbmonstertmanage.MonsterManagerCaseItem caseItems = 16;
+    uint32 talentAll = 17;
+    repeated .pbmonstertmanage.MonsterManageTalentItem talentItems = 18;
+}

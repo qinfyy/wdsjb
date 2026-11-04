@@ -1,0 +1,106 @@
+// JsProtoDumper: pb/cmd_mine_sweeper.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbminesweeper;
+
+message MineSweeperGridInfo {
+    uint32 num = 1;
+    uint32 status = 2;
+}
+
+message MineSweeperItem {
+    uint32 gameId = 1;
+    uint32 levelId = 2;
+    uint32 status = 3;
+    uint32 levelFinishType = 4;
+    repeated .pbminesweeper.MineSweeperGridInfo gridInfo = 5;
+}
+
+message GetMineSweeperDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1353;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 activityId = 1;
+}
+
+message GetMineSweeperDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1354;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    .pbminesweeper.MineSweeperItem mineSweeperData = 3;
+}
+
+message MineSweeperOptGridReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1355;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+    uint32 optType = 2;
+    uint32 gridPos = 3;
+    uint32 costTime = 4;
+}
+
+message MineSweeperOptGridRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1356;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    .pbminesweeper.MineSweeperItem mineSweeperData = 3;
+}
+
+message MineSweeperUnlockLevelReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1357;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 activityId = 1;
+}
+
+message MineSweeperUnlockLevelRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1358;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 activityId = 2;
+    .pbminesweeper.MineSweeperItem mineSweeperData = 3;
+}

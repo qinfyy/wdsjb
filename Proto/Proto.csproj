@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.35.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.83.0" PrivateAssets="all" />
+    <Protobuf Include="Save\PlayerSaveProto.proto" GrpcServices="None" />
+    <Protobuf Include="JavaScriptSideProto\pb\*.proto" GrpcServices="None" ProtoRoot="JavaScriptSideProto\pb" />
+  </ItemGroup>
+
+</Project>

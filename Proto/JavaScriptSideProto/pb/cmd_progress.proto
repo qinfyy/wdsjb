@@ -1,0 +1,106 @@
+// JsProtoDumper: pb/cmd_progress.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbprogress;
+
+message ProgressScheduleRewardItem {
+    uint32 gradeId = 1;
+    uint32 needPoint = 2;
+    uint32 status = 3;
+    repeated .pbprogress.RewardDataItem rewards = 4;
+    uint32 isKey = 5;
+}
+
+message ProgressScheduleItem {
+    uint32 progressId = 1;
+    uint32 scheduleId = 2;
+    int32 curProgress = 3;
+    uint32 status = 4;
+    int64 startTime = 5;
+    int64 endTime = 6;
+    repeated .pbprogress.ProgressScheduleRewardItem progressRewawrds = 7;
+}
+
+message GetProgressRewardDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1320;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 allProgress = 1;
+    repeated uint32 progressId = 2 [packed = true];
+}
+
+message GetProgressRewardDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1321;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 allProgress = 2;
+    repeated .pbprogress.ProgressScheduleItem progressItems = 3;
+}
+
+message ProgressTakeRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1323;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 progressId = 1;
+    repeated uint32 gradeId = 2 [packed = true];
+}
+
+message ProgressTakeRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1324;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 progressId = 2;
+    repeated uint32 gradeId = 3 [packed = true];
+    repeated .pbprogress.RewardDataItem rewards = 4;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

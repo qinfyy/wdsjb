@@ -1,0 +1,78 @@
+// JsProtoDumper: pb/cmd_personal_gift.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbpersonalgift;
+
+message PersonalGiftScheduleData {
+    uint32 scheduleId = 1;
+    repeated .pbpersonalgift.PersonalGiftRoleData roleData = 2;
+    uint32 fullData = 3;
+}
+
+message PersonalGiftRoleData {
+    uint32 roleId = 1;
+    uint32 phaseId = 2;
+    uint32 storyId = 3;
+    int64 nextTimestamp = 4;
+    uint32 waitSetFinalStoryUnlockDay = 5;
+    uint32 allDone = 6;
+}
+
+message GetPersonalGiftScheduleDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1921;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetPersonalGiftScheduleDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1922;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    .pbpersonalgift.PersonalGiftScheduleData scheduleData = 3;
+}
+
+message PersonalGiftSetFinalStoryUnlockDayReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1923;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 roleId = 1;
+    uint32 day = 2;
+}
+
+message PersonalGiftSetFinalStoryUnlockDayRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1924;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 roleId = 2;
+    uint32 day = 3;
+}

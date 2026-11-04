@@ -1,0 +1,324 @@
+// JsProtoDumper: pb/cmd_wreck.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbwreck;
+
+message WreckDiaryItem {
+    uint32 routineId = 1;
+    repeated .pbwreck.RewardDataItem materialItems = 2;
+    uint32 roleId = 3;
+    uint32 diaryStatus = 4;
+    uint32 islandId = 5;
+}
+
+message WreckIslandItem {
+    uint32 islandId = 1;
+    uint32 status = 2;
+}
+
+message WreckEntityItem {
+    uint32 entityId = 1;
+    uint32 status = 2;
+}
+
+message WreckVoyageOptionItem {
+    uint32 voyageId = 1;
+    repeated uint32 stepIds = 2 [packed = true];
+}
+
+message WreckLevelItem {
+    uint32 levelId = 1;
+    uint32 levelType = 2;
+    uint32 accumulatedScore = 3;
+    uint32 status = 4;
+}
+
+message WreckDealLevelInfo {
+    uint32 orderId = 1;
+    uint32 resultType = 2;
+}
+
+message WreckData {
+    uint32 scheduleId = 1;
+    uint32 routineId = 2;
+    uint32 routineStatus = 3;
+    int64 routineOpenTime = 4;
+    uint32 diaryAll = 5;
+    repeated .pbwreck.WreckDiaryItem diaryItems = 6;
+    uint32 islandAll = 7;
+    repeated .pbwreck.WreckIslandItem islandItems = 8;
+    uint32 voyageOptionAll = 9;
+    repeated .pbwreck.WreckVoyageOptionItem voyageOptionItems = 10;
+    uint32 finishedVoyageAll = 11;
+    repeated uint32 finishedVoyageIds = 12 [packed = true];
+    uint32 todayFinishedVoyage = 13;
+    uint32 todayPicked = 14;
+    uint32 levelAll = 15;
+    repeated .pbwreck.WreckLevelItem levelItems = 16;
+    uint32 entityAll = 17;
+    repeated .pbwreck.WreckEntityItem entityItems = 18;
+    uint32 activityMissionAll = 19;
+    repeated .pbwreck.ActivityMissionItem activityMissionItems = 20;
+    repeated uint32 nightwatchRoleIds = 21 [packed = true];
+    uint32 foodGetLimitReached = 22;
+}
+
+message GetWreckDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1961;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetWreckDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1962;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    .pbwreck.WreckData wreckData = 2;
+}
+
+message WreckLevelPlayReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1963;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 levelType = 3;
+    uint32 score = 4;
+    uint32 accumulatedScore = 5;
+    uint32 fishingRoleId = 6;
+    map<uint32, uint32> fishingItems = 7;
+    repeated .pbwreck.WreckDealLevelInfo dealLevelInfo = 8;
+}
+
+message WreckLevelPlayRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1964;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbwreck.RewardDataItem rewardItems = 2;
+}
+
+message WreckVoyageReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1965;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 voyageId = 2;
+    repeated uint32 stepIds = 3 [packed = true];
+}
+
+message WreckVoyageRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1966;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WreckEntityReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1967;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 entityId = 2;
+}
+
+message WreckEntityRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1968;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbwreck.RewardDataItem rewardItems = 2;
+}
+
+message WreckPickupReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1969;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message WreckPickupRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1970;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbwreck.RewardDataItem rewardItems = 2;
+}
+
+message WreckRoleReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1971;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 roleId = 2;
+}
+
+message WreckRoleRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1972;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WreckSendDiaryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1973;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message WreckSendDiaryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1974;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message WreckUnlockRoutineReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1975;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 routineId = 2;
+}
+
+message WreckUnlockRoutineRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1976;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}
+
+message ActivityMissionItem {
+    uint32 missionId = 1;
+    uint32 missionGroupId = 2;
+    uint32 status = 3;
+    int64 unlockTime = 4;
+    repeated uint32 premissionIds = 5 [packed = true];
+    repeated uint32 aftermissionIds = 6 [packed = true];
+    uint32 currentProgress = 7;
+    uint32 maxProgress = 8;
+}

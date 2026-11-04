@@ -1,0 +1,423 @@
+// JsProtoDumper: pb/cmd_garden.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbgarden;
+
+message GardenClipWordItem {
+    uint32 wordId = 1;
+    uint32 wordStatus = 2;
+}
+
+message GardenClipItem {
+    uint32 clipId = 1;
+    repeated .pbgarden.GardenClipWordItem clipWordItems = 2;
+    uint32 clipStatus = 3;
+}
+
+message GardenClipGroupItem {
+    uint32 clipGroupId = 1;
+    repeated .pbgarden.GardenClipItem clipDataItems = 2;
+    uint32 clipGroupStatus = 3;
+    repeated .pbgarden.RewardDataItem rewards = 4;
+}
+
+message GardenProgressRewardItem {
+    uint32 percentage = 1;
+    repeated .pbgarden.RewardDataItem rewards = 2;
+    uint32 isTake = 3;
+}
+
+message GardenProgressItem {
+    uint32 progressId = 1;
+    uint32 currentProgress = 2;
+    repeated .pbgarden.GardenProgressRewardItem rewardItems = 3;
+}
+
+message GardenSceneItem {
+    uint32 gardenId = 1;
+    .pbgarden.GardenProgressItem progressItem = 2;
+    uint32 usedSculptureId = 3;
+    int64 nextAddWaterTime = 4;
+    repeated .pbgarden.GardenSlotItem slots = 5;
+    uint32 normalWaterPoint = 6;
+    uint32 criticalWaterPoint = 7;
+    int64 waterFullTime = 8;
+    repeated .pbgarden.GardenBuffEffectItem buffEffects = 9;
+}
+
+message GardenBuffEffectItem {
+    uint32 effectType = 1;
+    uint32 value = 2;
+}
+
+message GardenBuffItem {
+    uint32 buffId = 1;
+    uint32 grade = 2;
+    uint32 maxGrade = 3;
+}
+
+message GardenSculptureItem {
+    uint32 sculptureId = 1;
+    uint32 sculptureStatus = 2;
+}
+
+message GardenSlotItem {
+    uint32 slotId = 1;
+    uint32 currentNormalWaterNum = 2;
+    uint32 currentCriticalWaterNum = 3;
+    uint32 nextNormalWaterNum = 4;
+    uint32 nextCriticalWaterNum = 5;
+}
+
+message GardenScheduleDataItem {
+    uint32 scheduleId = 1;
+    uint32 currentGarden = 2;
+    uint32 currentClipGroupId = 3;
+    uint32 gardenSceneAll = 4;
+    repeated .pbgarden.GardenSceneItem sceneItems = 5;
+    uint32 clipGroupAll = 6;
+    repeated .pbgarden.GardenClipGroupItem clipGroupItems = 7;
+    uint32 buffAll = 8;
+    repeated .pbgarden.GardenBuffItem buffItems = 9;
+    uint32 sculptureAll = 10;
+    repeated .pbgarden.GardenSculptureItem sculptureItems = 11;
+    uint32 plantingType = 12;
+    uint32 plantingStatus = 13;
+    uint32 guideStatus = 14;
+}
+
+message GetGardenDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1481;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleAll = 1;
+    repeated uint32 scheduleId = 2 [packed = true];
+}
+
+message GetGardenDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1482;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleAll = 2;
+    repeated .pbgarden.GardenScheduleDataItem scheduleDataItems = 3;
+}
+
+message GardenSelectClipGroupReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1483;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 gardenId = 2;
+    uint32 clipGroupId = 3;
+}
+
+message GardenSelectClipGroupRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1484;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GardenStopPlantingReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1485;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GardenStopPlantingRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1486;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GardenRewardClipWordReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1487;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GardenRewardClipWordRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1488;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated uint32 clipWordIds = 2 [packed = true];
+    uint32 answerWordNum = 3;
+}
+
+message GardenFillClipWordReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1489;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 clipWordId = 2;
+    uint32 clipId = 3;
+}
+
+message GardenFillClipWordRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1490;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GardenClipGroupRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1491;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 clipGroupId = 2;
+}
+
+message GardenClipGroupRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1492;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbgarden.RewardDataItem rewards = 2;
+}
+
+message GardenProgressRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1493;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 percentage = 2 [packed = true];
+}
+
+message GardenProgressRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1494;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbgarden.GardenProgressRewardItem rewards = 2;
+}
+
+message GardenReadItemReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1495;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 clipGroupId = 2 [packed = true];
+    repeated uint32 sculptureId = 3 [packed = true];
+    repeated uint32 clipWordId = 4 [packed = true];
+}
+
+message GardenReadItemRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1496;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GardenUseSculptureReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1497;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 sculptureId = 2;
+}
+
+message GardenUseSculptureRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1498;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 sculptureId = 3;
+}
+
+message GardenBuffLevelUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1499;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 buffId = 2;
+    uint32 currentGrade = 3;
+    uint32 costCoinNum = 4;
+}
+
+message GardenBuffLevelUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1500;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GardenCollectWaterReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1501;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    repeated uint32 slotIds = 2 [packed = true];
+}
+
+message GardenCollectWaterRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1502;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbgarden.GardenSlotItem slotItems = 2;
+    uint32 progressScore = 3;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

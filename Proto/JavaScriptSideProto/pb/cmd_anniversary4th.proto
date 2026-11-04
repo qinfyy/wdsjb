@@ -1,0 +1,407 @@
+// JsProtoDumper: pb/cmd_anniversary4th.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbanniversary4th;
+
+message Anniversary4ThSpotItem {
+    uint32 spotId = 1;
+    uint32 spotStatus = 2;
+}
+
+message Anniversary4ThLevelOutItem {
+    uint32 levelOutId = 1;
+    uint32 star = 2;
+    uint32 status = 3;
+    repeated uint32 oneStarRewardStickerPacks = 4 [packed = true];
+    repeated uint32 twoStarRewardStickerPacks = 5 [packed = true];
+    repeated uint32 threeStarRewardStickerPacks = 6 [packed = true];
+    uint32 maxScore = 7;
+}
+
+message Anniversary4thRandomEventItem {
+    uint32 randomEventId = 1;
+    repeated uint32 rewardStickerIds = 2 [packed = true];
+    int32 posX = 3;
+    int32 posY = 4;
+}
+
+message Anniversary4ThParkItem {
+    uint32 parkId = 1;
+    uint32 parkFinishDegree = 2;
+    repeated .pbanniversary4th.Anniversary4ThSpotItem spotItems = 3;
+    uint32 isLevelOutOpen = 4;
+    repeated .pbanniversary4th.Anniversary4ThLevelOutItem levelOutItems = 5;
+    .pbanniversary4th.Anniversary4thRandomEventItem randomEvent = 6;
+    int64 openLevelOutTimestamp = 7;
+}
+
+message Anniversary4ThLine {
+    uint32 lineId = 1;
+    repeated .pbanniversary4th.Anniversary4ThParkItem parkItems = 2;
+    uint32 lineTime = 3;
+    uint32 lineStatus = 4;
+    repeated uint32 firstEnterRewardStickers = 5 [packed = true];
+}
+
+message GetAnniversary4ThDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1421;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetAnniversary4ThDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1422;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 lineAll = 3;
+    repeated .pbanniversary4th.Anniversary4ThLine lines = 4;
+}
+
+message ScrapBookStickerItem {
+    uint32 stickerId = 1;
+    int32 stickerNum = 2;
+    int64 recvUnixtime = 3;
+}
+
+message ScrapBookInPageStickerItem {
+    uint32 stickerId = 1;
+    int32 posX = 2;
+    int32 posY = 4;
+    uint32 scale = 5;
+    int32 rotation = 6;
+}
+
+message ScrapBookPageAreaItem {
+    uint32 areaNo = 1;
+    uint32 areaId = 2;
+    repeated .pbanniversary4th.ScrapBookInPageStickerItem stickerItems = 3;
+}
+
+message ScrapBookPageItem {
+    uint32 pageId = 1;
+    uint32 templateId = 2;
+    repeated .pbanniversary4th.ScrapBookPageAreaItem areaItems = 3;
+    .pbanniversary4th.ScrapBookStickerTaskItem stickerTask = 4;
+    uint32 backgroundId = 5;
+    int64 unlockTimestamp = 6;
+}
+
+message ScrapBookStickerTaskItem {
+    uint32 currentNum = 1;
+    uint32 targetNum = 2;
+    uint32 isRewarded = 3;
+    repeated .pbanniversary4th.RewardDataItem rewards = 4;
+}
+
+message ScrapBookItem {
+    uint32 scrapBookId = 1;
+    repeated .pbanniversary4th.ScrapBookPageItem pageItems = 2;
+    repeated uint32 finishedParkIds = 3 [packed = true];
+}
+
+message GetScrapBookDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1423;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scrapBookAll = 1;
+    uint32 stickerAll = 2;
+}
+
+message GetScrapBookDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1424;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scrapBookAll = 2;
+    repeated .pbanniversary4th.ScrapBookItem scrapBookItems = 3;
+    uint32 stickerAll = 4;
+    repeated .pbanniversary4th.ScrapBookStickerItem stickerItems = 5;
+}
+
+message Anniversary4ThOpenLevelOutReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1437;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+}
+
+message Anniversary4ThOpenLevelOutRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1438;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Anniversary4ThEnterParkReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1439;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+}
+
+message Anniversary4ThEnterParkRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1440;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Anniversary4ThLevelBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1425;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+    uint32 levelOutId = 4;
+}
+
+message Anniversary4ThLevelBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1426;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message Anniversary4ThLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1427;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+    uint32 levelOutId = 4;
+    uint32 result = 5;
+    uint32 score = 6;
+}
+
+message Anniversary4ThLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1428;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 levelOutId = 2;
+    repeated uint32 rewardStickers = 3 [packed = true];
+    repeated uint32 rewardStickerPacks = 4 [packed = true];
+    uint32 isFirstPass = 5;
+    uint32 isNewRecord = 6;
+}
+
+message Anniversary4ThReadSpotReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1429;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+    uint32 spotId = 4;
+}
+
+message Anniversary4ThReadSpotRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1430;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated uint32 rewardStickers = 2 [packed = true];
+}
+
+message Anniversary4ThReadEventReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1431;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 lineId = 2;
+    uint32 parkId = 3;
+    uint32 eventId = 4;
+}
+
+message Anniversary4ThReadEventRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1432;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated uint32 rewardStickerIds = 2 [packed = true];
+}
+
+message ScrapBookSavePageReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1433;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scrapBookId = 1;
+    .pbanniversary4th.ScrapBookPageItem pageItem = 2;
+}
+
+message ScrapBookSavePageRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1434;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message ScrapBookRewardReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1435;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scrapBookId = 1;
+    uint32 pageId = 2;
+}
+
+message ScrapBookRewardRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1436;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    repeated .pbanniversary4th.RewardDataItem rewards = 2;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

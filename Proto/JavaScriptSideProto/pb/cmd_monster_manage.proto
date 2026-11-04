@@ -1,0 +1,416 @@
+// JsProtoDumper: pb/cmd_monster_manage.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbmonstermanage;
+
+message MonsterManageBaseData {
+    uint32 organizationLevel = 1;
+    uint32 maxOrganizationLevel = 2;
+    uint32 girlBubbleId = 3;
+    uint32 miniStoryId = 4;
+    int64 nextUnlockMonsterLevel = 5;
+    repeated .pbmonstermanage.RewardDataItem afterStoryRewards = 6;
+    uint32 bountyId = 7;
+}
+
+message MonsterManageCatchMonsterItem {
+    uint32 monsterId = 1;
+    uint32 monsterValue = 2;
+    uint32 bonusValue = 3;
+}
+
+message MonsterManageDistributeCaseItem {
+    repeated .pbmonstermanage.MonsterManageCatchMonsterItem catchMonsters = 1;
+    .pbmonstermanage.MonsterManageCatchMonsterItem acceptCatchMonster = 2;
+    uint32 showFundsGot = 3;
+    uint32 realFundsGot = 4;
+    uint32 caseId = 5;
+    uint32 showSpellPointGot = 6;
+    uint32 realSpellPointGot = 7;
+}
+
+message MonsterManageExploreData {
+    uint32 exploreStatus = 1;
+    uint32 levelId = 2;
+    uint32 roleId = 3;
+    string levelSaveData = 4;
+    repeated .pbmonstermanage.MonsterManageDistributeCaseItem distributeCaseItems = 5;
+    uint32 levelStoryId = 6;
+    uint32 predictFundsGot = 7;
+    map<uint32, uint32> predictFinishCase = 8;
+}
+
+message MonsterManageMaterialItem {
+    uint32 type = 1;
+    uint32 materialId = 2;
+    uint32 currentGotNum = 3;
+    uint32 currentMaxGotNum = 4;
+    int64 newMaxGotNumTime = 5;
+    uint32 newMaxGotNum = 6;
+    uint32 exchangeCost = 7;
+}
+
+message MonsterManageOrganizationDecoItem {
+    uint32 decoType = 1;
+    uint32 level = 2;
+}
+
+message MonsterManageLevelItem {
+    uint32 levelId = 1;
+    uint32 levelStatus = 2;
+    repeated .pbmonstermanage.RewardDataItem rewards = 3;
+}
+
+message MonsterManageMonsterItem {
+    uint32 monsterId = 1;
+    uint32 isUnlock = 2;
+    uint32 gotTimes = 3;
+}
+
+message MonsterManageCaseItem {
+    uint32 caseId = 1;
+    uint32 level = 2;
+    uint32 status = 3;
+}
+
+message MonsterManageTalentItem {
+    uint32 talentId = 1;
+    uint32 level = 2;
+    uint32 status = 3;
+}
+
+message MonsterManageOrganizationTaskItem {
+    uint32 level = 1;
+    uint32 taskId = 2;
+    int64 startTime = 3;
+    uint32 taskStatus = 4;
+}
+
+message MonsterManageUseItem {
+    uint32 itemId = 1;
+    uint32 itemNum = 2;
+}
+
+message GetMonsterManageDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1621;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetMonsterManageDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1622;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 hasBaseData = 3;
+    .pbmonstermanage.MonsterManageBaseData baseData = 4;
+    uint32 hasExploreData = 5;
+    .pbmonstermanage.MonsterManageExploreData exploreData = 6;
+    uint32 materialAll = 7;
+    repeated .pbmonstermanage.MonsterManageMaterialItem materialItems = 8;
+    uint32 organizationDecoAll = 9;
+    repeated .pbmonstermanage.MonsterManageOrganizationDecoItem organizationDecoItems = 10;
+    uint32 levelAll = 11;
+    repeated .pbmonstermanage.MonsterManageLevelItem levelItems = 12;
+    uint32 monsterAll = 13;
+    repeated .pbmonstermanage.MonsterManageMonsterItem monsterItems = 14;
+    uint32 caseAll = 15;
+    repeated .pbmonstermanage.MonsterManageCaseItem caseItems = 16;
+    uint32 talentAll = 17;
+    repeated .pbmonstermanage.MonsterManageTalentItem talentItems = 18;
+    uint32 organizationTaskAll = 19;
+    repeated .pbmonstermanage.MonsterManageOrganizationTaskItem organizationTaskItems = 20;
+    uint32 hasFinishEntityIds = 21;
+    repeated uint32 finishEntityIds = 22 [packed = true];
+}
+
+message MonsterManagePlayMiniStoryReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1623;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 miniStoryId = 2;
+}
+
+message MonsterManagePlayMiniStoryRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1624;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message MonsterManageGetTicketReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1625;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 ticketNum = 2;
+    uint32 useStamina = 3;
+    uint32 currentStaminaNum = 4;
+}
+
+message MonsterManageGetTicketRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1626;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 ticketNum = 2;
+}
+
+message MonsterManageLevelBeginReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1627;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 roleId = 3;
+}
+
+message MonsterManageLevelBeginRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1628;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 roleId = 4;
+}
+
+message MonsterManageLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1629;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 roleId = 3;
+    uint32 result = 4;
+    repeated .pbmonstermanage.MonsterManageCatchMonsterItem catchMonsters = 5;
+    repeated uint32 enterMapIds = 6 [packed = true];
+    int64 timeCost = 7;
+    repeated .pbmonstermanage.MonsterManageUseItem useItems = 8;
+    bool isBountyDone = 9;
+}
+
+message MonsterManageLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1630;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 roleId = 4;
+    uint32 result = 5;
+    repeated .pbmonstermanage.MonsterManageCatchMonsterItem catchMonsters = 6;
+    repeated uint32 enterMapIds = 7 [packed = true];
+    int64 timeCost = 8;
+    repeated .pbmonstermanage.RewardDataItem rewards = 9;
+}
+
+message MonsterManageLevelSaveReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1631;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 roleId = 3;
+    string saveData = 4;
+    repeated .pbmonstermanage.MonsterManageCatchMonsterItem catchMonsters = 5;
+    repeated uint32 finishEntityIds = 9 [packed = true];
+}
+
+message MonsterManageLevelSaveRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1632;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 roleId = 4;
+    string saveData = 5;
+}
+
+message MonsterManageFinishCaseReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1633;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message MonsterManageFinishCaseRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1634;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message MonsterManageOrganizationLevelUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1635;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+}
+
+message MonsterManageOrganizationLevelUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1636;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 level = 3;
+}
+
+message MonsterManageTalentCaseLevelUpReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1637;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 talentId = 2;
+    uint32 caseId = 3;
+    uint32 currentLevel = 4;
+}
+
+message MonsterManageTalentCaseLevelUpRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1638;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 talentId = 3;
+    uint32 caseId = 4;
+    uint32 level = 5;
+}
+
+message RewardDataItem {
+    uint32 rewardType = 1;
+    uint32 itemId = 2;
+    uint32 itemLevel = 3;
+    uint32 itemNum = 4;
+    uint32 rewardId = 5;
+    string rewardTextmapId = 6;
+    uint32 decompose = 7;
+    uint32 materialId = 8;
+    uint32 materialNum = 9;
+    uint32 coinId = 10;
+    uint32 coinNum = 11;
+    uint32 addItemNum = 12;
+    int64 curItemNum = 13;
+    uint32 showBonus = 14;
+    uint32 rewardNameId = 15;
+    uint32 uniqId = 16;
+    uint32 expireUnixtime = 17;
+    uint32 materialDecomposeNum = 18;
+    uint32 showOldPlayer = 19;
+    uint32 rewardItemTag = 20;
+}

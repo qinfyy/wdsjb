@@ -1,0 +1,117 @@
+// JsProtoDumper: pb/cmd_merge_watermelon.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbmergewatermelon;
+
+message MergeWatermelonScheduleData {
+    uint32 scheduleId = 1;
+    repeated .pbmergewatermelon.MergeWatermelonLevelData levelData = 2;
+    .pbmergewatermelon.MergeWatermelonMakeData makeData = 3;
+    int64 packageStartTime = 4;
+}
+
+message MergeWatermelonLevelData {
+    uint32 levelId = 1;
+    uint32 levelType = 2;
+    uint32 status = 3;
+    uint32 score = 4;
+}
+
+message MergeWatermelonMakeData {
+    uint32 makeId = 1;
+    uint32 status = 2;
+    int64 finishTimestamp = 3;
+}
+
+message GetMergeWatermelonDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1703;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    uint32 scheduleId = 1;
+}
+
+message GetMergeWatermelonDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1704;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    .pbmergewatermelon.MergeWatermelonScheduleData scheduleData = 3;
+}
+
+message MergeWatermelonLevelEndReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1705;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 levelId = 2;
+    uint32 score = 3;
+    map<uint32, uint32> itemMap = 4;
+}
+
+message MergeWatermelonLevelEndRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1706;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 levelId = 3;
+    uint32 score = 4;
+}
+
+message MergeWatermelonMakeReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1707;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 makeId = 2;
+    uint32 optType = 3;
+}
+
+message MergeWatermelonMakeRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1708;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    uint32 scheduleId = 2;
+    uint32 makeId = 3;
+    uint32 optType = 4;
+}

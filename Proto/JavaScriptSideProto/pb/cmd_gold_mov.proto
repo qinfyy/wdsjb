@@ -1,0 +1,232 @@
+// JsProtoDumper: pb/cmd_gold_mov.js
+// Written by Cyt
+
+syntax = "proto3";
+
+package pbgoldmov;
+
+message GoldMovData {
+    uint32 scheduleId = 1;
+    .pbgoldmov.GoldMovMapPanel mapPanel = 2;
+    .pbgoldmov.GoldMovMissionPanel missionPanel = 3;
+    .pbgoldmov.GoldMovTerminalPanel terminalPanel = 4;
+}
+
+message GoldMovMapPanel {
+    repeated .pbgoldmov.GoldMovAreaInfo areaInfo = 1;
+}
+
+message GoldMovAreaInfo {
+    uint32 areaId = 1;
+    uint32 status = 2;
+    repeated .pbgoldmov.GoldMovLocationInfo locationInfo = 3;
+}
+
+message GoldMovLocationInfo {
+    uint32 locationId = 1;
+    uint32 status = 2;
+    repeated .pbgoldmov.GoldMovSceneInfo sceneInfo = 3;
+}
+
+message GoldMovSceneInfo {
+    uint32 sceneId = 1;
+    uint32 status = 2;
+    repeated .pbgoldmov.GoldMovNpcInfo npcInfo = 3;
+    repeated .pbgoldmov.GoldMovInteractivePointInfo interactivePointInfo = 4;
+}
+
+message GoldMovNpcInfo {
+    uint32 npcId = 1;
+    uint32 status = 2;
+}
+
+message GoldMovInteractivePointInfo {
+    uint32 interactivePointId = 1;
+    uint32 status = 2;
+}
+
+message GoldMovMissionPanel {
+    repeated .pbgoldmov.GoldMovMissionInfo missionInProgress = 1;
+    repeated .pbgoldmov.GoldMovMissionInfo missionDone = 2;
+    int64 nextMissionOpenTimestamp = 3;
+}
+
+message GoldMovMissionInfo {
+    uint32 missionId = 1;
+    uint32 status = 2;
+}
+
+message GoldMovTerminalPanel {
+    repeated .pbgoldmov.GoldMovCommentInfo commentInfo = 1;
+    repeated uint32 ciphertextInfo = 2 [packed = true];
+}
+
+message GoldMovCommentInfo {
+    uint32 clueId = 1;
+    uint32 commentId = 2;
+}
+
+message GetGoldMovDataReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1523;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+}
+
+message GetGoldMovDataRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1524;
+        IS_ALLOW_CLIENT = 0;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 0;
+    }
+    int32 retcode = 1;
+    repeated .pbgoldmov.GoldMovData goldMovData = 2;
+}
+
+message GoldMovMissionCompletedReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1525;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 missionId = 2;
+}
+
+message GoldMovMissionCompletedRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1526;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GoldMovInteractivePointDoneReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1527;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 interactivePointId = 2;
+}
+
+message GoldMovInteractivePointDoneRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1528;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GoldMovCommentReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1529;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 clueId = 2;
+    uint32 commentId = 3;
+}
+
+message GoldMovCommentRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1530;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GoldMovCiphertextReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1531;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 ciphertextId = 2;
+}
+
+message GoldMovCiphertextRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1532;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+}
+
+message GoldMovMoveReq {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1533;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    uint32 scheduleId = 1;
+    uint32 areaId = 2;
+    uint32 locationId = 3;
+    uint32 sceneId = 4;
+}
+
+message GoldMovMoveRsp {
+    enum CmdId {
+        option allow_alias = true;
+        NONE = 0;
+        CMD_ID = 1534;
+        IS_ALLOW_CLIENT = 1;
+        ENET_CHANNEL_ID = 0;
+        ENET_IS_RELIABLE = 1;
+        REQUIRED_RPC_ID = 1;
+    }
+    int32 retcode = 1;
+    .pbgoldmov.GoldMovData goldMovData = 2;
+}
