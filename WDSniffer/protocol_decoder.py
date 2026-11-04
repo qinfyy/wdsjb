@@ -29,6 +29,8 @@ class SnifferConfig:
     cmd_ids_paths: list[Path]
     listening_port: int
     listening_address: str = "127.0.0.1"
+    realm: str = "auto"
+    initialize_native_bridge: bool = True
 
 
 def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
@@ -61,6 +63,12 @@ def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
     if not isinstance(address, str):
         raise ValueError("ListeningAddress 必须是字符串")
     address = address.strip() or "127.0.0.1"
+    realm = config.get("Realm", "auto")
+    if realm not in {"auto", "native", "emulated"}:
+        raise ValueError("Realm 必须是 auto、native 或 emulated")
+    initialize_native_bridge = config.get("InitializeNativeBridge", True)
+    if not isinstance(initialize_native_bridge, bool):
+        raise ValueError("InitializeNativeBridge 必须是布尔值")
     sources = config.get("proto")
     if isinstance(sources, str):
         sources = [sources]
@@ -76,7 +84,7 @@ def load_config(path: Path = DEFAULT_CONFIG) -> SnifferConfig:
             raise FileNotFoundError(f"proto 目录或文件未找到: {target}")
         proto_paths.append(target)
     cmd_ids_paths = input_paths("cmdId")
-    return SnifferConfig(proto_paths, cmd_ids_paths, port, address)
+    return SnifferConfig(proto_paths, cmd_ids_paths, port, address, realm, initialize_native_bridge)
 
 
 @dataclass(frozen=True)

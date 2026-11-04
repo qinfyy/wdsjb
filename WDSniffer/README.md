@@ -32,9 +32,13 @@ WDSniffer.json 的路径相对该配置文件：
     "..\\JsProtoDumper\\output\\pb"
   ],
   "ListeningAddress": "127.0.0.1",
-  "ListeningPort": 1984
+  "ListeningPort": 1984,
+  "Realm": "auto",
+  "InitializeNativeBridge": true
 }
 ~~~
+
+`Realm` 支持 `auto`、`native`、`emulated`，默认 `auto`。`InitializeNativeBridge` 控制模拟器模式下是否注入 Native Bridge 初始化脚本；当重定向器已经初始化过 Native Bridge 时设置为 `false`。
 
 
 消息匹配不使用 package，按数组顺序加载，后面的同名消息覆盖前面的。目录必须包含 `.proto`；`cmdId` 按数组顺序合并命令清单，忽略命名空间，后面的同名命令覆盖前面的。配置的输入缺失时直接报错，不使用旧描述符。
@@ -42,11 +46,10 @@ WDSniffer.json 的路径相对该配置文件：
 命令号对应多个消息时，逐个尝试解码，优先选择没有未知字段（含嵌套消息）的候选；多个候选都完整时取清单中的第一个。没有完整候选时，选实际解析字段最多的，并列取第一个。部分解码仍显示已解析字段，控制台输出诊断，始终保留完整 raw；运行时类型仅作为记录信息。
 
 ~~~powershell
-py Srv.py --realm emulated
 py Srv.py --adb "D:\tools\adb.exe" --device emulator-5554
 ~~~
 
---realm 支持 auto、native、emulated，默认 auto；x86_64 模拟器自动选择 emulated。ADB 默认从 PATH 查找 adb.exe。ARM64 agent 固定读取 ../WDRedirector/frida-agent-arm64.so。
+ADB 默认从 PATH 查找 adb.exe。ARM64 agent 固定读取 ../WDRedirector/frida-agent-arm64.so。
 
 监听地址和端口只使用配置里的 ListeningAddress、ListeningPort，不提供命令行参数。ListeningAddress 缺省或为空时使用 127.0.0.1。
 

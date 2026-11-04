@@ -65,12 +65,13 @@ def running_pid(device: Any, package: str, adb_path: Path) -> int | None:
 
 class FridaRuntime:
     def __init__(self, package: str, adb: Path = DEFAULT_ADB, realm: str = "auto",
-                 device_id: str | None = None) -> None:
+                 initialize_native_bridge: bool = True, device_id: str | None = None) -> None:
         if realm not in {"auto", "native", "emulated"}:
             raise ValueError(f"无效 realm: {realm}")
         self.package = package
         self.adb_path = adb
         self.realm = realm
+        self.initialize_native_bridge = initialize_native_bridge
         self.device_id = device_id
         self.pid: int | None = None
         self.device: Any = None
@@ -133,23 +134,24 @@ class FridaRuntime:
                 native_session = self.device.attach(self.pid, realm="native")
                 self.sessions.append(native_session)
                 native_session.on("detached", on_detached)
-                bridge_ready = threading.Event()
-                bridge_errors: list[str] = []
+                if self.initialize_native_bridge:
+                    bridge_ready = threading.Event()
+                    bridge_errors: list[str] = []
 
-                def on_bridge(message: dict[str, Any], data: bytes | None) -> None:
-                    if message.get("type") == "send":
-                        if message.get("payload", {}).get("event") == "bridge-ready":
+                    def on_bridge(message: dict[str, Any], data: bytes | None) -> None:
+                        if message.get("type") == "send":
+                            if message.get("payload", {}).get("event") == "bridge-ready":
+                                bridge_ready.set()
+                        else:
+                            bridge_errors.append(str(message.get("stack") or message.get("description")))
                             bridge_ready.set()
-                    else:
-                        bridge_errors.append(str(message.get("stack") or message.get("description")))
-                        bridge_ready.set()
 
-                bridge = native_session.create_script(BRIDGE_SCRIPT)
-                self.scripts.append(bridge)
-                bridge.on("message", on_bridge)
-                bridge.load()
-                if not bridge_ready.wait(15) or bridge_errors:
-                    raise RuntimeError("Native Bridge 初始化失败: " + " | ".join(bridge_errors))
+                    bridge = native_session.create_script(BRIDGE_SCRIPT)
+                    self.scripts.append(bridge)
+                    bridge.on("message", on_bridge)
+                    bridge.load()
+                    if not bridge_ready.wait(15) or bridge_errors:
+                        raise RuntimeError("Native Bridge 初始化失败: " + " | ".join(bridge_errors))
                 session = self.device.attach(self.pid, realm="emulated", emulated_agent_path=REMOTE_AGENT)
             else:
                 session = self.device.attach(self.pid, realm="native")

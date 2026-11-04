@@ -114,6 +114,7 @@ class FridaController:
         capture_writer: PacketCaptureWriter,
         adb: Path = DEFAULT_ADB,
         realm: str = "auto",
+        initialize_native_bridge: bool = True,
         device_id: str | None = None,
     ) -> None:
         self.package = package
@@ -123,6 +124,7 @@ class FridaController:
         self.capture_writer = capture_writer
         self.adb = adb
         self.realm = realm
+        self.initialize_native_bridge = initialize_native_bridge
         self.device_id = device_id
         self._lock = threading.RLock()
         self._runtime: FridaRuntime | None = None
@@ -229,7 +231,7 @@ class FridaController:
 
         if self._runtime is not None:
             self._runtime.close()
-        runtime = FridaRuntime(self.package, self.adb, self.realm, self.device_id)
+        runtime = FridaRuntime(self.package, self.adb, self.realm, self.initialize_native_bridge, self.device_id)
         self._runtime = runtime
         try:
             runtime.connect(self._script_source(), self._on_message, self._on_detached)
@@ -273,7 +275,6 @@ def create_server(
     max_packet_bytes: int = 8 * 1024 * 1024,
     config_path: Path = DEFAULT_CONFIG,
     adb: Path = DEFAULT_ADB,
-    realm: str = "auto",
     device_id: str | None = None,
 ) -> Flask:
     if max_packet_bytes <= 0:
@@ -287,7 +288,7 @@ def create_server(
     clients = ClientHub()
     capture_writer = PacketCaptureWriter(ROOT)
     controller = FridaController(package, max_packet_bytes, decoder, clients, capture_writer,
-                                 adb, realm, device_id)
+                                 adb, config.realm, config.initialize_native_bridge, device_id)
     app = Flask(__name__, static_folder=None)
     app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
     app.config["LISTENING_PORT"] = port if port is not None else config.listening_port
@@ -439,7 +440,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--package", default=DEFAULT_PACKAGE)
     parser.add_argument("--max-packet-bytes", type=int, default=8 * 1024 * 1024)
     parser.add_argument("--adb", type=Path, default=DEFAULT_ADB, help="默认从 PATH 查找 adb.exe")
-    parser.add_argument("--realm", choices=("auto", "native", "emulated"), default="auto")
     parser.add_argument("--device", help="Frida/ADB 设备 ID")
     return parser.parse_args()
 
@@ -448,7 +448,7 @@ def main() -> int:
     args = parse_args()
     server = create_server(host=args.host, package=args.package,
                            max_packet_bytes=args.max_packet_bytes, adb=args.adb,
-                           realm=args.realm, device_id=args.device)
+                           device_id=args.device)
     port = server.config["LISTENING_PORT"]
     print(f"WDSniffer listening on http://{args.host}:{port}", flush=True)
     try:
