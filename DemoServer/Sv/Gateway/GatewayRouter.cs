@@ -6,10 +6,11 @@ using Sv.Gateway.Handlers;
 
 namespace Sv.Gateway;
 
-public sealed class GatewayRouter
+public static class GatewayRouter
 {
-    private readonly Dictionary<ushort, Action<GatewaySession, byte[]>> _handlers = [];
-    public GatewayRouter()
+    private static readonly Dictionary<ushort, Action<GatewaySession, byte[]>> _handlers = [];
+    private static readonly ProtoFallbackHandler _protoFallback = new();
+    static GatewayRouter()
     {
         Register(Pbmisc.PingReq.Types.CmdId.CmdId, AccountHandler.Ping);
         Register(GetPlayerTokenReq.Types.CmdId.CmdId, AccountHandler.GetToken);
@@ -34,13 +35,14 @@ public sealed class GatewayRouter
         Register(LevelBeginReq.Types.CmdId.CmdId, ProgressHandler.BeginLevel);
         Register(LevelEndReq.Types.CmdId.CmdId, ProgressHandler.EndLevel);
     }
-    private void Register<T>(T cmdId, Action<GatewaySession, byte[]> handler) where T : struct, Enum
+    private static void Register<T>(T cmdId, Action<GatewaySession, byte[]> handler) where T : struct, Enum
     {
         _handlers.Add(Convert.ToUInt16(cmdId), handler);
     }
-    public void Dispatch(GatewaySession session, ushort id, byte[] body)
+    public static void Dispatch(GatewaySession session, ushort id, byte[] body)
     {
-        if (!_handlers.TryGetValue(id, out Action<GatewaySession, byte[]>? handler))
+        bool hasHandler = _handlers.TryGetValue(id, out Action<GatewaySession, byte[]>? handler);
+        if (!hasHandler && !_protoFallback.CanHandle(id))
         {
             Log.Warning("未注册 TCP 命令: {Command}", id); session.Close(); return;
         }
@@ -48,14 +50,15 @@ public sealed class GatewayRouter
         {
             if (id == (ushort)Pbmisc.PingReq.Types.CmdId.CmdId || id == (ushort)GetPlayerTokenReq.Types.CmdId.CmdId || id == (ushort)PlayerLoginReq.Types.CmdId.CmdId)
             {
-                handler(session, body);
+                handler!(session, body);
                 return;
             }
             Player player = session.Player ?? throw new PlayerActionException(-420, "连接尚未认证");
             lock (player.SyncRoot)
             {
                 if (!session.IsLoggedIn || player.Session != session) throw new PlayerActionException(-420, "连接尚未登录或已被替换");
-                handler(session, body);
+                if (hasHandler) handler!(session, body);
+                else _protoFallback.Handle(session, id, body);
             }
         }
         catch (PlayerActionException exception) { Error(session, id, exception.Retcode, exception.Message); }

@@ -3,7 +3,6 @@ namespace Sv.Database;
 public sealed class PlayerEntity
 {
     public long Uid { get; set; }
-    public string Uuid { get; set; } = string.Empty;
     public int ChannelId { get; set; }
     public string OpenId { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }

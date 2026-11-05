@@ -2,6 +2,16 @@ using System.Text.Json.Serialization;
 
 namespace Sv.Resources.Tables;
 
+public sealed class DeskDisplayConfigData : TableBase
+{
+    [JsonPropertyName("default_id")] public uint DefaultId { get; init; }
+    public override int GetId() => 1;
+    public override void Verification()
+    {
+        if (DefaultId == 0) throw new InvalidDataException("默认看板 ID 无效");
+    }
+}
+
 public sealed class PlayerLevelData : TableBase
 {
     [JsonPropertyName("lV")] public uint Level { get; init; }

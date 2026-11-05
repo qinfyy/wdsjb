@@ -29,9 +29,7 @@ public sealed class GameDbContext(DbContextOptions<GameDbContext> options) : DbC
             entity.ToTable("Players");
             entity.HasKey(value => value.Uid);
             entity.Property(value => value.Uid).ValueGeneratedOnAdd();
-            entity.HasIndex(value => value.Uuid).IsUnique();
             entity.HasIndex(nameof(PlayerEntity.ChannelId), nameof(PlayerEntity.OpenId)).IsUnique();
-            entity.Property(value => value.Uuid).HasMaxLength(50);
             entity.Property(value => value.OpenId).HasMaxLength(75);
             entity.Property(value => value.CreatedAt).HasConversion(TimeZoneConverter);
             entity.Property(value => value.UpdatedAt).HasConversion(TimeZoneConverter);

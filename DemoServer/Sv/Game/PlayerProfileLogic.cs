@@ -26,10 +26,12 @@ public sealed class PlayerProfileLogic(Player player) : PlayerLogicBase(player)
     {
         Comp.Nickname = "Demo"; Comp.Language = "zh-cn"; Comp.Level = 1; Comp.Stamina = StaminaLimit;
         Comp.CreateTime = Time.Now.ToUnixTimeSeconds(); Comp.LastStaminaTime = Comp.CreateTime;
+        Comp.DeskDisplayId = GameTableCatalog.Instance.GetDataById<DeskDisplayConfigData>(1)!.DefaultId;
     }
     public override void OnLoad()
     {
         if (GameTableCatalog.Instance.GetDataById<PlayerLevelData>(Level) is null) throw new InvalidDataException("存档玩家等级无效");
+        if (Comp.DeskDisplayId == 0) Comp.DeskDisplayId = GameTableCatalog.Instance.GetDataById<DeskDisplayConfigData>(1)!.DefaultId;
     }
     public override void OnLogin()
     {
@@ -38,13 +40,16 @@ public sealed class PlayerProfileLogic(Player player) : PlayerLogicBase(player)
     public GetMainDataRsp CreateMainData(uint dataAll = 1)
     {
         DateTimeOffset now = Time.Now;
-        return new GetMainDataRsp
+        GetMainDataRsp response = new()
         {
             Retcode = 1, DataAll = dataAll, Nickname = Nickname, ExpLevel = Level, Exp = Exp, Lang = Language,
             Hcoin = Player.Wallet.Hcoin, Scoin = Player.Wallet.Scoin, Ycoin = Player.Wallet.Ycoin, FriendPoint = Player.Wallet.FriendPoint,
             Stamina = Stamina, StaminaRecoverLeftTime = RecoveryLeftTime, StaminaRecoverConfigTime = 360, DeskDisplayId = DeskDisplayId,
             CurTime = now.ToUnixTimeSeconds(), CurTimeMs = now.ToUnixTimeMilliseconds(), CurZone = checked((int)now.Offset.TotalHours),
+            DeskDisplaySwitchInfo = new() { SwitchFrequencyType = 1 },
         };
+        response.BatchDeskDisplayIdList.Add(DeskDisplayId);
+        return response;
     }
     protected internal override void OnPlayerEventType(PlayerEventType type, int param1 = 0, int param2 = 0, int param3 = 0, object? state = null)
     {

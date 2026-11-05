@@ -43,17 +43,18 @@ public sealed partial class GameDatabase
             bool isNew = entity is null;
             if (entity is null)
             {
-                long uid = Math.Max(10000001, (db.Players.Select(value => (long?)value.Uid).Max() ?? 0) + 1);
-                if (uid > uint.MaxValue) throw new InvalidOperationException("玩家 UID 超出协议范围");
                 entity = new PlayerEntity
                 {
-                    Uid = uid, Uuid = Guid.NewGuid().ToString("N"), ChannelId = channelId, OpenId = openId,
+                    ChannelId = channelId, OpenId = openId,
                     CreatedAt = Time.Now, UpdatedAt = Time.Now,
                 };
             }
             PlayerSaveData data = isNew ? InitialPlayerTemplate.CreateSaveData() : PlayerSaveData.Parser.ParseFrom(entity.Data);
-            Player player = new(entity.Uid, entity.ChannelId, entity.OpenId, data, isNew);
+            using var transaction = isNew ? db.Database.BeginTransaction() : null;
             if (isNew) { entity.Data = data.ToByteArray(); db.Players.Add(entity); db.SaveChanges(); }
+            if (entity.Uid is <= 0 or > uint.MaxValue) throw new InvalidOperationException("玩家 UID 超出协议范围");
+            Player player = new(entity.Uid, entity.ChannelId, entity.OpenId, data, isNew);
+            if (isNew) { entity.Data = data.ToByteArray(); db.SaveChanges(); transaction!.Commit(); }
             _players.Add((channelId, openId), player);
             return player;
         }

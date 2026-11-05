@@ -9,6 +9,8 @@ namespace Sv.Game;
 
 /// <summary>对应客户端 ServerEnum.pb.eLevelStatus。</summary>
 public enum LevelStatus : uint { Done = 0, UnderProgress = 1, Deleted = 2, Locked = 4, LockedDone = 5 }
+/// <summary>对应客户端 Pb.eOpenType 的本地章节排期。</summary>
+public enum ChapterOpenType : uint { Closed = 0, AlwaysOpen = 1 }
 
 public sealed class LevelManager(Player player) : PlayerLogicBase(player)
 {
@@ -23,6 +25,11 @@ public sealed class LevelManager(Player player) : PlayerLogicBase(player)
     public GetLevelDataRsp CreateLevelData(uint dataAll = 1, ICollection<uint>? ids = null)
     {
         GetLevelDataRsp response = new() { Retcode = 1, LevelDataAll = dataAll };
+        foreach (ChapterData chapter in GameTableCatalog.Instance.GetAllData<ChapterData>().OrderBy(row => row.Id))
+        {
+            bool open = chapter.Levels.Any(level => IsOpen(level.Id));
+            response.ChapterList.Add(new ChapterItem { Chapter = chapter.Id, OpenType = (uint)(open ? ChapterOpenType.AlwaysOpen : ChapterOpenType.Closed) });
+        }
         foreach (uint id in OpenLevels.Where(id => dataAll != 0 || ids is null || ids.Contains(id)).Order())
         {
             uint passed = PassCount(id);

@@ -431,8 +431,8 @@ FodyWeavers.xsd
 # Custom
 Reverse/
 ReTools/
-/Sv/save
-/Sv/logs
+save/
+logs/
 Handbook.txt
 
 # Node

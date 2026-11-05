@@ -10,5 +10,5 @@
   "ListeningAddress": "127.0.0.1",
   "ListeningPort": 1984,
   "Realm": "auto",
-  "InitializeNativeBridge": true
+  "InitializeNativeBridge": false
 }

@@ -8,10 +8,11 @@ using Sv.Game;
 
 namespace Sv.Gateway;
 
-public sealed class GatewayHostedService(GatewayRouter router) : BackgroundService
+public sealed class GatewayHostedService : BackgroundService
 {
     private readonly TcpListener _listener = new(IPAddress.Any, Config.Server.GamePort);
     private readonly ConcurrentDictionary<GatewaySession, Task> _sessions = new();
+    private long _nextConnectionId;
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _listener.Start(); Log.Information("TCP 网关已启动: {Port}", Config.Server.GamePort);
@@ -36,7 +37,7 @@ public sealed class GatewayHostedService(GatewayRouter router) : BackgroundServi
         while (!cancellationToken.IsCancellationRequested)
         {
             TcpClient client = await _listener.AcceptTcpClientAsync(cancellationToken);
-            GatewaySession session = new(client, router, Config.Server);
+            GatewaySession session = new(client, Config.Server, Interlocked.Increment(ref _nextConnectionId));
             _sessions[session] = RunSessionAsync(session, cancellationToken);
         }
     }
